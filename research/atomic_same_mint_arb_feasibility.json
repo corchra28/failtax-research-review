@@ -1,0 +1,57 @@
+{
+ "inventory": {
+  "built": "2026-09-04 16:19:29",
+  "event_types": {
+   "SellEvent": 21291584,
+   "BuyEvent": 20978631,
+   "CreatePoolEvent": 6763
+  },
+  "n_create_pool": 6763,
+  "n_active_pools": 32491,
+  "deposit_withdraw_events_present": false,
+  "n_canonical": 1947,
+  "n_noncanonical": 4816
+ },
+ "pairs": {
+  "strict_token_base_wsol_quote_pairs_with_2plus_pools": 0,
+  "unordered_info_only": 0,
+  "reversed_orientation_pools_excluded": 4714
+ },
+ "gaps": {
+  "outage_windows": 22,
+  "truncated_segments": 2
+ },
+ "pairs_detail": [],
+ "pair_types": {},
+ "token_program_observability": {
+  "observable": false,
+  "note": "programul tokenului (owner-ul mint-ului) NU este capturat in evenimentele PumpSwap; fara el Token-2022 (transfer fee/hooks) nu poate fi exclus => PREREQUISITE_MISSING = token_program_per_mint; recuperare minima = 1 getAccountInfo per mint (interzis acum)"
+ },
+ "PREREQUISITE_MISSING": "token_program_per_mint (owner-ul contului de mint)",
+ "MINIMAL_RECOVERY_REQUIRED": "o citire getAccountInfo per mint din perechile duplicate (sau captura owner-ului la CreatePool) \u2014 NU se executa fara aprobare",
+ "overlap": {
+  "windows_total_dedup_pair_slot": 0,
+  "windows_gt2_slots": 0,
+  "windows_gt2_by_utc_date": {},
+  "dates_with_pairs": []
+ },
+ "chain_consistency": {
+  "pairs": 0,
+  "mismatches": 0,
+  "rate_ok": null
+ },
+ "vq": {
+  "pools": 0,
+  "vq_computable": 0
+ },
+ "fee_resolver": true,
+ "FEASIBILITY_GATE": {
+  "pairs_ge_20": false,
+  "windows_gt2_ge_100": false,
+  "dates_ge_2": false,
+  "reserves_and_fee_resolver_valid": false,
+  "no_gap_in_required_interval": false,
+  "token_program_observable": false,
+  "PASS": false
+ }
+}

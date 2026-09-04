@@ -1,0 +1,336 @@
+{
+ "A_pool_outcomes_h5": {
+  "prospective_rows": 973,
+  "entry_fee_zero_rows": 102,
+  "share": 0.10483042137718397,
+  "rows_recomputed": 102,
+  "old_pnl_sum": 22.117486500000012,
+  "old_pnl_mean": 0.21683810294117659,
+  "corrected_pnl_sum": -3.5454354999999835,
+  "corrected_pnl_mean": -0.03475917156862729,
+  "estimated_pnl_impact_sum": -25.662921999999995,
+  "correct_fee_total_bps_distribution": {
+   "43": 1,
+   "120": 25,
+   "100": 6,
+   "115": 10,
+   "45": 1,
+   "125": 2,
+   "55": 6,
+   "80": 5,
+   "53": 2,
+   "48": 6,
+   "60": 8,
+   "90": 8,
+   "85": 1,
+   "30": 9,
+   "70": 6,
+   "50": 2,
+   "65": 1,
+   "75": 2,
+   "35": 1
+  }
+ },
+ "C_timing": {
+  "shadows": 1559,
+  "pre_creation_entries": 7,
+  "violations": [
+   {
+    "pool_id": "e043cd23370b660f80f7877edc5fb68d",
+    "shadow_entry_ts": 1788228342.0,
+    "pool_creation_ts": 1788228350.0,
+    "delta_s": 8.0,
+    "date": "2026-09-01"
+   },
+   {
+    "pool_id": "93566fa4cf242c8972c30cb91c5806f1",
+    "shadow_entry_ts": 1788228356.0,
+    "pool_creation_ts": 1788228371.0,
+    "delta_s": 15.0,
+    "date": "2026-09-01"
+   },
+   {
+    "pool_id": "33784bd55a70e0b24d664afdd856e726",
+    "shadow_entry_ts": 1788298429.0,
+    "pool_creation_ts": 1788298433.0,
+    "delta_s": 4.0,
+    "date": "2026-09-01"
+   },
+   {
+    "pool_id": "7b97399d184279e99af232810ce278d1",
+    "shadow_entry_ts": 1788306676.0,
+    "pool_creation_ts": 1788306680.0,
+    "delta_s": 4.0,
+    "date": "2026-09-01"
+   },
+   {
+    "pool_id": "f8a8b55595b6ce614a6029906e37ab1d",
+    "shadow_entry_ts": 1788370250.0,
+    "pool_creation_ts": 1788370262.0,
+    "delta_s": 12.0,
+    "date": "2026-09-02"
+   },
+   {
+    "pool_id": "b0d0e387742ee81a182113d4855d5106",
+    "shadow_entry_ts": 1788451510.0,
+    "pool_creation_ts": 1788451511.0,
+    "delta_s": 1.0,
+    "date": "2026-09-03"
+   },
+   {
+    "pool_id": "39339665ed2b519f93d0ebd59f52b308",
+    "shadow_entry_ts": 1788451522.0,
+    "pool_creation_ts": 1788451528.0,
+    "delta_s": 6.0,
+    "date": "2026-09-03"
+   }
+  ],
+  "by_date": {
+   "2026-09-01": 4,
+   "2026-09-02": 1,
+   "2026-09-03": 2
+  },
+  "rule": "entry_ts >= pool_creation_ts; incalcarile trebuie EXCLUSE, nu mutate"
+ },
+ "D_regime_contamination": {
+  "prospective_shadows": 973,
+  "entry_fee_zero_shadows": 106,
+  "share": 0.10894141829393628,
+  "mean_pnl_delta_usd": -0.24840734150943408,
+  "sum_pnl_delta_usd": -26.331178200000014,
+  "ON_trades_affected": 0,
+  "note": "raportat doar; regime_gate_results.json NU a fost recalculat; incalcarile de timing (C) trebuie excluse intr-o reevaluare separata"
+ },
+ "B_fee_resolver_tests": {
+  "tier_totals_bps": [
+   125,
+   120,
+   115,
+   110,
+   105,
+   100,
+   95,
+   90,
+   85,
+   80,
+   75,
+   70,
+   65,
+   60,
+   55,
+   52.5,
+   50,
+   47.5,
+   45,
+   42.5,
+   40,
+   37.5,
+   35,
+   32.5,
+   30
+  ],
+  "tier_total_range": [
+   30,
+   125
+  ],
+  "tier_monotone_nonincreasing": true,
+  "all_tiers_positive": true,
+  "observed_swaps_compared": 200000,
+  "observed_match": 199241,
+  "observed_mismatch": 759,
+  "mismatch_examples": [
+   {
+    "pool": "9e0b78f3a4fbadb3464c9c6f99659367",
+    "i": 440,
+    "observed": [
+     20,
+     5,
+     147
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 569.8171000233696
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 148,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 420.92283290938843
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 266,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 421.1122378664445
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 270,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 420.3853668246936
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 400,
+    "observed": [
+     2,
+     93,
+     33
+    ],
+    "resolver": [
+     2,
+     93,
+     30
+    ],
+    "mcap_sol": 346.10532559526786
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 485,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 423.93501485102763
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 504,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 424.4038108906695
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 519,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 423.9122413872483
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 575,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 421.08940584993104
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 583,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 420.16189370301095
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 584,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 420.521728076615
+   },
+   {
+    "pool": "e203e7cde95f4b9167cd743c16fa974b",
+    "i": 585,
+    "observed": [
+     2,
+     93,
+     30
+    ],
+    "resolver": [
+     20,
+     5,
+     95
+    ],
+    "mcap_sol": 425.356944716972
+   }
+  ],
+  "zero_fee_events_seen": 2322,
+  "zero_fee_as_first_event_of_pool": 0,
+  "canonical_fee_total_positive_for_all_states": true,
+  "noncanonical_observed_bps_hist_top": [
+   [
+    "25/5/0",
+    21935354
+   ]
+  ],
+  "noncanonical_resolver_total": 30
+ },
+ "overlay_limitation": "Overlay-ul static (rezerve viitoare observate + pozitia proprie) NU este un counterfactual protocol-exact pentru strategiile directionale: tranzactiile ulterioare ale altora s-ar fi executat pe starea modificata de pozitia noastra (preturi/impact diferite) si unele nu s-ar fi produs deloc. Arbitrajul atomic nu are aceasta problema: ambele leg-uri se evalueaza consecutiv pe starea de landing.",
+ "FEE_RESOLVER_VALID": true
+}
