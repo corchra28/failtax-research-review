@@ -346,12 +346,48 @@ def stage_eligibility():
     out["proposed_mint_rpc"]=dict(eligible_mints=sorted(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),count=len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),calls_needed=(len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"]))+99)//100)
     json.dump(out,open("research/atomic_same_mint_arb_populations_frozen.json","w"),indent=1,default=str)
     print(json.dumps(out["pool_filter_summary"],default=str)); [print(k,json.dumps({kk:vv for kk,vv in out[k]["report"].items() if kk!="top_tokens"},default=str)) for k in ("PRIMARY_MEME","SECONDARY_ALL_NONCANONICAL")]; print("proposed_mint_rpc",out["proposed_mint_rpc"]["count"],"calls",out["proposed_mint_rpc"]["calls_needed"]); print("ELIGIBILITY_DONE")
-POPFILE="research/atomic_same_mint_arb_populations_frozen.json"; SPEC2="research/slow_atomic_revert_arb_frozen_spec.json"
+POPFILE="research/atomic_same_mint_arb_populations_frozen.json"; SPEC2="research/slow_atomic_revert_arb_frozen_spec_v2.json"   # V1 (spec.json) pastrat neschimbat: FROZEN_V1_REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS
 USDC="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 def load_frozen_secondary(path=POPFILE):
     """populatia SECONDARY_ALL_NONCANONICAL inghetata (token -> pools); NU inventarul si NU derivarea."""
     Pp=json.load(open(path)); sec=Pp["SECONDARY_ALL_NONCANONICAL"]
     return dict(tokens={t:v["pools"] for t,v in sec["tokens"].items()},combos=sec["combos"],inputs=Pp["inputs"],rule=Pp["rule"],frozen_at=Pp["frozen_at"])
+MINT_MAP_FULL="research/token_program_map_full.json"
+def buy_exact_out(rb,rq,vq,B,lp,pr,cc):
+    """PumpSwap buy standard: base_amount_out=B exact; quote necesar = ceil(B*(rq+vq)/(rb-B)) + taxe (ceil pe fiecare bp); returneaza (quote_total, q2_net, lp_fee) sau None daca B>=rb."""
+    if B<=0 or B>=rb: return None
+    q2=-(-B*(rq+vq)//(rb-B)); lpf=-(-q2*lp//10000); prf=-(-q2*pr//10000); ccf=-(-q2*cc//10000); return q2+lpf+prf+ccf,q2,lpf
+def max_base_for_budget(rb,rq,vq,Q,lp,pr,cc):
+    """B = cea mai mare cantitate intreaga de base cumparabila cu bugetul Q (inclusiv taxe), din starea de DECIZIE; cautare binara pe buy_exact_out."""
+    lo,hi=0,rb-1
+    while lo<hi:
+        mid=(lo+hi+1)//2; r=buy_exact_out(rb,rq,vq,mid,lp,pr,cc)
+        if r is not None and r[0]<=Q: lo=mid
+        else: hi=mid-1
+    return lo
+def anchored(ev,idx):
+    """post-starea lui ev[idx] este PROBATA neschimbata pana la ev[idx+1] (pre-starea urmatoare identica). Cozile (ultimul eveniment) si starile dinaintea unei rupturi NU sunt ancorate."""
+    return 0<=idx<len(ev)-1 and ev[idx][8]==ev[idx+1][6] and ev[idx][9]==ev[idx+1][7]
+def state_provable(ev,slot):
+    """starea 'dupa toate evenimentele cu slot<=slot' este utilizabila doar daca este ancorata (ev[idx+1] exista cu pre==post) SI evenimentul urmator este dupa 'slot' (starea e cea curenta la 'slot', nu una stale)."""
+    st=state_after_slot(ev,slot)
+    if st is None: return None
+    idx=st[2]
+    if not anchored(ev,idx): return None
+    if ev[idx+1][2]<=slot: return None
+    return st
+def load_mint_map(path=MINT_MAP_FULL):
+    return json.load(open(path)) if os.path.exists(path) else None
+def filter_population_by_mint_map(population,mint_map):
+    """doar mint-uri cu owner = SPL Token clasic si initialized intra in motor; Token-2022, owner necunoscut, null, scurt, neinitializat => excluse. Returneaza (population_ok, excluded_reasons, descriptive)."""
+    ok={}; excl={}; desc={}
+    for tok,pools in population.items():
+        m=(mint_map or {}).get(tok)
+        if m is None: excl[tok]="MINT_METADATA_MISSING"; continue
+        if m.get("status")!="SPL_TOKEN": excl[tok]=m.get("status","UNKNOWN"); continue
+        if not m.get("initialized"): excl[tok]="MINT_NOT_INITIALIZED"; continue
+        ok[tok]=pools; desc[tok]=dict(mint_authority_present=m.get("mint_authority_present"),freeze_authority_present=m.get("freeze_authority_present"),decimals=m.get("decimals"),supply=m.get("supply"))
+    return ok,excl,desc
 def run_engine(population,meta,events,spec,selector=None,OUT_W=(),TR=()):
     """SLOW_ATOMIC_REVERT_ARB — motor pur (fara I/O). population: {token: [pools]} (SECONDARY inghetat); meta: {pool: {orientation, canonical, base_mint, quote_mint, supply?}}; events: {pool: ev}.
     Decizie = ultima stare completa observabila (dupa slotul s); rutele unui token = toate perechile ordonate (buy in a, sell in b); selectia = token_episode_selection (max o decizie per token si episod, exclusiv dupa predicted);
@@ -375,31 +411,44 @@ def run_engine(population,meta,events,spec,selector=None,OUT_W=(),TR=()):
             c=meta[p]["_vqcache"]
             if idx not in c: c[idx]=implied_vq(events[p][:idx+1])[0]
             return c[idx]
+        FEE=SIG+PRI; plan={}
         for s in slots:
-            st={p:state_after_slot(events[p],s) for p in ok}; preds={}
+            st={p:state_provable(events[p],s) for p in ok}; preds={}   # doar stari ANCORATE (fara schimbare ascunsa de rezerve pana la urmatorul eveniment) si curente la slotul s
             for a,b in routes:
                 if st[a] is None or st[b] is None: continue
                 va=vq_at(a,st[a][2]); vb=vq_at(b,st[b][2])
                 if va is None or vb is None: continue
-                pr=arb(meta,a,st[a][:2],int(va),b,st[b][:2],int(vb),Q)
-                if pr is None or not pr["invariant_ok"]: continue
-                preds[f"{a}>{b}"]=pr["out"]-Q-SIG-PRI
+                fa=resolve_fee(meta,a,st[a][0],st[a][1],int(va),supply=meta[a].get("supply"),ev_tier=event_tier_at(events[a],st[a][2])); fb=resolve_fee(meta,b,st[b][0],st[b][1],int(vb),supply=meta[b].get("supply"),ev_tier=event_tier_at(events[b],st[b][2]))
+                if fa is None or fb is None: continue
+                B=max_base_for_budget(st[a][0],st[a][1],int(va),Q,*fa)            # B exact din starea de decizie, sub bugetul inghetat
+                if B<=0: continue
+                bo=buy_exact_out(st[a][0],st[a][1],int(va),B,*fa)
+                if bo is None: continue
+                out,brut,_,_,_=exec_sell(st[b][0],st[b][1],int(vb),B,*fb)        # vanzare exact B in pool-ul b
+                if out<=0 or (st[b][0]+B)*(st[b][1]+int(vb)-brut)<st[b][0]*(st[b][1]+int(vb)): continue
+                pred=out-bo[0]-FEE; preds[f"{a}>{b}"]=pred; plan[(s,f"{a}>{b}")]=dict(B=B,Q=Q,min_out=Q+FEE,va=int(va),vb=int(vb),fa=fa,fb=fb,quote_pred=bo[0])
             if preds: by_slot.append((s,preds)); cache[s]=st
         selected=sel_fn(by_slot); used_selector.append(len(by_slot))
         for ep_i,(s,route,pred) in enumerate(selected):
-            a,b=route.split(">"); st=cache[s]; t1=max(events[p][st[p][2]][0] for p in (a,b))
+            a,b=route.split(">"); st=cache[s]; pl=plan[(s,route)]; t1=max(events[p][st[p][2]][0] for p in (a,b)); nr=len(dict(by_slot)[s])
             if not interval_clean(t1-1,t1+L2*0.4+1,OUT_W,TR): viol["STATE_IN_OUTAGE_OR_TRUNCATION"]+=1; continue
-            la1=state_after_slot(events[a],s+L1); lb1=state_after_slot(events[b],s+L1); la2=state_after_slot(events[a],s+L2); lb2=state_after_slot(events[b],s+L2)
-            if not (chain_ok_between(meta[a]["_breaks"],st[a][2],la2[2]) and chain_ok_between(meta[b]["_breaks"],st[b][2],lb2[2])): viol["CHAIN_BREAK_DECISION_TO_LANDING"]+=1; continue
-            va=int(vq_at(a,st[a][2])); vb=int(vq_at(b,st[b][2]))   # VQ de la decizie (constanta de protocol), nu re-estimat din viitor
-            def land(sa,sb):
-                r=arb(meta,a,sa[:2],va,b,sb[:2],vb,Q)
-                if r is None or not r["invariant_ok"]: return dict(status="REVERTED_GUARD",pnl=-(SIG+PRI)/LAMP,out=None)
-                min_out=Q+SIG+PRI   # garda de profit >= 0 pe leg-ul 2
-                if r["out"]>=min_out: return dict(status="SUCCESS",pnl=(r["out"]-Q-SIG-PRI)/LAMP,out=r["out"])
-                return dict(status="REVERTED_GUARD",pnl=-(SIG+PRI)/LAMP,out=r["out"])
-            r1=land(la1,lb1); r2=land(la2,lb2); episodes+=1
-            rows.append(dict(token=tok,episode_id=f"{tok}#{ep_i}",decision_slot=s,decision_t=t1,utc_date=datetime.datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d"),route=route,pool_buy=a,pool_sell=b,n_routes_available=len(by_slot and [1]),predicted_net_sol=pred/LAMP,landing_primary_status=r1["status"],realized_primary_sol=r1["pnl"],landing_stress_status=r2["status"],realized_stress_sol=r2["pnl"],usdc_related=int(tok==USDC)))
+            def land_at(slot_):
+                """executie la landing: buy exact B cu max_quote Q (revert daca quote necesar > Q), sell exact B cu min_quote_out inghetat (revert daca out < min_out); ambele stari trebuie ancorate."""
+                sa=state_provable(events[a],slot_); sb=state_provable(events[b],slot_)
+                if sa is None or sb is None: return None
+                if not (chain_ok_between(meta[a]["_breaks"],st[a][2],sa[2]) and chain_ok_between(meta[b]["_breaks"],st[b][2],sb[2])): return None
+                bo=buy_exact_out(sa[0],sa[1],pl["va"],pl["B"],*pl["fa"])
+                if bo is None or bo[0]>pl["Q"]: return dict(status="REVERTED_MAX_QUOTE",pnl=-FEE/LAMP,quote_spent=None,sell_out=None)
+                out,brut,_,_,_=exec_sell(sb[0],sb[1],pl["vb"],pl["B"],*pl["fb"])
+                if out<pl["min_out"]: return dict(status="REVERTED_MIN_OUT",pnl=-FEE/LAMP,quote_spent=bo[0],sell_out=out)
+                return dict(status="SUCCESS",pnl=(out-bo[0]-FEE)/LAMP,quote_spent=bo[0],sell_out=out,residual_inventory=0)
+            def worst(L):
+                cands=[x for x in (land_at(s+L-1),land_at(s+L)) if x is not None]   # incertitudinea slotului (fara txIndex): starea dinainte SI dupa slotul de landing; se ia rezultatul mai defavorabil
+                return min(cands,key=lambda x:x["pnl"]) if cands else None
+            r1=worst(L1); r2=worst(L2)
+            if r1 is None or r2 is None: viol["LANDING_STATE_NOT_PROVABLE"]+=1; continue
+            episodes+=1
+            rows.append(dict(token=tok,episode_id=f"{tok}#{ep_i}",decision_slot=s,decision_t=t1,utc_date=datetime.datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d"),route=route,pool_buy=a,pool_sell=b,n_routes_available=nr,base_amount_exact=pl["B"],max_quote_in=pl["Q"],min_quote_out=pl["min_out"],predicted_quote_spent=pl["quote_pred"],predicted_net_sol=pred/LAMP,landing_primary_status=r1["status"],realized_primary_sol=r1["pnl"],primary_quote_spent=r1.get("quote_spent"),primary_sell_out=r1.get("sell_out"),landing_stress_status=r2["status"],realized_stress_sol=r2["pnl"],residual_inventory=0,usdc_related=int(tok==USDC)))
     # dedup portofoliu: cheia include token+episod (deja unic) si max o tranzactie per slot intre token-uri (dupa predicted)
     best={}
     for r in rows:
@@ -414,19 +463,40 @@ def evaluate_slow_arb(rows,spec):
     if not port: return dict(N=0,gate=None,verdict="SLOW_ATOMIC_REVERT_ARB_INSUFFICIENT_SAMPLE")
     pn=[r["realized_primary_sol"] for r in port]; st=stats(pn); succ=sum(1 for r in port if r["landing_primary_status"]=="SUCCESS")
     days=collections.defaultdict(float); [days.__setitem__(r["utc_date"],days[r["utc_date"]]+r["realized_primary_sol"]) for r in port]
-    toks=collections.defaultdict(float); [toks.__setitem__(r["token"],toks[r["token"]]+r["realized_primary_sol"]) for r in port]; gp=sum(max(0,v) for v in toks.values()) or 1e-12
+    toks=collections.defaultdict(float); [toks.__setitem__(r["token"],toks[r["token"]]+max(0.0,r["realized_primary_sol"])) for r in port]; gp=sum(toks.values()) or 1e-12   # profituri POZITIVE ale episoadelor per token / toate profiturile pozitive
     cl=collections.defaultdict(list); [cl[(r["token"],r["utc_date"])].append(r["realized_primary_sol"]) for r in port]; groups=list(cl.values()); rng=random.Random(7); bs=[]
     for _ in range(1000):
         flat=[a for gg in [rng.choice(groups) for _ in groups] for a in gg]; bs.append(sum(flat)/len(flat))
     bs.sort(); ci=(bs[25],bs[974]); nonusdc=[r["realized_primary_sol"] for r in port if not r["usdc_related"]]; s5=[r["realized_stress_sol"] for r in port]
     gate=dict(episodes50=len(port)>=g["episodes_min"],tokens5=len({r["token"] for r in port})>=g["tokens_min"],EV=st["EV"]>0,PF=st["PF"]>=g["PF_min"],CI_low=ci[0]>0,days2of3=sum(1 for v in days.values() if v>0)>=g["positive_days_min"],exb1pct=st["EX_BEST_1PCT"]>0,token_share=max(toks.values())/gp<=g["token_share_max"],ev_ex_usdc=(sum(nonusdc)/len(nonusdc) if nonusdc else -1)>0,stress5=(sum(s5)/len(s5))>0)
     return dict(N=len(port),success=succ,reverted=len(port)-succ,stats=st,CI95_token_day=ci,by_day=dict(days),by_token_share=max(toks.values())/gp,gate=gate,verdict=("SLOW_ATOMIC_REVERT_ARB_HISTORICAL_PAPER_CANDIDATE" if all(gate.values()) else "SLOW_ATOMIC_REVERT_ARB_NO_VERIFIED_EDGE"))
+def stage_reserve_audit():
+    """(item 4) completitudinea starilor de rezerve pe cele 80 de pool-uri secundare inghetate, doar din tape: Deposit/Withdraw (nedecodate de colector), rupturi, stari ancorate, cozi neancorate, stari de decizie probabile cu landing s+3/s+5 pre/post probabil."""
+    pop=load_frozen_secondary(); E=load_pass2(); inv=load_inv(); OUT_W=outages(); TR=truncated_tails(); per=[]; tot=collections.Counter()
+    for tok,pools in pop["tokens"].items():
+        for p in pools:
+            ev=E.get(p,[]); br=chain_breaks(ev); anch=sum(1 for i in range(len(ev)) if anchored(ev,i)); tail=1 if ev else 0; pre_break=len(br)
+            slots=sorted({e[2] for e in ev}); prov=0; prov_land=0
+            for s_ in slots:
+                st=state_provable(ev,s_)
+                if st is None: continue
+                prov+=1
+                if all(state_provable(ev,s_+L) is not None and state_provable(ev,s_+L-1) is not None for L in (3,5)): prov_land+=1
+            d=dict(token=tok,pool=p,events=len(ev),chain_breaks=len(br),anchored_states=anch,unanchored_tail_states=tail,states_invalidated_before_breaks=pre_break,provable_decision_states=prov,provable_with_landing_3_and_5_pre_post=prov_land); per.append(d)
+            for k in ("events","chain_breaks","anchored_states","unanchored_tail_states","states_invalidated_before_breaks","provable_decision_states","provable_with_landing_3_and_5_pre_post"): tot[k]+=d[k]
+    A_=dict(deposit_withdraw_events_in_tape=dict(inv["event_types"]),deposit_withdraw_recovered=False,collector_decodes_only=["BuyEvent","SellEvent","CreatePoolEvent"],rule="o stare este utilizabila doar daca este ANCORATA (evenimentul urmator are pre-starea identica cu post-starea) si curenta la slotul cerut; cozile si starile dinaintea unei rupturi sunt excluse; landing-ul cere stari probabile atat inainte cat si dupa slotul de landing (s+L-1, s+L) pentru L=3 si L=5",totals=dict(tot),pools=per,RESERVE_STATE_PROVABLE=(tot["provable_with_landing_3_and_5_pre_post"]>=100))
+    json.dump(A_,open("research/slow_atomic_revert_arb_reserve_audit.json","w"),indent=1); print(json.dumps({k:v for k,v in A_.items() if k!="pools"})); print("RESERVE_AUDIT_DONE")
 def stage_freeze_slow():
-    """ingheata SLOW_ATOMIC_REVERT_ARB (spec + hash-uri) INAINTE de orice PnL; consuma populatia secundara inghetata."""
-    pop=load_frozen_secondary(); spec=dict(hypothesis="SLOW_ATOMIC_REVERT_ARB",label="POST_HOC_HISTORICAL",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),
+    """ingheata SLOW_ATOMIC_REVERT_ARB V2 (spec + hash-uri) INAINTE de orice PnL; consuma populatia secundara inghetata. V1 ramane neschimbat (respins pre-outcome)."""
+    pop=load_frozen_secondary(); spec=dict(hypothesis="SLOW_ATOMIC_REVERT_ARB",version="V2",supersedes=dict(v1="research/slow_atomic_revert_arb_frozen_spec.json",v1_sha256=sha("research/slow_atomic_revert_arb_frozen_spec.json"),v1_status="FROZEN_V1_REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS"),label="POST_HOC_HISTORICAL",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),
+        execution_semantics_v2=dict(buy="instructiune standard PumpSwap buy: base_amount_out = B exact, max_quote_amount_in = Q = 0,25 SOL; B = cea mai mare cantitate intreaga cumparabila sub Q din starea de DECIZIE (cautare binara pe quote necesar = ceil(B*(rq+vq)/(rb-B)) + taxe ceil); la landing, daca quote necesar > Q => tranzactia REVERTEAZA",sell="instructiune standard PumpSwap sell: base_amount_in = exact acelasi B; min_quote_amount_out inghetat la decizie = Q + taxa de tranzactie (profit >= 0 fata de bugetul maxim); la landing, daca out < min_out => REVERTEAZA",success_pnl="sell_quote_out - quote_efectiv_cheltuit_la_buy - taxa_tranzactie",failure="ambele swap-uri revertate; se pierde doar taxa completa a tranzactiei (semnatura + prioritate = 0,000105 SOL); zero inventar rezidual",no_router="fara program CPI/router personalizat; fara cantitate variabila la runtime",design_property="B dimensionat exact la buget => orice scumpire a pool-ului de cumparare intre decizie si landing produce REVERTED_MAX_QUOTE (proprietate de design, nu parametru ajustabil)"),
+        reserve_integrity=dict(deposit_withdraw="nedecodate de colector (0 in banda) => nerecuperabile",rule="stare utilizabila doar daca ANCORATA (evenimentul urmator are pre==post) si curenta la slot; cozile si starile dinaintea rupturilor excluse; landing cere stari probabile la s+L-1 si s+L",audit="research/slow_atomic_revert_arb_reserve_audit.json"),
+        landing_uncertainty="fara transactionIndex: se evalueaza starea de dinainte (s+L-1) si de dupa (s+L) slotul de landing; rezultatul primar = cel mai defavorabil executabil; la fel la s+5; selectia foloseste doar datele de decizie",
+        mint_metadata=dict(source="research/token_program_map_full.json (dupa MINT_RPC_APPROVED)",rule="doar owner = SPL Token clasic si initialized; Token-2022, owner necunoscut, null, scurt, neinitializat => excluse inainte de run_engine; autoritatile mint/freeze raportate descriptiv; hash-ul hartii intra in manifestul executabil",status="NOT_AVAILABLE_UNTIL_APPROVED"),
+        metrics=dict(token_profit_share="profituri pozitive ale episoadelor tokenului / toate profiturile pozitive",n_routes_available="numarul real de rute cu predictie la slotul deciziei",bootstrap="cluster token x zi UTC, 1000 repetari deterministe",global_slot_selection="exclusiv dupa predicted"),
         rationale="studiu general de arbitraj multipool PumpSwap pe pool-uri noncanonice pentru acelasi token (SECONDARY_ALL_NONCANONICAL: 13 token-uri, 80 pool-uri, 477 combinatii, 3.807 ferestre curate (token, slot), 3 zile UTC); NU salveaza ipoteza primara meme (inchisa: INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE); proiectat fara a inspecta spread-uri, preturi sau PnL",
         population=dict(source=POPFILE,population="SECONDARY_ALL_NONCANONICAL",tokens=sorted(pop["tokens"]),n_tokens=len(pop["tokens"]),n_pools=sum(len(v) for v in pop["tokens"].values()),rule=pop["rule"],frozen_at=pop["frozen_at"]),
-        inputs=dict(populations_sha256=sha(POPFILE),rpc_meta_sha256=sha(RPC_META),pair_events_cache_sha256=sha(CACHE2),rpc_pairs_sha256=sha(RPC_PAIRS)),
+        inputs=dict(populations_sha256=sha(POPFILE),rpc_meta_sha256=sha(RPC_META),pair_events_cache_sha256=sha(CACHE2),rpc_pairs_sha256=sha(RPC_PAIRS),reserve_audit_sha256=sha("research/slow_atomic_revert_arb_reserve_audit.json"),mint_map_sha256="NOT_AVAILABLE_UNTIL_APPROVED"),
         infrastructure=dict(access="Helius WSS/RPC obisnuit, fara Jito/relay privat",decision="ultima stare completa observabila (dupa slotul s)",landing=dict(primary_slots=3,stress_slots=5),transaction="ambele leg-uri PumpSwap intr-o singura tranzactie atomica; leg-ul 2 cu garda min_out = Q + taxa semnatura + prioritate (profit >= 0)",revert="garda picata => fara pierdere de inventar; se plateste integral taxa de retea + prioritate; tranzactiile reusite si revertate raportate separat"),
         notional_sol=0.25,landing=dict(primary_slots=3,stress_slots=5),costs=dict(base_signature_fee_lamports=SIG_FEE,priority_fee_lamports=PRIO,jito_tip_lamports=0),
         fees="noncanonical 25/5/0 bps; canonical (absent in populatie) doar tier demonstrat din evenimente sau supply validat per mint; niciodata supply hardcodat",
@@ -436,10 +506,14 @@ def stage_freeze_slow():
     json.dump(spec,open(SPEC2,"w"),indent=1,ensure_ascii=False); print("SLOW_ATOMIC_REVERT_ARB spec frozen; sha",sha(SPEC2))
 def stage_run_slow(dry_run=False,_loaders=None):
     """calea REALA de executie: populatia secundara inghetata + maparea RPC + evenimentele pass2 -> run_engine -> evaluate. NU se ruleaza acum (fara PnL)."""
-    L=_loaders or dict(pop=load_frozen_secondary,meta=load_rpc_meta,events=load_pass2,spec=lambda:json.load(open(SPEC2)),outages=outages,truncated=truncated_tails)
+    L=_loaders or dict(pop=load_frozen_secondary,meta=load_rpc_meta,events=load_pass2,spec=lambda:json.load(open(SPEC2)),outages=outages,truncated=truncated_tails,mints=load_mint_map)
     spec=L["spec"](); assert spec["status"]=="FROZEN_NOT_EXECUTED" or dry_run
     if not dry_run: assert spec["script_sha256"]==sha(__file__),"scriptul difera de spec-ul inghetat"
-    pop=L["pop"](); meta=L["meta"](); ev=L["events"](); res=run_engine(pop["tokens"],meta,ev,spec,OUT_W=L["outages"](),TR=L["truncated"]()); ev_=evaluate_slow_arb(res["rows"],spec)
+    mint_map=L["mints"]()
+    if mint_map is None: raise SystemExit("PREREQUISITE_MISSING = normalized mint map (research/token_program_map_full.json): fetch-ul mint cere MINT_RPC_APPROVED")
+    pop=L["pop"](); pop_ok,excl,desc=filter_population_by_mint_map(pop["tokens"],mint_map)
+    manifest=dict(mint_map_sha256=(sha(MINT_MAP_FULL) if os.path.exists(MINT_MAP_FULL) else "SYNTHETIC"),populations_sha256=(sha(POPFILE) if os.path.exists(POPFILE) else "SYNTHETIC"),tokens_in=len(pop["tokens"]),tokens_allowed=len(pop_ok),tokens_excluded=excl,mint_authorities=desc)
+    meta=L["meta"](); ev=L["events"](); res=run_engine(pop_ok,meta,ev,spec,OUT_W=L["outages"](),TR=L["truncated"]()); ev_=evaluate_slow_arb(res["rows"],spec); res["executable_input_manifest"]=manifest
     if dry_run: return res,ev_
     json.dump(dict(engine=res,evaluation=ev_,label="POST_HOC_HISTORICAL"),open("research/slow_atomic_revert_arb_results.json","w"),indent=1,default=str); print("VERDICT",ev_["verdict"]); return res,ev_
 def stage_freeze():
@@ -546,4 +620,4 @@ def _legacy_stage_run():
     R["final_gate_primary_0_25"]=g; R["FINAL_VERDICT"]="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if (g and all(g.values())) else "ATOMIC_ARB_NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open("research/atomic_same_mint_arb_results.json","w"),indent=1,default=str); print("rows",len(rows),"portfolio",len(port),"viol",dict(viol)); print("VERDICT",R["FINAL_VERDICT"],g); print("RUN_DONE")
 if __name__=="__main__":
-    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"eligibility":stage_eligibility,"freeze_slow":stage_freeze_slow,"run_slow":stage_run_slow,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
+    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"eligibility":stage_eligibility,"reserve_audit":stage_reserve_audit,"freeze_slow":stage_freeze_slow,"run_slow":stage_run_slow,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()

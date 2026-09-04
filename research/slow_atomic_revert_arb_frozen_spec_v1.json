@@ -1,0 +1,72 @@
+{
+ "hypothesis": "SLOW_ATOMIC_REVERT_ARB",
+ "label": "POST_HOC_HISTORICAL",
+ "frozen_at": "2026-09-04 20:00:23 EEST",
+ "rationale": "studiu general de arbitraj multipool PumpSwap pe pool-uri noncanonice pentru acelasi token (SECONDARY_ALL_NONCANONICAL: 13 token-uri, 80 pool-uri, 477 combinatii, 3.807 ferestre curate (token, slot), 3 zile UTC); NU salveaza ipoteza primara meme (inchisa: INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE); proiectat fara a inspecta spread-uri, preturi sau PnL",
+ "population": {
+  "source": "research/atomic_same_mint_arb_populations_frozen.json",
+  "population": "SECONDARY_ALL_NONCANONICAL",
+  "tokens": [
+   "2aHSiC1qn7gep885zfbpk2VKJqEk3bZeneY1HvEv1L64",
+   "3EMheh5MPVWpAGDdXnGBgs6uaukKL29zv65uuXxspump",
+   "57651PAVutNCTppbhuS35BQJzBBM4LqG1PxB9XDDNzS7",
+   "5NJfQ6UQ1LJTxtKLrsZQcbiSUWequSD6aZLNJaN7Zviv",
+   "5bFprcy5Qc9HeM1ke8mw5YPHuxERSEKXCrnJY9iYYEhj",
+   "8JPzfwto4Pu1WwiHKSVHHNe57dh5RHqLYLQra9vpaKsW",
+   "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+   "D7A7iQtrgPKxmFb8Yo2UfquyF9Tabd554tSfQZMUpump",
+   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+   "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+   "G2kc8f9shn7VBxxKjVnJYmyzBsp3hozgfwMRbydXQbDP",
+   "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+   "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn"
+  ],
+  "n_tokens": 13,
+  "n_pools": 80,
+  "rule": "ELIGIBLE_BEFORE_TOKEN_PROGRAM: ambele pool-uri STRICT (base=token, quote=WSOL), ambele fluxuri prezente, VQ valid separat (>=5 obs, nenegativ, IQR mic), schema de taxe observata compatibila (canonical: triplete in tabelul de tiere; noncanonical: 25/5/0), >=1 fereastra curata >2 sloturi cu lant 100 % si fara outage/trunchiere; poarta: >=20 token-uri unice, >=100 ferestre (token, start_slot), >=2 zile UTC; PRIMARY_MEME = doar canonical+noncanonical; SECONDARY = doar noncanonical+noncanonical, raportare separata",
+  "frozen_at": "2026-09-04 17:53:45 EEST"
+ },
+ "inputs": {
+  "populations_sha256": "4afe8475a4197be6b44930c81870bb4d00d20ed6f1d5d039017e8a22eb6162de",
+  "rpc_meta_sha256": "6daeaaf47b0cfdd1041bad3fffb4fb7fd659f2b06f908d2ae08eeff2bab8eb54",
+  "pair_events_cache_sha256": "bf7f0cd81650552af44138883e5bbe6efeef857c8ef0c45d4466dfc12ce22a54",
+  "rpc_pairs_sha256": "15944fdbecce5b93d7a8d0bc7e142fca952528c4dba5e8900725039e7b4646c2"
+ },
+ "infrastructure": {
+  "access": "Helius WSS/RPC obisnuit, fara Jito/relay privat",
+  "decision": "ultima stare completa observabila (dupa slotul s)",
+  "landing": {
+   "primary_slots": 3,
+   "stress_slots": 5
+  },
+  "transaction": "ambele leg-uri PumpSwap intr-o singura tranzactie atomica; leg-ul 2 cu garda min_out = Q + taxa semnatura + prioritate (profit >= 0)",
+  "revert": "garda picata => fara pierdere de inventar; se plateste integral taxa de retea + prioritate; tranzactiile reusite si revertate raportate separat"
+ },
+ "notional_sol": 0.25,
+ "landing": {
+  "primary_slots": 3,
+  "stress_slots": 5
+ },
+ "costs": {
+  "base_signature_fee_lamports": 5000,
+  "priority_fee_lamports": 100000,
+  "jito_tip_lamports": 0
+ },
+ "fees": "noncanonical 25/5/0 bps; canonical (absent in populatie) doar tier demonstrat din evenimente sau supply validat per mint; niciodata supply hardcodat",
+ "selection": "token_episode_selection: max o decizie per token si episod de dislocare; ruta aleasa exclusiv dupa predicted net executabil; fara re-tranzactionare in sloturi consecutive pana cand toate rutele tokenului revin la predicted <= 0; combinatiile de perechi NU sunt observatii independente; cheia portofoliului = (token, episod) + max o tranzactie per slot",
+ "gates": {
+  "episodes_min": 50,
+  "tokens_min": 5,
+  "EV_gt": 0,
+  "PF_min": 1.5,
+  "CI95_cluster": "token x zi UTC, limita inferioara > 0",
+  "positive_days_min": 2,
+  "ex_best_1pct_gt": 0,
+  "token_share_max": 0.4,
+  "ev_ex_usdc_gt": 0,
+  "stress_slot5_ev_gt": 0,
+  "note": "INGHETATE inainte de orice PnL; nu se editeaza dupa"
+ },
+ "script_sha256": "ba96af611a02c2da3cd3d4db20f23eef33c311e3006851fa83446061907021f0",
+ "status": "FROZEN_NOT_EXECUTED"
+}

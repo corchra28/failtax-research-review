@@ -35,3 +35,4 @@
 {"ts":"2026-09-04","event":"CLOSE","hypothesis":"ATOMIC_ARB_PRIMARY_MEME","verdict":"INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE","thresholds_preserved":true}
 {"ts":"2026-09-04","event":"REGISTER","hypothesis":"SLOW_ATOMIC_REVERT_ARB","population":"SECONDARY_ALL_NONCANONICAL (13 tokens, 80 pools, 477 combos, 3807 token-slot windows, 3 days)","status":"FROZEN_NOT_EXECUTED","pnl_inspected":false,"rpc_executed":false}
 {"ts":"2026-09-04","experiment":"SLOW_ATOMIC_REVERT_ARB","stage":"FREEZE","spec":"research/slow_atomic_revert_arb_frozen_spec.json","engine_wired_to_frozen_secondary":true,"token_episode_selection_in_engine":true,"tests":"SLOW_ARB_BEHAVIORAL_TESTS=PASS","rpc_executed":false,"pnl_computed":false}
+{"ts":"2026-09-04","experiment":"SLOW_ATOMIC_REVERT_ARB","stage":"V2_FREEZE","v1_status":"REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS","reserve_state_provable":true,"deposit_withdraw_recovered":false,"rpc_executed":false,"pnl_computed":false}

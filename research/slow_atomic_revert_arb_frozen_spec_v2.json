@@ -1,0 +1,105 @@
+{
+ "hypothesis": "SLOW_ATOMIC_REVERT_ARB",
+ "version": "V2",
+ "supersedes": {
+  "v1": "research/slow_atomic_revert_arb_frozen_spec.json",
+  "v1_sha256": "ea25f45b4489b99c2e2a45def1c727c83b402efe6d5a03aca3b9cfb4b465da8b",
+  "v1_status": "FROZEN_V1_REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS"
+ },
+ "label": "POST_HOC_HISTORICAL",
+ "frozen_at": "2026-09-04 20:53:02 EEST",
+ "execution_semantics_v2": {
+  "buy": "instructiune standard PumpSwap buy: base_amount_out = B exact, max_quote_amount_in = Q = 0,25 SOL; B = cea mai mare cantitate intreaga cumparabila sub Q din starea de DECIZIE (cautare binara pe quote necesar = ceil(B*(rq+vq)/(rb-B)) + taxe ceil); la landing, daca quote necesar > Q => tranzactia REVERTEAZA",
+  "sell": "instructiune standard PumpSwap sell: base_amount_in = exact acelasi B; min_quote_amount_out inghetat la decizie = Q + taxa de tranzactie (profit >= 0 fata de bugetul maxim); la landing, daca out < min_out => REVERTEAZA",
+  "success_pnl": "sell_quote_out - quote_efectiv_cheltuit_la_buy - taxa_tranzactie",
+  "failure": "ambele swap-uri revertate; se pierde doar taxa completa a tranzactiei (semnatura + prioritate = 0,000105 SOL); zero inventar rezidual",
+  "no_router": "fara program CPI/router personalizat; fara cantitate variabila la runtime",
+  "design_property": "B dimensionat exact la buget => orice scumpire a pool-ului de cumparare intre decizie si landing produce REVERTED_MAX_QUOTE (proprietate de design, nu parametru ajustabil)"
+ },
+ "reserve_integrity": {
+  "deposit_withdraw": "nedecodate de colector (0 in banda) => nerecuperabile",
+  "rule": "stare utilizabila doar daca ANCORATA (evenimentul urmator are pre==post) si curenta la slot; cozile si starile dinaintea rupturilor excluse; landing cere stari probabile la s+L-1 si s+L",
+  "audit": "research/slow_atomic_revert_arb_reserve_audit.json"
+ },
+ "landing_uncertainty": "fara transactionIndex: se evalueaza starea de dinainte (s+L-1) si de dupa (s+L) slotul de landing; rezultatul primar = cel mai defavorabil executabil; la fel la s+5; selectia foloseste doar datele de decizie",
+ "mint_metadata": {
+  "source": "research/token_program_map_full.json (dupa MINT_RPC_APPROVED)",
+  "rule": "doar owner = SPL Token clasic si initialized; Token-2022, owner necunoscut, null, scurt, neinitializat => excluse inainte de run_engine; autoritatile mint/freeze raportate descriptiv; hash-ul hartii intra in manifestul executabil",
+  "status": "NOT_AVAILABLE_UNTIL_APPROVED"
+ },
+ "metrics": {
+  "token_profit_share": "profituri pozitive ale episoadelor tokenului / toate profiturile pozitive",
+  "n_routes_available": "numarul real de rute cu predictie la slotul deciziei",
+  "bootstrap": "cluster token x zi UTC, 1000 repetari deterministe",
+  "global_slot_selection": "exclusiv dupa predicted"
+ },
+ "rationale": "studiu general de arbitraj multipool PumpSwap pe pool-uri noncanonice pentru acelasi token (SECONDARY_ALL_NONCANONICAL: 13 token-uri, 80 pool-uri, 477 combinatii, 3.807 ferestre curate (token, slot), 3 zile UTC); NU salveaza ipoteza primara meme (inchisa: INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE); proiectat fara a inspecta spread-uri, preturi sau PnL",
+ "population": {
+  "source": "research/atomic_same_mint_arb_populations_frozen.json",
+  "population": "SECONDARY_ALL_NONCANONICAL",
+  "tokens": [
+   "2aHSiC1qn7gep885zfbpk2VKJqEk3bZeneY1HvEv1L64",
+   "3EMheh5MPVWpAGDdXnGBgs6uaukKL29zv65uuXxspump",
+   "57651PAVutNCTppbhuS35BQJzBBM4LqG1PxB9XDDNzS7",
+   "5NJfQ6UQ1LJTxtKLrsZQcbiSUWequSD6aZLNJaN7Zviv",
+   "5bFprcy5Qc9HeM1ke8mw5YPHuxERSEKXCrnJY9iYYEhj",
+   "8JPzfwto4Pu1WwiHKSVHHNe57dh5RHqLYLQra9vpaKsW",
+   "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+   "D7A7iQtrgPKxmFb8Yo2UfquyF9Tabd554tSfQZMUpump",
+   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+   "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+   "G2kc8f9shn7VBxxKjVnJYmyzBsp3hozgfwMRbydXQbDP",
+   "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+   "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn"
+  ],
+  "n_tokens": 13,
+  "n_pools": 80,
+  "rule": "ELIGIBLE_BEFORE_TOKEN_PROGRAM: ambele pool-uri STRICT (base=token, quote=WSOL), ambele fluxuri prezente, VQ valid separat (>=5 obs, nenegativ, IQR mic), schema de taxe observata compatibila (canonical: triplete in tabelul de tiere; noncanonical: 25/5/0), >=1 fereastra curata >2 sloturi cu lant 100 % si fara outage/trunchiere; poarta: >=20 token-uri unice, >=100 ferestre (token, start_slot), >=2 zile UTC; PRIMARY_MEME = doar canonical+noncanonical; SECONDARY = doar noncanonical+noncanonical, raportare separata",
+  "frozen_at": "2026-09-04 17:53:45 EEST"
+ },
+ "inputs": {
+  "populations_sha256": "4afe8475a4197be6b44930c81870bb4d00d20ed6f1d5d039017e8a22eb6162de",
+  "rpc_meta_sha256": "6daeaaf47b0cfdd1041bad3fffb4fb7fd659f2b06f908d2ae08eeff2bab8eb54",
+  "pair_events_cache_sha256": "bf7f0cd81650552af44138883e5bbe6efeef857c8ef0c45d4466dfc12ce22a54",
+  "rpc_pairs_sha256": "15944fdbecce5b93d7a8d0bc7e142fca952528c4dba5e8900725039e7b4646c2",
+  "reserve_audit_sha256": "57fb32ba9ad4132f0a85de6611c0385e00742d34a6cee8ec2b3c4fa464f7d47a",
+  "mint_map_sha256": "NOT_AVAILABLE_UNTIL_APPROVED"
+ },
+ "infrastructure": {
+  "access": "Helius WSS/RPC obisnuit, fara Jito/relay privat",
+  "decision": "ultima stare completa observabila (dupa slotul s)",
+  "landing": {
+   "primary_slots": 3,
+   "stress_slots": 5
+  },
+  "transaction": "ambele leg-uri PumpSwap intr-o singura tranzactie atomica; leg-ul 2 cu garda min_out = Q + taxa semnatura + prioritate (profit >= 0)",
+  "revert": "garda picata => fara pierdere de inventar; se plateste integral taxa de retea + prioritate; tranzactiile reusite si revertate raportate separat"
+ },
+ "notional_sol": 0.25,
+ "landing": {
+  "primary_slots": 3,
+  "stress_slots": 5
+ },
+ "costs": {
+  "base_signature_fee_lamports": 5000,
+  "priority_fee_lamports": 100000,
+  "jito_tip_lamports": 0
+ },
+ "fees": "noncanonical 25/5/0 bps; canonical (absent in populatie) doar tier demonstrat din evenimente sau supply validat per mint; niciodata supply hardcodat",
+ "selection": "token_episode_selection: max o decizie per token si episod de dislocare; ruta aleasa exclusiv dupa predicted net executabil; fara re-tranzactionare in sloturi consecutive pana cand toate rutele tokenului revin la predicted <= 0; combinatiile de perechi NU sunt observatii independente; cheia portofoliului = (token, episod) + max o tranzactie per slot",
+ "gates": {
+  "episodes_min": 50,
+  "tokens_min": 5,
+  "EV_gt": 0,
+  "PF_min": 1.5,
+  "CI95_cluster": "token x zi UTC, limita inferioara > 0",
+  "positive_days_min": 2,
+  "ex_best_1pct_gt": 0,
+  "token_share_max": 0.4,
+  "ev_ex_usdc_gt": 0,
+  "stress_slot5_ev_gt": 0,
+  "note": "INGHETATE inainte de orice PnL; nu se editeaza dupa"
+ },
+ "script_sha256": "00fb5f8a1b83c5e32c62a2e19266bacd9bf5a4bca7694020083175fd9d1d8928",
+ "status": "FROZEN_NOT_EXECUTED"
+}

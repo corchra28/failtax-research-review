@@ -17,7 +17,16 @@ src=open("research/atomic_same_mint_arb.py").read()
 if "def run_engine" not in src or "sel_fn(by_slot)" not in src: fails.append("ENGINE_NOT_USING_TOKEN_EPISODE_SELECTION")
 if "def load_frozen_secondary" not in src or 'L["pop"]()' not in src: fails.append("RUNNER_NOT_USING_FROZEN_POPULATION")
 if os.path.exists("research/slow_atomic_revert_arb_frozen_spec.json"):
-    Sp=json.load(open("research/slow_atomic_revert_arb_frozen_spec.json"))
+    if sha("research/slow_atomic_revert_arb_frozen_spec.json")!="ea25f45b4489b99c2e2a45def1c727c83b402efe6d5a03aca3b9cfb4b465da8b": fails.append("V1_SPEC_MODIFIED")
+    else: notes.append("V1 spec pastrat neschimbat (REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS)")
+if os.path.exists("research/slow_atomic_revert_arb_reserve_audit.json"):
+    Ra=json.load(open("research/slow_atomic_revert_arb_reserve_audit.json")); notes.append(f"reserve audit: provable decision states with landing {Ra['totals']['provable_with_landing_3_and_5_pre_post']}, breaks {Ra['totals']['chain_breaks']}, tails excluded {Ra['totals']['unanchored_tail_states']}, Deposit/Withdraw recovered={Ra['deposit_withdraw_recovered']}")
+body=src.split("def run_engine(")[1].split("\ndef ")[0] if "def run_engine(" in src else ""
+if "exec_buy(" in body or "buy_exact_out(" not in body or "min_quote_out" not in body: fails.append("V2_EXECUTION_SEMANTICS_MISSING")
+if "state_provable(" not in body or "land_at(s+L-1)" not in body: fails.append("V2_ANCHOR_OR_WORSTCASE_MISSING")
+if 'L["mints"]()' not in src or "filter_population_by_mint_map" not in src: fails.append("MINT_MAP_NOT_WIRED")
+if os.path.exists("research/slow_atomic_revert_arb_frozen_spec_v2.json"):
+    Sp=json.load(open("research/slow_atomic_revert_arb_frozen_spec_v2.json"))
     if Sp.get("script_sha256")!=sha("research/atomic_same_mint_arb.py"): fails.append("SLOW_SPEC_SCRIPT_HASH_MISMATCH")
     if Sp.get("inputs",{}).get("populations_sha256")!=sha("research/atomic_same_mint_arb_populations_frozen.json"): fails.append("SLOW_SPEC_POPULATION_HASH_MISMATCH")
     if Sp.get("population",{}).get("population")!="SECONDARY_ALL_NONCANONICAL": fails.append("SLOW_SPEC_WRONG_POPULATION")

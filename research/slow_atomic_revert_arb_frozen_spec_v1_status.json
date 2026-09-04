@@ -1,0 +1,9 @@
+{
+ "spec": "research/slow_atomic_revert_arb_frozen_spec.json",
+ "copy": "research/slow_atomic_revert_arb_frozen_spec_v1.json",
+ "sha256": "ea25f45b4489b99c2e2a45def1c727c83b402efe6d5a03aca3b9cfb4b465da8b",
+ "status": "FROZEN_V1_REJECTED_PRE_OUTCOME_EXECUTION_SEMANTICS",
+ "reason": "revizuire externa: semantica tranzactiei (exact-quote cu output variabil) nu corespunde instructiunilor standard PumpSwap (buy: base_amount_out exact + max_quote_amount_in; sell: base_amount_in exact + min_quote_amount_out); metadatele mint neconectate in runner; completitudinea rezervelor neauditata; incertitudinea slotului de landing netratata",
+ "outcomes_inspected": false,
+ "recorded_at": "2026-09-04 20:44:25 EEST"
+}
