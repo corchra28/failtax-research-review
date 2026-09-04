@@ -1,0 +1,3 @@
+# overnight_20260905
+
+Cercetare istorica post-hoc pe date existente (fara RPC/date noi/live). Fisiere: integrity_manifest.json, fixed_family_preregistration.json (inainte de outcome), thresholds_frozen.json (DEV), data_dictionary.csv, leakage_tests.json, cohort_panel_manifest.json (randurile panoului contin portofele si raman locale), outcomes_manifest.json, h1/h2/h3 *_results.json + *_report.md, unconditional_results.json, multiple_testing_summary.json, adversarial_review.{json,md}, final_report.md, terminal_summary.txt, cod (wallet_history_pass.py, cohort_panel.py, fixed_family_eval.py, adversarial_review.py, make_docs.py), SHA256SUMS.

@@ -1,0 +1,11 @@
+{
+ "feature_leakage": {
+  "pools_tested": 200,
+  "identical_after_future_mutation": 200,
+  "violations": 0,
+  "violation_examples": [],
+  "PASS": true
+ },
+ "rule": "toate trasaturile din evenimente cu ts < D strict; istoricul portofelelor filtrat la first_ts < D; INVENTORY_PROXY din trade-uri",
+ "tested_at": "2026-09-04 21:07:07"
+}

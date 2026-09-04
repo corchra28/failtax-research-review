@@ -1,0 +1,20 @@
+{
+ "thresholds": {
+  "H1": {
+   "selectivity_threshold_prior_mints": 6.0,
+   "q3_rotation_score": 110.7831835865112,
+   "n_dev_eligible": 235
+  },
+  "H2": {
+   "q1_decay_ratio": 0.13251662129226568,
+   "median_remaining_inventory": 0.8045609813569526,
+   "n_dev_eligible": 92
+  },
+  "H3": {
+   "q3_quality": 0.6567375886524823,
+   "n_dev_eligible": 235
+  }
+ },
+ "frozen_at": "2026-09-04 21:07:49",
+ "note": "praguri distributionale din DEV (2026-09-02), inghetate inainte de evaluarea VAL/CONF"
+}

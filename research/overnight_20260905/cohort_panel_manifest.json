@@ -1,0 +1,49 @@
+{
+ "built": "2026-09-04 21:07:10",
+ "rows": 946,
+ "by_day": {
+  "2026-09-02": 235,
+  "2026-09-03": 531,
+  "2026-09-04": 180
+ },
+ "decision": "T0_ts+60s",
+ "panel_content_sha256": "b1d4a8da8e277f02888e3ccc0fe41d31b7c206643f91a4ff3f02690b0a0b05c8",
+ "wallet_history_manifest": {
+  "built": "2026-09-04 21:06:30",
+  "relevant_wallets": 126783,
+  "wallets_with_history": 126783,
+  "events": 12773966,
+  "content_sha256": "a8c6bde8c41db0277db8f4f1528aa5b1ecd77fe93eb3defedadb002f72b6dbac",
+  "pool2mint_entries": 32502,
+  "script_sha256": "3b069f07217e88eec4864fe024c3263041804e00ebf67015ec1119625a48a9dd"
+ },
+ "m_cache_manifest": {
+  "parser": "m_cache_v1 (adaptor v3 al evaluarii sigilate: pool@173, q_net=@104-@80, taxa creator derivata)",
+  "built": "2026-09-04 14:00:26",
+  "N": 946,
+  "by_day": {
+   "2026-09-02": 235,
+   "2026-09-03": 531,
+   "2026-09-04": 180
+  },
+  "exclusions": {
+   "NO_CREATE_IN_TAPE": 203,
+   "NOT_BOOST_PROXY_INITIAL_STATE": 512,
+   "NON_SOL_QUOTE": 68,
+   "UNREADABLE_SEGMENT_IN_INTERVAL": 51,
+   "FIRST_EVENT_REAL_QUOTE_NOT_BOOST": 25,
+   "OUTAGE_IN_INTERVAL": 104,
+   "NO_POST_TAPE_300S": 5
+  },
+  "population_sha256": "d5a3c02a0bae4cd6bf40db06e224cc27f4f29b4ae208638154d8d36bcb250d9c",
+  "matches_sealed_population": true,
+  "content_sha256": "7f38b246725e67d468e69f02125a80e5b543eebeada7311750cf64e569e12ed2",
+  "curve_trades": 349683,
+  "pool_events": 1923520,
+  "outage_windows": 22,
+  "script_sha256": "09657f365f4e6a95a1c8b778790a0cddafc639f41caeab52c1cba3f0fd770172"
+ },
+ "script_sha256": "db04c39140c54675526ba999faba1e1e1c0acb2bd7b1aebfbf473eac0afb7b05",
+ "runtime_s": 14.7,
+ "published": "NU (randurile contin portofele brute); doar manifestul si dictionarul"
+}

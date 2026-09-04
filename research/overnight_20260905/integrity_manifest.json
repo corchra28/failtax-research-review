@@ -1,0 +1,40 @@
+{
+ "commit": "fe55a933f127c5f8c1e193a8b346889ef5b37a15",
+ "tape_day_manifests": {
+  "2026-09-02": "844ce65dbcd2c15b4146591287789aba1d8262b99802b50c727e30b940fd6d67",
+  "2026-09-03": "b49738b577bd9bdeb0a9426c57eeabda9f0b4b27b31c8e27730cb97276c4545b",
+  "2026-09-04": "3068bfa383a398824b8837a9eafb77f6b9ea583a953fbe56c6c1256280a35def"
+ },
+ "m_cache_manifest": {
+  "parser": "m_cache_v1 (adaptor v3 al evaluarii sigilate: pool@173, q_net=@104-@80, taxa creator derivata)",
+  "built": "2026-09-04 14:00:26",
+  "N": 946,
+  "by_day": {
+   "2026-09-02": 235,
+   "2026-09-03": 531,
+   "2026-09-04": 180
+  },
+  "exclusions": {
+   "NO_CREATE_IN_TAPE": 203,
+   "NOT_BOOST_PROXY_INITIAL_STATE": 512,
+   "NON_SOL_QUOTE": 68,
+   "UNREADABLE_SEGMENT_IN_INTERVAL": 51,
+   "FIRST_EVENT_REAL_QUOTE_NOT_BOOST": 25,
+   "OUTAGE_IN_INTERVAL": 104,
+   "NO_POST_TAPE_300S": 5
+  },
+  "population_sha256": "d5a3c02a0bae4cd6bf40db06e224cc27f4f29b4ae208638154d8d36bcb250d9c",
+  "matches_sealed_population": true,
+  "content_sha256": "7f38b246725e67d468e69f02125a80e5b543eebeada7311750cf64e569e12ed2",
+  "curve_trades": 349683,
+  "pool_events": 1923520,
+  "outage_windows": 22,
+  "script_sha256": "09657f365f4e6a95a1c8b778790a0cddafc639f41caeab52c1cba3f0fd770172"
+ },
+ "regime_cache_sha256": "2842d7062cdffe0730ec5762bdd9e1449e2b43d2527852b95a4b508bd971bc3b",
+ "pool_metadata_normalized_sha256": "6daeaaf47b0cfdd1041bad3fffb4fb7fd659f2b06f908d2ae08eeff2bab8eb54",
+ "slow_arb_pnl_exists": false,
+ "rpc_calls_this_session_overnight": 0,
+ "validators": "ARTIFACT_VALIDATION=PASS; SLOW_ARB_BEHAVIORAL_TESTS=PASS; PATCHED_BLOCKERS=10/10; MULTIPOOL_EPISODE_TESTS=PASS",
+ "checked_at": "2026-09-04 20:54:54 EEST"
+}

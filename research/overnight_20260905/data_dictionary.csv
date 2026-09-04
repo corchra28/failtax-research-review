@@ -1,0 +1,36 @@
+FILE,COLUMN,TYPE,FORMULA,SOURCE,EARLIEST_AVAILABILITY,POINT_IN_TIME_FEATURE_OR_OUTCOME
+panel,mint,string,adresa mint (LOCAL; nepublicat),CreateEvent,-,KEY
+panel,day,date,zi UTC a CompleteEvent,-,-,META
+panel,T0_ts,int s,ts on-chain CreatePoolEvent,CreatePoolEvent,-,PIT
+panel,D,int s,T0_ts+60 (decizie),spec,-,PIT
+panel,cohort_size,int,portofele cu INVENTORY_PROXY>0 din trade-urile de curba,curba,<Complete,PIT
+panel,inventory_proxy_total,int tokeni bruti,suma inventarelor reconstruite din trade-uri (NU solduri ajustate cu transferuri),curba,<Complete,PIT
+panel,creator_inventory_share,float,inventar creator / total,curba,<Complete,PIT
+panel,feature_max_ts,int s,cel mai mare ts al evenimentelor de pool folosite (< D),pool,<D,PIT
+panel,last_contributing_slot,int,ultimul slot contribuitor,pool,<D,PIT
+panel,n_post_swaps,int,"evenimente pool in [T0,D)",pool,<D,PIT
+panel,n_post_buyers / n_post_sellers,int,cumparatori/vanzatori distincti,pool,<D,PIT
+panel,n_post_only_buyers,int,cumparatori care NU sunt in cohorta pre-migrare,pool+curba,<D,PIT
+panel,n_incumbent_sellers,int,vanzatori din cohorta,pool+curba,<D,PIT
+panel,buy_quote / sell_quote,float SOL,flux quote,pool,<D,PIT
+panel,incumbent_sell_quote / incumbent_sell_share,float,vanzari ale cohortei; cota din fluxul total,pool+curba,<D,PIT
+panel,post_only_buy_quote / post_only_buy_share,float,cumparari ale portofelelor noi,pool,<D,PIT
+panel,top1_buy_share / top3_buy_share / hhi_buy,float,concentratia fluxului de cumparare pe portofel,pool,<D,PIT
+panel,inc_sell_0_30 / inc_sell_30_60 / decay_ratio,float SOL,intensitatea vanzarilor incumbente pe subferestre; raport 30-60/0-30,pool+curba,<D,PIT
+panel,remaining_inventory_proxy,float,INVENTORY_PROXY ramas al cohortei / total T0,pool+curba,<D,PIT
+panel,largest_incumbent_remaining_share,float,cel mai mare inventar ramas / supply proxy 1e15,pool+curba,<D,PIT
+panel,buyers_prior,"list (n_prior_mints, n_prior_24h, quote)",selectivitatea cumparatorilor post-only din istoricul ANTERIOR deciziei (mint-uri distincte tranzactionate cu first_ts < D),tape intreg,<D,PIT
+panel,median_prior_mints / median_prior_mints_24h,float,mediana selectivitatii,tape,<D,PIT
+panel,liquidity_sol,float SOL,rezerva reala de quote la ultima stare < D,pool,<D,PIT (control)
+panel,ret_bp,float bp,pret la D vs deschidere,pool,<D,PIT (control)
+panel,vol_bp,float bp,dev. std. a log-randamentelor intre stari,pool,<D,PIT (control)
+panel,buy_flow_sol_per_s,float,intensitatea cumpararilor,pool,<D,PIT (control)
+outcomes,primary.status,string,"OK sau motivul excluderii (ENTRY_STATE_UNANCHORED, CHAIN_BREAK_IN_HOLD, FEE_UNRESOLVED_*, NO_EXIT_STATE ...)",executie,dupa D,OUTCOME
+outcomes,primary.entry_ts/exit_ts,float s,intrare la D (stare ancorata dupa toate evenimentele ts<=D); iesire la intrare+60 s,executie,dupa D,OUTCOME
+outcomes,primary.B / quote_spent / sell_out,int,"cumparare exact-B sub bugetul 0,25 SOL; vanzare exact B cu overlay",executie,dupa D,OUTCOME
+outcomes,primary.pnl_sol,float SOL,"sell_out - quote_spent - 0,00021 SOL",executie,dupa D,OUTCOME
+outcomes,secondary_120,dict,idem la 120 s (descriptiv),executie,dupa D,OUTCOME
+outcomes,cost_x125 / latency_plus2,dict,"stres taxe x1,25 / intrare la D+2 s",executie,dupa D,OUTCOME
+signals,H1 / H2 / H3,bool,semnal conform pragurilor DEV inghetate,eval,<D,PIT
+signals,H1_v / H2_v / H3_v,float,valoarea trasaturii,eval,<D,PIT
+signals,H*_elig,bool,"eligibilitate (minime de cumparatori/swap-uri, trasatura definita)",eval,<D,PIT

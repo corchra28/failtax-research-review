@@ -1,0 +1,93 @@
+{
+ "label": "POST_HOC_HISTORICAL_RESEARCH",
+ "registered_at": "2026-09-04 20:54:54 EEST",
+ "partition": {
+  "DEVELOPMENT": "2026-09-02",
+  "VALIDATION": "2026-09-03",
+  "CONFIRMATION_STRESS": "2026-09-04",
+  "note": "zile UTC ale CompleteEvent; deconectarile si segmentele trunchiate excluse (populatia master 946)"
+ },
+ "population": "migrari BOOST cu istoric pre-migrare complet si evenimente post-migrare utilizabile (cache m_pools, 946 pool-uri, manifest sigilat d5a3c02a…)",
+ "execution": {
+  "decision": "T0 + 60 s dupa crearea pool-ului (T0 = CreatePoolEvent ts)",
+  "entry": "prima stare completa observabila (ancorata, fara schimbare ascunsa de rezerve) la sau dupa decizie, ordonare conservatoare (dupa toate evenimentele cu ts <= X)",
+  "notional_sol": 0.25,
+  "exit_primary": "60 s dupa intrarea reala (prima stare ancorata >= intrare+60 s, conservator)",
+  "exit_secondary_descriptive": "120 s",
+  "fees": "schema observata validata (bps din evenimente; taxa 0 inlocuita cu resolver-ul de tiere/25-5-0)",
+  "impact": "propriu, exact, la intrare si iesire",
+  "network_cost_sol": 0.00021,
+  "constraints": [
+   "intrarea nu precede crearea pool-ului",
+   "fara txIndex => conservator",
+   "starile cu schimbari de lichiditate neobservate (rupturi de lant) excluse",
+   "limitarea counterfactuala directionala raportata explicit",
+   "fara cautare de parametri sau orizonturi"
+  ]
+ },
+ "hypotheses": {
+  "H1_COHORT_ROTATION_V2": {
+   "mechanism": "cererea persista cand proprietatea se roteste de la participantii pre-migrare catre multi cumparatori noi, in timp ce cohorta vanzatorilor incumbenti scade",
+   "feature": "rotation_score = selective_new_buyer_quote_share * new_buyer_breadth / (1 + incumbent_sell_quote_share + concentration_HHI)",
+   "definitions": {
+    "selective_new_buyer_quote_share": "quote al cumparatorilor post-only cu selectivitate >= mediana DEV a numarului de mint-uri anterioare (mai putine = mai selectiv) / quote total de cumparare in [T0, D)",
+    "new_buyer_breadth": "numar de cumparatori post-only distincti",
+    "incumbent_sell_quote_share": "quote vandut de cohorta pre-migrare / quote total (buy+sell) in [T0,D)",
+    "concentration_HHI": "HHI al cotelor de quote de cumparare pe portofel in [T0,D)"
+   },
+   "signal": "cuartila superioara a distributiei DEV a rotation_score, cu >= 5 cumparatori post-only, >= 10 swap-uri post-migrare, istoric pre-migrare complet"
+  },
+  "H2_SELLER_OVERHANG_DECAY_V2": {
+   "mechanism": "pretul poate avansa doar dupa ce intensitatea vanzarilor cohortei pre-migrare scade si overhang-ul de inventar reconstruit nu mai este dominant",
+   "features": {
+    "incumbent_sell_0_30": "quote vandut de incumbenti in secundele 0-30",
+    "incumbent_sell_30_60": "quote vandut de incumbenti in secundele 30-60",
+    "decay_ratio": "incumbent_sell_30_60 / (incumbent_sell_0_30 + epsilon)",
+    "remaining_inventory_proxy": "INVENTORY_PROXY ramas al cohortei / inventarul total la T0",
+    "largest_incumbent_remaining_share": "cea mai mare cota individuala ramasa / oferta pool-ului (proxy)"
+   },
+   "signal": "decay_ratio in cuartila DEV cea mai epuizata (cea mai mica) SI remaining_inventory_proxy sub mediana DEV; praguri distributionale, niciodata din PnL"
+  },
+  "H3_SELECTIVE_BUYER_QUALITY_V1": {
+   "mechanism": "cinci portofele noi care cumpara un token nu sunt echivalente cu cinci portofele care pulverizeaza sute de lansari",
+   "feature": "quality = media rangurilor DEV (egal ponderate) pentru: +new_buyer_breadth, -median_prior_mint_count al cumparatorilor post-only, -top_wallet_buy_flow_concentration",
+   "signal": "cuartila superioara a quality (ranguri DEV), cu >= 5 cumparatori post-only"
+  }
+ },
+ "statistics": {
+  "family_size": 3,
+  "correction": "Bonferroni x3",
+  "bootstrap": "10.000 repetari deterministe, clustere mint x zi UTC",
+  "baselines": [
+   "matched (lichiditate la decizie, randament anterior, numar de tranzactii, intensitate flux de cumparare)",
+   "complement",
+   "populatie eligibila neconditionata"
+  ],
+  "gate": {
+   "signals_min": 50,
+   "mints_min": 20,
+   "EV_gt": 0,
+   "PF_min": 1.5,
+   "corrected_CI95_low_gt": 0,
+   "corrected_p_lt": 0.05,
+   "positive_both_days": [
+    "2026-09-03",
+    "2026-09-04"
+   ],
+   "EV_gt_matched_and_complement": true,
+   "ex_best_1pct_gt": 0,
+   "mint_share_max": 0.2,
+   "cost_x125_EV_gt": 0,
+   "latency_plus2s_EV_gt": 0,
+   "no_violations": true
+  },
+  "insufficient": "< 50 semnale sau < 20 mint-uri => INSUFFICIENT_CLEAN_SAMPLE"
+ },
+ "forbidden": [
+  "combinarea ipotezelor",
+  "schimbarea pragurilor",
+  "alegerea celui mai bun orizont",
+  "ansambluri dupa rezultate",
+  "tuning de coeficienti din outcome-uri"
+ ]
+}

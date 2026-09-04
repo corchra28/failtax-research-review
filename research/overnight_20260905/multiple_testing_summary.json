@@ -1,0 +1,40 @@
+{
+ "family_size": 3,
+ "correction": "Bonferroni x3 (p si CI la alpha/3)",
+ "tests": {
+  "H1": {
+   "p_raw": 0.9513,
+   "p_bonferroni": 1.0,
+   "CI95_corrected": [
+    -0.03270863672222221,
+    0.006237918222222218
+   ],
+   "N": 54,
+   "mints": 54,
+   "verdict": "FAIL"
+  },
+  "H2": {
+   "p_raw": 0.2813,
+   "p_bonferroni": 0.8439,
+   "CI95_corrected": [
+    -0.03479239516666667,
+    0.07296064144444445
+   ],
+   "N": 18,
+   "mints": 18,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE"
+  },
+  "H3": {
+   "p_raw": 0.2637,
+   "p_bonferroni": 0.7910999999999999,
+   "CI95_corrected": [
+    -0.013710104017543861,
+    0.022694704350877185
+   ],
+   "N": 57,
+   "mints": 57,
+   "verdict": "FAIL"
+  }
+ },
+ "best_candidate": null
+}

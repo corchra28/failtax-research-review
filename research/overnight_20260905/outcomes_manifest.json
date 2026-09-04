@@ -1,0 +1,12 @@
+{
+ "rows": 946,
+ "status_counts": {
+  "OK": 888,
+  "CHAIN_BREAK_IN_HOLD": 52,
+  "ENTRY_STATE_UNANCHORED": 2,
+  "FEE_UNRESOLVED_EXIT": 2,
+  "FEE_UNRESOLVED_ENTRY": 2
+ },
+ "content_sha256": "9b83b743bd2585162cd3a9c5d78ed13f55b7138c45ea679060906c77980be002",
+ "built": "2026-09-04 21:07:19"
+}
