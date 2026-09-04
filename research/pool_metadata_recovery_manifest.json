@@ -1,0 +1,28 @@
+{
+ "frozen_at": "2026-09-04 17:10:27 EEST",
+ "source_commit": "8460a117397f56efe67c3466e5ab3f50cb7787be",
+ "n_pools": 32491,
+ "pool_list_sha256": "3c496bc019c8aa25b0c99fd3d59eaa97f4e3224b46cea113b94b3765bd986559",
+ "batch_size": 100,
+ "n_batches": 325,
+ "max_calls": 325,
+ "rpc_method": "getMultipleAccounts",
+ "params": {
+  "commitment": "finalized",
+  "encoding": "base64",
+  "dataSlice": {
+   "offset": 0,
+   "length": 107
+  }
+ },
+ "discriminator_hex": "f19a6d0411b16dbc",
+ "layout": "disc[0:8] pool_bump[8] index u16le[9:11] creator[11:43] base_mint[43:75] quote_mint[75:107]",
+ "script_sha256": "d35933c2d00ffa83a95987110e217ce1d9f1c6c0791e212a04d1d50f394d4de8",
+ "inventory_sha256": "508edfaa5d332898cf1166be7241d49d79a511dc675f6b1063323b92574ef791",
+ "status": "FETCHED",
+ "rpc_request_count": 325,
+ "errors": [],
+ "fetched_at": "2026-09-04 17:12:16 EEST",
+ "wall_s": 98.0,
+ "raw_cache_sha256": "30b66cd0123748e63ba73885944013b30d0430540a0bbbe3ec509cc0ac15272d"
+}

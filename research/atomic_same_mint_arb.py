@@ -5,7 +5,7 @@ import gzip,json,base64,struct,os,glob,collections,sys,time,zlib,hashlib,bisect,
 sys.path.insert(0,'strategy_e'); import pda; from pda import b58e
 sys.path.insert(0,'.'); import pumpswap_fees as PF
 D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; TAPE="strategy_m/data/tape"; WSOL="So11111111111111111111111111111111111111112"; SUPPLY=10**15
-INV=f"{D}/pamm_pool_inventory.json.gz"; CACHE2=f"{D}/arb_pair_events.jsonl.gz"; SPEC="research/atomic_same_mint_arb_frozen_spec.json"; DERIV="research/atomic_same_mint_arb_derivation.json"
+INV=f"{D}/pamm_pool_inventory.json.gz"; CACHE2=f"{D}/arb_pair_events.jsonl.gz"; SPEC="research/atomic_same_mint_arb_frozen_spec.json"; DERIV="research/atomic_same_mint_arb_derivation.json"; RPC_PAIRS=f"{D}/same_mint_pairs_rpc.json"; RPC_META="research/pool_metadata_normalized.jsonl.gz"
 PUMP="6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"; PAMM="pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"; TOKEN_PROGRAM_MAP_PATH="research/token_program_map.json"   # {mint: owner_program}; inexistent => necunoscut
 SPL_TOKEN="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"; TOKEN_2022="TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
 def load_token_program_map():
@@ -72,7 +72,12 @@ def stage_derive():
         if m["index"]<=0 or WSOL not in (m["base_mint"],m["quote_mint"]): continue
         tok=m["quote_mint"] if m["base_mint"]==WSOL else m["base_mint"]; addr,creator=canonical_pool_address(tok)
         rows.append(dict(sibling_pool=p,sibling_index=m["index"],sibling_creator=m["creator"],sibling_is_canonical_creator=(m["creator"]==creator),token_mint=tok,strict_orientation=(m["base_mint"]==tok and m["quote_mint"]==WSOL),canonical_creator=creator,canonical_pool=addr,canonical_in_tape_createpool=(addr in P),canonical_active=(addr in active),sibling_active=(p in active),canonical_events=(inv["stats"].get(addr,{}).get("n_buy",0)+inv["stats"].get(addr,{}).get("n_sell",0)),sibling_events=(inv["stats"].get(p,{}).get("n_buy",0)+inv["stats"].get(p,{}).get("n_sell",0))))
-    out=dict(built=time.strftime("%Y-%m-%d %H:%M:%S"),derivation_validation=dict(canonical_pools_in_tape=ok+bad,pda_matches=ok,pda_mismatches=bad),INDEX_GT0_SOL_POOLS=len(rows),DERIVED_CANONICAL_ADDRESSES=len({r["canonical_pool"] for r in rows}),DERIVED_CANONICAL_ACTIVE_MATCHES=sum(1 for r in rows if r["canonical_active"]),STRICT_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and r["strict_orientation"]),REVERSED_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and not r["strict_orientation"]),PAIRS_WITH_BOTH_EVENT_STREAMS=sum(1 for r in rows if r["canonical_active"] and r["sibling_active"]),pairs=rows)
+    allnc=[]
+    for p,m in P.items():
+        if m["canonical"] or WSOL not in (m["base_mint"],m["quote_mint"]): continue
+        tok=m["quote_mint"] if m["base_mint"]==WSOL else m["base_mint"]; addr,creator=canonical_pool_address(tok)
+        if addr in active: allnc.append(dict(noncanonical_pool=p,index=m["index"],strict_orientation=(m["base_mint"]==tok),token_mint=tok,canonical_pool=addr,canonical_active=True,noncanonical_active=(p in active)))
+    out=dict(built=time.strftime("%Y-%m-%d %H:%M:%S"),all_noncanonical_sol_pools_scanned=sum(1 for m in P.values() if not m["canonical"] and WSOL in (m["base_mint"],m["quote_mint"])),all_noncanonical_with_active_derived_canonical=allnc,derivation_validation=dict(canonical_pools_in_tape=ok+bad,pda_matches=ok,pda_mismatches=bad),INDEX_GT0_SOL_POOLS=len(rows),DERIVED_CANONICAL_ADDRESSES=len({r["canonical_pool"] for r in rows}),DERIVED_CANONICAL_ACTIVE_MATCHES=sum(1 for r in rows if r["canonical_active"]),STRICT_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and r["strict_orientation"]),REVERSED_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and not r["strict_orientation"]),PAIRS_WITH_BOTH_EVENT_STREAMS=sum(1 for r in rows if r["canonical_active"] and r["sibling_active"]),pairs=rows)
     json.dump(out,open(DERIV,"w"),indent=1); print({k:v for k,v in out.items() if k!="pairs"}); print("DERIVE_DONE")
 def readlines(fp):
     try:
@@ -93,6 +98,7 @@ def outages():
 def stage_pass2():
     inv=load_inv(); dup,_=pairs_from_inventory(inv); want={p for ps in dup.values() for p in ps}
     if os.path.exists(DERIV): want|={d["canonical_pool"] for d in json.load(open(DERIV))["pairs"] if d["canonical_active"]}|{d["sibling_pool"] for d in json.load(open(DERIV))["pairs"] if d["canonical_active"]}   # inclusiv orientarea inversa, pentru raportare
+    if os.path.exists(RPC_PAIRS): want|={p for ps in json.load(open(RPC_PAIRS))["pairs"].values() for p in ps}   # PHASE 1: perechi same-mint din metadatele RPC (toate orientarile, pentru raportare)
     print("pool-uri in perechi duplicate",len(want),"perechi",len(dup),flush=True)
     if not want:
         with gzip.open(CACHE2,"wt") as f: pass
@@ -153,6 +159,42 @@ def truncated_tails():
     return out
 def interval_clean(t1,t2,OUT_W,TR):
     return not any(not (e<=t1 or s>=t2) for s,e in OUT_W) and not any(not (e<=t1 or s>=t2) for s,e in TR)
+def joint_windows_clean(evA,evB,OUT_W,TR,brA,brB):
+    """ferestre de stare comuna (dedup pe slot de inceput), fara outage/trunchiere pana la landing s+2 si FARA ruptura de lant in oricare pool in interiorul ferestrei (consistenta 100 %)."""
+    W=joint_windows(evA,evB,OUT_W,TR); out=[]; slA=[e[2] for e in evA]; slB=[e[2] for e in evB]
+    for s1,s2,L,t1 in W:
+        ia0=bisect.bisect_right(slA,s1)-1; ia1=bisect.bisect_right(slA,s2+2)-1; ib0=bisect.bisect_right(slB,s1)-1; ib1=bisect.bisect_right(slB,s2+2)-1
+        if ia0<0 or ib0<0: continue
+        if chain_ok_between(brA,ia0,ia1) and chain_ok_between(brB,ib0,ib1): out.append((s1,s2,L,t1))
+    return out
+def load_rpc_meta():
+    M={}
+    for l in gzip.open(RPC_META,"rt"): r=json.loads(l); M[r["pool"]]=r
+    return M
+def stage_feasibility_rpc():
+    """PHASE 1 (item 6-7): perechi same-mint din metadatele RPC; ferestre din Buy/Sell existente; FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM. Fara spread/PnL."""
+    M=load_rpc_meta(); pairs=json.load(open(RPC_PAIRS))["pairs"]; E=load_pass2(); OUT_W=outages(); TR=truncated_tails(); inv=load_inv()
+    res=[]; n_w=0; n_w2=0; n_w2_clean=0; win_by_date=collections.Counter(); win_by_date_all=collections.Counter(); both=0; combos_type=collections.Counter(); ptype=collections.Counter(); vq_ok=0; vq_n=0; chain_pairs=chain_bad=0; excl=collections.Counter()
+    for tok,ps in pairs.items():
+        strict=[p for p in ps if M[p]["orientation"]=="STRICT"]; rev=[p for p in ps if M[p]["orientation"]=="REVERSED"]
+        ptype["STRICT_ONLY_GROUP" if len(strict)>=2 else ("MIXED" if strict and rev else "REVERSED_ONLY")]+=1
+        if len(strict)<2: excl["GROUP_WITHOUT_2_STRICT_POOLS"]+=1; continue
+        evs={p:E.get(p,[]) for p in strict}; brk={p:chain_breaks(evs[p]) for p in strict}
+        for p in strict:
+            ev=evs[p]; chain_pairs+=max(0,len(ev)-1); chain_bad+=len(brk[p]); vq_n+=1; vq_ok+=(implied_vq(ev)[0] is not None)
+        for i in range(len(strict)):
+            for j in range(i+1,len(strict)):
+                a,b=strict[i],strict[j]
+                if not evs[a] or not evs[b]: excl["COMBO_MISSING_EVENT_STREAM"]+=1; continue
+                both+=1; c=M[a]["canonical"]+M[b]["canonical"]; combos_type["CANONICAL+NONCANONICAL" if c==1 else ("NONCANONICAL+NONCANONICAL" if c==0 else "CANONICAL+CANONICAL")]+=1
+                Wall=joint_windows(evs[a],evs[b],OUT_W,TR); Wc=joint_windows_clean(evs[a],evs[b],OUT_W,TR,brk[a],brk[b]); n_w+=len(Wall); g2=[w for w in Wall if w[2]>2]; c2=[w for w in Wc if w[2]>2]; n_w2+=len(g2); n_w2_clean+=len(c2)
+                for w in c2: win_by_date[datetime.datetime.utcfromtimestamp(w[3]).strftime("%Y-%m-%d")]+=1
+                for w in g2: win_by_date_all[datetime.datetime.utcfromtimestamp(w[3]).strftime("%Y-%m-%d")]+=1
+                res.append(dict(token_mint=tok,pool_a=a,pool_b=b,canonical_a=M[a]["canonical"],canonical_b=M[b]["canonical"],ev_a=len(evs[a]),ev_b=len(evs[b]),breaks_a=len(brk[a]),breaks_b=len(brk[b]),windows=len(Wall),windows_gt2=len(g2),windows_gt2_clean=len(c2)))
+    F=dict(source="PHASE1_RPC_METADATA + tape Buy/Sell",groups=len(pairs),group_types=dict(ptype),excluded=dict(excl),combos_with_both_streams=both,combo_types=dict(combos_type),windows_total=n_w,windows_gt2=n_w2,windows_gt2_clean_chain100=n_w2_clean,windows_gt2_clean_by_utc_date=dict(win_by_date),windows_gt2_all_by_utc_date=dict(win_by_date_all),chain=dict(pairs=chain_pairs,breaks=chain_bad),vq=dict(pools=vq_n,computable=vq_ok),outage_windows=len(OUT_W),truncated_segments=len(TR),fee_resolver=json.load(open("research/external_review_remediation.json")).get("FEE_RESOLVER_VALID"),combos=res)
+    gate=dict(pairs_ge_20=sum(1 for r in res if r["windows_gt2_clean"]>0)>=20,clean_windows_gt2_ge_100=n_w2_clean>=100,dates_ge_2=len(win_by_date)>=2,both_streams_present=both>0,reserves_valid_and_chain100_in_used_windows=(F["fee_resolver"] is True and n_w2_clean>0))
+    F["pairs_with_clean_windows"]=sum(1 for r in res if r["windows_gt2_clean"]>0); F["FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM"]=dict(gate,PASS=all(v is True for v in gate.values()))
+    json.dump(F,open("research/atomic_same_mint_arb_feasibility_rpc.json","w"),indent=1,default=str); print(json.dumps({k:v for k,v in F.items() if k!="combos"},default=str)); print("FEASIBILITY_RPC_DONE")
 def joint_windows(evA,evB,OUT_W,TR=()):
     """ferestre de stare comuna: intre schimbari consecutive ale oricaruia din pool-uri, cand ambele au stare cunoscuta; dedup pe slot de inceput; lungime in sloturi."""
     if not evA or not evB: return []
@@ -335,4 +377,4 @@ def stage_run():
     R["final_gate_primary_0_25"]=g; R["FINAL_VERDICT"]="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if (g and all(g.values())) else "ATOMIC_ARB_NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open("research/atomic_same_mint_arb_results.json","w"),indent=1,default=str); print("rows",len(rows),"portfolio",len(port),"viol",dict(viol)); print("VERDICT",R["FINAL_VERDICT"],g); print("RUN_DONE")
 if __name__=="__main__":
-    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
+    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()

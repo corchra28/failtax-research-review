@@ -9,6 +9,32 @@ for dep in ("strategy_e/pda.py","pumpswap_fees.py"):
 t=subprocess.run([sys.executable,"research/atomic_same_mint_arb_tests.py"],capture_output=True,text=True); out=t.stdout
 if "ALL_TESTS_PASS = True" not in out or "PATCHED_BLOCKERS = 10/10" not in out: fails.append("BEHAVIORAL_TESTS_FAILED"); notes.append(out[-800:])
 else: notes.append("teste comportamentale: PATCHED_BLOCKERS = 10/10, ALL_TESTS_PASS = True")
+# PHASE 1 metadata recovery: manifest inghetat inainte de apeluri, buget respectat, control semantic, cache brut NEpublicat, normalizat publicat
+if os.path.exists("research/pool_metadata_recovery_manifest.json"):
+    Mn=json.load(open("research/pool_metadata_recovery_manifest.json")); Rp=json.load(open("research/pool_metadata_recovery_report.json")) if os.path.exists("research/pool_metadata_recovery_report.json") else {}
+    if Mn.get("rpc_request_count",0)>Mn.get("max_calls",325): fails.append("RPC_BUDGET_EXCEEDED")
+    if Mn.get("n_batches")!=325 or Mn.get("batch_size")!=100: fails.append("RPC_BATCHING_NOT_AS_APPROVED")
+    if Mn.get("frozen_at") and Mn.get("fetched_at") and Mn["frozen_at"]>Mn["fetched_at"]: fails.append("FREEZE_AFTER_FETCH")
+    if (Rp.get("CREATEPOOL_METADATA_MATCH_RATE") or 0)<0.999: fails.append("DECODER_SEMANTIC_MISMATCH")
+    if os.path.exists("research/pool_accounts_raw.jsonl.gz") or os.path.exists("pool_accounts_raw.jsonl.gz"): fails.append("RAW_RPC_CACHE_PUBLISHED")
+    if os.path.exists("research/pool_metadata_normalized.jsonl.gz"):
+        if Rp.get("normalized_sha256") and sha("research/pool_metadata_normalized.jsonl.gz")!=Rp["normalized_sha256"]: fails.append("NORMALIZED_HASH_MISMATCH")
+        import re as _re; n_clear=0
+        for l in gzip.open("research/pool_metadata_normalized.jsonl.gz","rt"):
+            r=json.loads(l)
+            if "creator" in r or not _re.fullmatch(r"[0-9a-f]{32}",r.get("creator_id","")): n_clear+=1
+        if n_clear: fails.append(f"CREATOR_NOT_HASHED {n_clear}")
+    notes.append(f"phase1: calls {Mn.get('rpc_request_count')}/{Mn.get('max_calls')}, recovered {Rp.get('ACCOUNTS_RECOVERED')}, match {Rp.get('CREATEPOOL_METADATA_MATCH_RATE')}, groups {Rp.get('SAME_MINT_PAIRS_TOTAL')}")
+if os.path.exists("research/atomic_same_mint_arb_feasibility_rpc.json"):
+    Fr=json.load(open("research/atomic_same_mint_arb_feasibility_rpc.json")); gr=Fr["FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM"]
+    # recalcul independent al portii din campurile raportate
+    exp=dict(pairs_ge_20=Fr["pairs_with_clean_windows"]>=20,clean_windows_gt2_ge_100=Fr["windows_gt2_clean_chain100"]>=100,dates_ge_2=len(Fr["windows_gt2_clean_by_utc_date"])>=2,both_streams_present=Fr["combos_with_both_streams"]>0,reserves_valid_and_chain100_in_used_windows=(Fr["fee_resolver"] is True and Fr["windows_gt2_clean_chain100"]>0))
+    if any(gr.get(k)!=v for k,v in exp.items()) or gr["PASS"]!=all(exp.values()): fails.append("FEASIBILITY_RPC_GATE_RECOMPUTE_MISMATCH")
+    if sum(c["windows_gt2_clean"] for c in Fr["combos"])!=Fr["windows_gt2_clean_chain100"]: fails.append("FEASIBILITY_RPC_WINDOW_SUM_MISMATCH")
+    notes.append(f"feasibility_rpc: pairs_clean {Fr['pairs_with_clean_windows']}, clean windows {Fr['windows_gt2_clean_chain100']}, dates {sorted(Fr['windows_gt2_clean_by_utc_date'])}, PASS={gr['PASS']}")
+    if os.path.exists("research/atomic_same_mint_arb_derivation.json"):
+        Dv=json.load(open("research/atomic_same_mint_arb_derivation.json"))
+        if not isinstance(Dv.get("all_noncanonical_with_active_derived_canonical"),list): fails.append("MISSING_INFORMATIVE_NONCANONICAL_SCAN")
 if os.path.exists("research/atomic_same_mint_arb_derivation.json"):
     Dv=json.load(open("research/atomic_same_mint_arb_derivation.json")); notes.append(f"derivare zero-RPC: pda_matches {Dv['derivation_validation']['pda_matches']}/{Dv['derivation_validation']['canonical_pools_in_tape']} (nepotrivirile = pool-uri canonice cu quote != WSOL), index>0 {Dv['INDEX_GT0_SOL_POOLS']}, canonice active {Dv['DERIVED_CANONICAL_ACTIVE_MATCHES']}")
 req=["research/external_review_remediation.py","research/external_review_remediation.json","research/external_review_remediation_report.md","research/atomic_same_mint_arb.py","research/atomic_same_mint_arb_feasibility.json","research/atomic_same_mint_arb_report.md","research/atomic_arb_inventory_pass1.py"]
