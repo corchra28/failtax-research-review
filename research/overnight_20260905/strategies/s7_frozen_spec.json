@@ -1,0 +1,19 @@
+{
+ "strategy": "S7_TOXIC_TOKEN_AVOIDANCE_FILTER",
+ "mechanism": "respingerea tranzactiilor cu semne PRE-intrare de extractie (creator/concentrare/vanzari incumbente/spam/discontinuitati) reduce pierderile extreme ale unei intrari fixe",
+ "who_loses": "nimeni direct: filtrul evita sa fim contrapartea extractorilor (creatori, sniperi, wash) in lansarile toxice",
+ "components": [
+  "creator_prior_failure_rate (istoricul creatorului din lansarile ANTERIOARE in banda: 1 - rata de migrare; None => neutru 0.5)",
+  "creator_inventory_share (pre-migrare)",
+  "top1_buy_share (dominanta unui portofel)",
+  "incumbent_sell_share (vanzari incumbente imediate)",
+  "spam_buyer_share (cota cumparatorilor post-only cu >= 20 mint-uri in 24 h anterioare)",
+  "chain_breaks_pre_decision (discontinuitati de rezerve inainte de D)",
+  "liquidity_deterioration (rq la D / rq la deschidere, inversat)",
+  "same_signature_multi_swap_share (evenimente din tranzactii cu >= 2 swap-uri in acelasi pool inainte de D)"
+ ],
+ "normalization": "rang percentil pe DEV per componenta (toxicitate crescatoare), medie egal ponderata; filtru = scor >= Q3 DEV",
+ "baseline": "decizie T0+60 s; intrare +3 sloturi (worst-of pre/post), 0,10 SOL, exact-B; iesire +60 s; stres +5 sloturi; cost x1.25",
+ "pass_rule": "reduce pierderea medie a cozii stangi (5 % cele mai slabe) SI creste EV net pe VAL+PH; altfel TAIL_ONLY sau NO_VALUE",
+ "frozen_at": "2026-09-04 23:22:28"
+}

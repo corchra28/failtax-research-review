@@ -1,0 +1,8 @@
+{
+ "fuzz_cases": 3000,
+ "violations": [],
+ "hidden_deposit_breaks_anchor": true,
+ "tail_unanchored": true,
+ "pre_post_worstcase": "verificat in slow_atomic_revert_arb_tests (v2_landing_slot_worst_case_used)",
+ "PASS": true
+}

@@ -1,0 +1,99 @@
+[
+ {
+  "name": "EXECUTED bot cycles (observed, not accessible)",
+  "realism": "observat real; necesita infrastructura de bot (aceeasi tranzactie, competitie in acelasi slot 100 %)",
+  "evidence": "N=500, EV 0.02518 SOL, PF 295.1, concentrare 84 %",
+  "category": "actual bot profits observed"
+ },
+ {
+  "name": "SLOW_CAPTURE_V1",
+  "realism": "ordinar +3 sloturi",
+  "evidence": "0 stari profitabile in populatia inghetata",
+  "category": "inaccessible / no verified edge"
+ },
+ {
+  "name": "S6 router",
+  "realism": "executie",
+  "evidence": "EXECUTION_COST_REDUCTION_NOT_CONFIRMED",
+  "category": "execution-cost improvement (not confirmed)"
+ },
+ {
+  "name": "S7 toxicity filter",
+  "realism": "filtru",
+  "evidence": "TOXICITY_FILTER_NO_VALUE",
+  "category": "loss-avoidance filter (no value)"
+ },
+ {
+  "name": "S1",
+  "realism": "directional, +3 sloturi",
+  "evidence": {
+   "verdict": "FAIL",
+   "N": 33638,
+   "EV": -0.0067156819696771505,
+   "PF": 0.5663254184637458
+  },
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "S2",
+  "realism": "directional, +3 sloturi",
+  "evidence": {
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "N": null,
+   "EV": null,
+   "PF": null
+  },
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "S3",
+  "realism": "directional, +3 sloturi",
+  "evidence": {
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "N": 2,
+   "EV": 0.0011463575,
+   "PF": Infinity
+  },
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "S4",
+  "realism": "directional, +3 sloturi",
+  "evidence": {
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "N": 23,
+   "EV": 0.00010120378260869534,
+   "PF": 1.013436995606545
+  },
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "S5",
+  "realism": "directional, +3 sloturi",
+  "evidence": {
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "N": 16,
+   "EV": -0.00570685225,
+   "PF": 0.4398229747654796
+  },
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "H1",
+  "realism": "directional (intrare la D)",
+  "evidence": "FAIL",
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "H2",
+  "realism": "directional (intrare la D)",
+  "evidence": "INSUFFICIENT_CLEAN_SAMPLE",
+  "category": "failed / insufficient"
+ },
+ {
+  "name": "H3",
+  "realism": "directional (intrare la D)",
+  "evidence": "FAIL",
+  "category": "failed / insufficient"
+ }
+]

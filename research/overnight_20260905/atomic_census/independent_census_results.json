@@ -1,0 +1,25 @@
+{
+ "TOTAL_SWAP_EVENTS_SCANNED": 42270215,
+ "CANDIDATE_SIGNATURES": 1034,
+ "candidate_groups": 1034,
+ "EXACT": 500,
+ "DUST": 1,
+ "gross_sum_exact_lamports": 12640888500,
+ "unique_tokens_exact": 63,
+ "unique_users_exact": 52,
+ "dates": [
+  "2026-09-02",
+  "2026-09-03",
+  "2026-09-04"
+ ],
+ "by_day": {
+  "2026-09-02": 293,
+  "2026-09-03": 189,
+  "2026-09-04": 18
+ },
+ "sample_100": {
+  "n": 100,
+  "field_agreement": 100,
+  "diffs": []
+ }
+}

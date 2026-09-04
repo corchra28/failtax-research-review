@@ -1,0 +1,29 @@
+{
+ "branch": "EXECUTED_CROSS_POOL_ARB_CENSUS",
+ "label": "POST_HOC_HISTORICAL_RESEARCH",
+ "purpose": "recensamant NEUTRU al ciclurilor de arbitraj cross-pool executate efectiv in banda PumpSwap existenta (09-02..09-04), inainte de orice calcul de profit",
+ "inputs": {
+  "tape": "strategy_m/data/tape/events_*.jsonl.gz (manifeste SEP02 844ce65d..., SEP03 b49738b5..., SEP04 3068bfa3...)",
+  "pool_metadata": "research/pool_metadata_normalized.jsonl.gz (sha256 6daeaaf47b0cfdd1041bad3fffb4fb7fd659f2b06f908d2ae08eeff2bab8eb54; 32.491 pool-uri active recuperate) + CreatePoolEvent in banda"
+ },
+ "grouping": "(signature, user, base_mint); toate evenimentele unei tranzactii sunt pe aceeasi linie de banda (logsSubscribe per semnatura)",
+ "primary_exact_cycle": [
+  "aceeasi semnatura", "acelasi user (BuyEvent/SellEvent.user)", "acelasi base_mint", "quote_mint = WSOL", ">= 2 pool-uri PumpSwap distincte", ">= 1 buy si >= 1 sell",
+  "orientare stricta: base = token, quote = WSOL pentru toate pool-urile implicate", "sum(base cumparat) == sum(base vandut) EXACT (unitati brute)",
+  "toate evenimentele decodate (lungimi 465/480/417) si invariantul rezervelor (post = pre +/- sume) valid pentru fiecare eveniment", "ordinea evenimentelor in semnatura consistenta (indexul evenimentului crescator; lantul pre/post per pool consistent in interiorul semnaturii)",
+  "excluse: Deposit/Withdraw (nedecodate => orice linie cu evenimente nerecunoscute este exclusa daca contine tokenul), fluxuri multi-user in aceeasi semnatura pentru acelasi mint (grup ambiguu), semnaturi cu evenimente lipsa/duplicate (acelasi (pool, index de eveniment) de doua ori)"
+ ],
+ "dust_cycle_population": "descriptiva, separata: |sum(base cumparat) - sum(base vandut)| <= 1 bp din base-ul cumparat, restul conditiilor identice; NU poate inlocui sau salva populatia primara",
+ "user_amounts": "buy: quote platit de user = max(quote_amount_in@64, user_quote_amount_in@112) (varianta 480 are campurile inversate); sell: quote primit de user = min(quote_amount_out@64, user_quote_amount_out@112); base = base_amount_out / base_amount_in @16",
+ "economics_frozen_before_results": {
+  "gross_quote_profit": "sum(quote primit pe sell-uri) - sum(quote platit pe buy-uri), in lamports, din sumele executate (NU din miscarea rezervelor)",
+  "transaction_cost_scenarios_sol": {"PRIMARY": 0.000105, "STRESS_1": 0.0005, "STRESS_2": 0.001, "NEW_ACCOUNT_STRESS": 0.002105},
+  "multi_token_transactions": "fiecare ciclu de token din aceeasi tranzactie este taxat CONSERVATOR cu costul complet al tranzactiei",
+  "bootstrap": "10.000 repetari deterministe (seed 20260905); clustere user x zi UTC si token x zi UTC",
+  "gate_EXECUTED_ARB_MECHANISM_CONFIRMED": {"exact_cycles_min": 50, "tokens_min": 5, "dates_min": 2, "primary_net_EV_gt": 0, "primary_PF_min": 2.0, "CI95_low_gt_0_both_clusterings": true, "ex_best_1pct_gt": 0, "STRESS_1_EV_gt": 0, "top_user_share_max": 0.40, "top_token_share_max": 0.40, "decode_or_invariant_violations": 0},
+  "pass_meaning": "confirma doar mecanismul executat de altii; NU implica capturabilitatea de catre un trader mai lent"
+ },
+ "publication": "utilizatorii si semnaturile hash-uite cu sha256('external-review-v1:'+valoare)[:32]; cache-ul brut ramane local",
+ "frozen_at": "2026-09-04 21:30 EEST",
+ "pnl_calculated_before_freeze": false
+}

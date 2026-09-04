@@ -1,10 +1,10 @@
 {
- "stage": "6_DOCS_DONE",
- "timestamp": "2026-09-04 21:09:06 EEST",
+ "stage": "ALL_QUEUES_COMPLETE",
+ "timestamp": "2026-09-04 23:34:23 EEST",
  "commit": "fe55a933f127c5f8c1e193a8b346889ef5b37a15",
- "result": "H1 FAIL, H2 INSUFFICIENT_CLEAN_SAMPLE, H3 FAIL; adversarial no discrepancies",
+ "result": "census + S1-S7 complete; no candidate; global Holm: none pass",
  "blocker": null,
- "next": "7_COMMIT_PUSH then STOP",
+ "next": "commit/push, STOP",
  "helius_calls": 0,
  "rpc_calls": 0,
  "new_data": false

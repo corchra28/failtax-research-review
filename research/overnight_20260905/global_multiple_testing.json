@@ -1,0 +1,85 @@
+{
+ "method": "Holm-Bonferroni pe toate testele primare ale noptii (m = 13: H1-H3, EXECUTED_ARB_MECHANISM, ARBER_PERSISTENCE, SLOW_CAPTURE, S1-S7)",
+ "m": 13,
+ "tests": [
+  {
+   "test": "H1",
+   "p_raw": 0.9513,
+   "verdict": "FAIL",
+   "p_holm": 1.0
+  },
+  {
+   "test": "H2",
+   "p_raw": 0.2813,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "p_holm": 1.0
+  },
+  {
+   "test": "H3",
+   "p_raw": 0.2637,
+   "verdict": "FAIL",
+   "p_holm": 1.0
+  },
+  {
+   "test": "EXECUTED_ARB_MECHANISM",
+   "p_raw": 0.1294,
+   "verdict": "EXECUTED_ARB_MECHANISM_NOT_CONFIRMED",
+   "p_holm": 1.0
+  },
+  {
+   "test": "ARBER_PERSISTENCE_V1",
+   "p_raw": null,
+   "verdict": "ARBER_PERSISTENCE_INSUFFICIENT_SAMPLE",
+   "p_holm": null
+  },
+  {
+   "test": "SLOW_CAPTURE_V1",
+   "p_raw": null,
+   "verdict": "SLOW_CAPTURE_NO_VERIFIED_EDGE",
+   "p_holm": null
+  },
+  {
+   "test": "S1",
+   "p_raw": 1.0,
+   "verdict": "FAIL",
+   "p_holm": 1.0
+  },
+  {
+   "test": "S2",
+   "p_raw": null,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "p_holm": null
+  },
+  {
+   "test": "S3",
+   "p_raw": 0.0,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "p_holm": 0.0
+  },
+  {
+   "test": "S4",
+   "p_raw": 0.5032,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "p_holm": 1.0
+  },
+  {
+   "test": "S5",
+   "p_raw": 0.8976,
+   "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+   "p_holm": 1.0
+  },
+  {
+   "test": "S6",
+   "p_raw": null,
+   "verdict": "EXECUTION_COST_REDUCTION_NOT_CONFIRMED",
+   "p_holm": null
+  },
+  {
+   "test": "S7",
+   "p_raw": null,
+   "verdict": "TOXICITY_FILTER_NO_VALUE",
+   "p_holm": null
+  }
+ ],
+ "any_pass_after_correction": false
+}

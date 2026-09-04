@@ -1,0 +1,14 @@
+{
+ "strategy": "S3_CROSS_POOL_FLOW_LEAD_LAG",
+ "mechanism": "o tranzactie mare intr-un pool actualizeaza informatia inainte ca participantii celuilalt pool sa reactioneze",
+ "who_loses": "LP-urile si traderii pool-ului tinta care coteaza pretul vechi",
+ "leader_rule": "per token, din activitatea DEV (09-02) anterioara: scor = rang(volum quote) + rang(traderi unici) + rang(-latenta mediana de raspuns a celuilalt pool la miscarile acestuia); liderul = scor maxim; inghetat; daca nu exista activitate DEV pentru token => token exclus",
+ "event": "slot s cu flux net al liderului (quote buy - sell in slot s) / rq_pre >= decila 9 DEV (pozitiv => cumparam in tinta); excluse: semnaturi care ating ambele pool-uri, semnaturi din recensamantul de arbitraj, tinta fara stare ancorata la landing, rupturi",
+ "execution": "+3 sloturi worst-of, 0,10 SOL exact-B in tinta, iesire +60 s; stres +5; cost x1.25; max o pozitie per slot",
+ "rejects": [
+  "efectul dispare fara tranzactiile atomice",
+  "liderul schimbat retroactiv",
+  "< 20 token-uri independente"
+ ],
+ "frozen_at": "2026-09-04 23:29:02"
+}

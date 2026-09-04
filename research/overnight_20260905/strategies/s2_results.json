@@ -1,0 +1,20 @@
+{
+ "spec_sha256": "2658106aa39bb9dd757d4a7a2586685d393b65e78fbe1bc462f6c6adcd599320",
+ "cycles": 500,
+ "counts": {
+  "ZERO_RESIDUAL_OPPORTUNITY": 197,
+  "VQ_INVALID": 604,
+  "NO_ROUTE": 303,
+  "FEE_UNRESOLVED": 2
+ },
+ "residual_opportunities_total": 0,
+ "zero_opportunity": 197,
+ "dev_descriptive": null,
+ "test": null,
+ "bootstrap": null,
+ "stress5": null,
+ "predicted_mean": null,
+ "gate": null,
+ "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+ "note": "cost x1.25 nu se aplica separat (taxele sunt 25/5/0 fixe pe noncanonical; costul de retea e inclus); revert = -0.000105 SOL"
+}

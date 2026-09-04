@@ -1,0 +1,16 @@
+{
+ "strategy": "S6_MULTIPOOL_BEST_EXECUTION_ROUTER",
+ "mechanism": "alegerea pool-ului cu pretul executabil mai bun (rezerve/taxe/impact diferite) sau impartirea determinista intre 2 pool-uri reduce costul de executie al unei tranzactii deja decise",
+ "who_loses": "nimeni: economie de executie fata de pool-ul implicit; contrapartea este LP-ul pool-ului mai ieftin",
+ "default_pool": "canonical daca exista in grup, altfel pool-ul cu rq real maxim la decizie",
+ "routes": "single best pool; split 50/50 pe cele mai bune 2 pool-uri (sume fixate inainte de trimitere, fara rutare dinamica)",
+ "costs": "cost suplimentar de instructiune 5.000 lamports per swap suplimentar; taxe pool observate/tier; +3 si +5 sloturi worst-of",
+ "requirements": {
+  "median_saving_gt_extra_cost": true,
+  "positive_after_5_slots": true,
+  "decisions_min": 50,
+  "tokens_min": 5,
+  "ex_best_1pct_gt": 0
+ },
+ "frozen_at": "2026-09-04 23:22:41"
+}

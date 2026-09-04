@@ -1,0 +1,14 @@
+{
+ "q3_toxicity": 0.7090425531914893,
+ "components": [
+  "creator_prior_failure",
+  "creator_inventory_share",
+  "top1_buy_share",
+  "incumbent_sell_share",
+  "spam_buyer_share",
+  "chain_breaks",
+  "liquidity_deterioration",
+  "same_sig_multi_share"
+ ],
+ "frozen_at": "2026-09-04 23:22:37"
+}

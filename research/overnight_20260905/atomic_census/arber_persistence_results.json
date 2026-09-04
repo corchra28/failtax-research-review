@@ -1,0 +1,47 @@
+{
+ "spec": {
+  "hypothesis": "ARBER_PERSISTENCE_V1",
+  "label": "POST_HOC_HISTORICAL_RESEARCH",
+  "frozen_before_results": true,
+  "rank_rule": "executorii ciclurilor EXACTE sunt clasati EXCLUSIV dupa EV-ul net PRIMARY al ciclurilor din PRIMA lor zi observata (zi UTC); cuartila superioara (>= Q3 al EV-urilor din prima zi, calculata pe toti executorii cu prima zi < ultima zi a benzii)",
+  "test": "executorii din cuartila superioara pastreaza EV net pozitiv pe ciclurile din zilele ULTERIOARE primei zile",
+  "requirements": {
+   "eligible_prior_day_executors_min": 10,
+   "subsequent_exact_cycles_min": 30,
+   "subsequent_EV_gt": 0,
+   "PF_min": 1.5,
+   "cluster_CI95_low_gt_0": "bootstrap 10.000, cluster user x zi",
+   "ex_best_1pct_gt": 0,
+   "positive_on_every_subsequent_day": true
+  },
+  "forbidden": "inversarea unui rezultat esuat; schimbarea regulii de rang dupa vederea rezultatelor",
+  "cost_scenario": "PRIMARY 0.000105 SOL per ciclu"
+ },
+ "eligible_prior_day_executors": 50,
+ "q3_first_day_EV": 0.00011537233333333333,
+ "top_quartile_executors": 13,
+ "subsequent": {
+  "N": 19,
+  "EV": 0.000334418947368421,
+  "PF": 6.412955565608007,
+  "EX_BEST_1PCT": 8.966338888888889e-05,
+  "by_day": {
+   "2026-09-03": 0.000386568875,
+   "2026-09-04": 5.628600000000001e-05
+  }
+ },
+ "CI95_user_day": [
+  -6.706562068965517e-05,
+  0.0015676237777777777
+ ],
+ "gate": {
+  "executors10": true,
+  "cycles30": false,
+  "EV": true,
+  "PF": true,
+  "CI_low": false,
+  "exb1pct": true,
+  "every_day_positive": true
+ },
+ "verdict": "ARBER_PERSISTENCE_INSUFFICIENT_SAMPLE"
+}

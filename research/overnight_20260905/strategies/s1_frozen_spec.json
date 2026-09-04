@@ -1,0 +1,26 @@
+{
+ "strategy": "S1_LARGE_SELL_OVERSHOOT_REVERSION",
+ "mechanism": "un sell mare intr-un AMM subtire deplaseaza mecanic pretul sub referinta; arbitrajorii si cumparatorii obisnuiti restaureaza o parte din impact",
+ "who_loses": "vanzatorul mare (plateste impactul) si LP-ul pool-ului subtire; noi cumparam dupa deplasare si vindem dupa restaurare partiala",
+ "events": "toate SellEvent din m_pools (946 pool-uri, [T0, T0+420 s]) si pass2 (571 pool-uri) cu rezerve pre/post decodate",
+ "features": [
+  "size_rel = quote_out / rq_pre",
+  "impact_bp = (px_post/px_pre - 1) x 1e4 (negativ)",
+  "displacement_bp = px_post fata de referinta (alte pool-uri ale mint-ului la ultima stare ancorata <= slotul sell-ului; altfel px_pre)",
+  "vol_pre (dev. std. log-randamente ultimele 20 stari)",
+  "rq_pre"
+ ],
+ "signal": "size_rel >= decila 9 DEV AND displacement_bp <= decila 1 DEV (cea mai negativa); stare solvabila (rq_post >= 1 SOL), fara ruptura de lant intre sell si landing, fara outage",
+ "exclusions": [
+  "vanzator = creatorul mint-ului",
+  "semnatura in ciclurile exacte ale recensamantului (arbitraj cross-pool)",
+  "evenimente cu lp_bp=0 (speciale)",
+  "pool-uri cu < 5 stari inainte (VQ)"
+ ],
+ "execution": "intrare la +3 sloturi dupa slotul sell-ului (worst-of pre/post), 0,10 SOL exact-B; iesire +60 s; stres +5 sloturi; cost x1.25; 120 s descriptiv; max o pozitie de portofoliu per slot",
+ "rejects": [
+  "profitul dispare fara cele mai mari 1 % sell-uri",
+  "profitul dispare dupa controlul miscarii pietei aceluiasi token (randamentul pool-urilor de referinta in aceeasi fereastra)"
+ ],
+ "frozen_at": "2026-09-04 23:22:44"
+}
