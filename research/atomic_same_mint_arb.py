@@ -5,7 +5,37 @@ import gzip,json,base64,struct,os,glob,collections,sys,time,zlib,hashlib,bisect,
 sys.path.insert(0,'strategy_e'); import pda; from pda import b58e
 sys.path.insert(0,'.'); import pumpswap_fees as PF
 D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; TAPE="strategy_m/data/tape"; WSOL="So11111111111111111111111111111111111111112"; SUPPLY=10**15
-INV=f"{D}/pamm_pool_inventory.json.gz"; CACHE2=f"{D}/arb_pair_events.jsonl.gz"; SPEC="research/atomic_same_mint_arb_frozen_spec.json"
+INV=f"{D}/pamm_pool_inventory.json.gz"; CACHE2=f"{D}/arb_pair_events.jsonl.gz"; SPEC="research/atomic_same_mint_arb_frozen_spec.json"; DERIV="research/atomic_same_mint_arb_derivation.json"
+PUMP="6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"; PAMM="pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"; TOKEN_PROGRAM_MAP_PATH="research/token_program_map.json"   # {mint: owner_program}; inexistent => necunoscut
+SPL_TOKEN="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"; TOKEN_2022="TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+def load_token_program_map():
+    return json.load(open(TOKEN_PROGRAM_MAP_PATH)) if os.path.exists(TOKEN_PROGRAM_MAP_PATH) else {}
+def pair_allowed_for_pnl(token_mint,token_program_map):
+    """(allowed, reason): doar mint-uri cu program CUNOSCUT si egal cu SPL Token clasic intra in motorul de PnL. Fara presupuneri din sufix/creator."""
+    prog=token_program_map.get(token_mint)
+    if prog is None: return False,"TOKEN_PROGRAM_UNKNOWN"
+    if prog==SPL_TOKEN: return True,"SPL_TOKEN"
+    if prog==TOKEN_2022: return False,"TOKEN_2022_EXCLUDED"
+    return False,"TOKEN_PROGRAM_UNSUPPORTED"
+def pump_pool_authority(token_mint): return pda.find_pda([b"pool-authority",pda.b58d(token_mint)],pda.b58d(PUMP))[0]
+def canonical_pool_address(token_mint):
+    """PDA PumpSwap: ["pool", u16_le(0), creator(=pool-authority pump), base_mint(token), quote_mint(WSOL)]."""
+    creator=pump_pool_authority(token_mint); return pda.find_pda([b"pool",struct.pack("<H",0),pda.b58d(creator),pda.b58d(token_mint),pda.b58d(WSOL)],pda.b58d(PAMM))[0],creator
+def episode_first_flags(pred_nets):
+    """(blocant 8) pentru o secventa cronologica de predicted_net ale unei (perechi, directii, notional): 1 doar la prima stare pozitiva a fiecarui episod; episodul se inchide cand predicted <= 0."""
+    flags=[]; open_=False
+    for v in pred_nets:
+        if v is None or v<=0: flags.append(0); open_=False
+        else: flags.append(0 if open_ else 1); open_=True
+    return flags
+def final_gate(A,BN,viol,spec,token_program_observable):
+    """(blocant 9) toate criteriile portii din spec, calculate explicit; no_post_hoc = constantele motorului identice cu spec-ul."""
+    rb_=A["realized_net_base"]; segs=[k for k in ("CANONICAL+NONCANONICAL","NONCANONICAL+NONCANONICAL") if BN.get(k) and BN[k]["realized_net_base"]]
+    VK=("INVARIANT_VIOLATION_PREDICTED","INVARIANT_VIOLATION_LANDING","FEE_RESOLVER_NONE","TIMING_LANDING_BEFORE_DECISION","CHAIN_BREAK_DECISION_TO_LANDING","STATE_IN_OUTAGE_OR_TRUNCATION","PAIR_COMBO_EXCLUDED_NO_EVENTS_OR_VQ","PAIR_EXCLUDED_TOKEN_PROGRAM","ORIENTATION_VIOLATION")
+    fg=spec["final_gate"]
+    return dict(N50=rb_["N"]>=fg["N_realized_min"],days2=A["positive_days"]>=fg["positive_days_min"],EV=rb_["EV"]>0,median=rb_["median"]>0,PF=rb_["PF"]>=fg["PF_min"],CI_low=rb_.get("CI95_cluster_hour",(-1,0))[0]>0,exb1pct=rb_["EX_BEST_1PCT"]>0,top1=rb_["top1pct_contrib"]<=fg["top1pct_max"],day_share=(A["max_day_share"] if A["max_day_share"] is not None else 1)<=fg["max_day_share_max"],survival=A["survival_pred_to_realized_base"]>=fg["survival_min"],landing_s2=((A["realized_landing_s2_base"] or {}).get("EV",-1))>0,stress2=(A["realized_net_stress2"]["EV"])>0,
+        zero_violations=all(viol.get(k,0)==0 for k in VK) and token_program_observable is True,segments_positive=(all(BN[k]["realized_net_base"]["EV"]>0 for k in segs) if segs else False),
+        no_post_hoc=(spec["primary_notional_sol"]==PRIMARY and spec["notionals_sol"]==NOTIONALS and spec["final_gate"]["PF_min"]==1.5 and spec["final_gate"]["N_realized_min"]==50 and spec["costs"]["priority_fee_lamports"]==PRIO and spec["costs"]["jito_tip_scenarios_lamports"]==TIPS and spec["costs"]["base_signature_fee_lamports"]==SIG_FEE))
 LAMP=10**9; SIG_FEE=5000; PRIO=100000; TIPS={"ZERO_TIP_DIAGNOSTIC":0,"BASE":10000,"STRESS_1":100000,"STRESS_2":1000000}; NOTIONALS=[0.01,0.05,0.10,0.25,0.50,1.00]; PRIMARY=0.25
 def sha(p): return hashlib.sha256(open(p,"rb").read()).hexdigest()
 def load_inv(): return json.load(gzip.open(INV,"rt"))
@@ -18,7 +48,32 @@ def pairs_from_inventory(inv):
         if WSOL in (m["base_mint"],m["quote_mint"]): unordered[m["quote_mint"] if m["base_mint"]==WSOL else m["base_mint"]].append(p)
     dup={tok:sorted(set(ps)) for tok,ps in strict.items() if len(set(ps))>=2}
     info=dict(unordered_pairs_with_2plus=sum(1 for ps in unordered.values() if len(set(ps))>=2),reversed_orientation_pools_excluded=reversed_excluded)
+    # perechi recuperate prin derivare zero-RPC (canonical derivat + pool index>0), doar orientare stricta
+    if os.path.exists(DERIV):
+        for d in json.load(open(DERIV))["pairs"]:
+            if d["strict_orientation"] and d["canonical_active"]:
+                ps=set(dup.get(d["token_mint"],[]))|{d["canonical_pool"],d["sibling_pool"]}; dup[d["token_mint"]]=sorted(ps)
     return dup,info
+def derived_pool_meta(inv):
+    """meta sintetic pentru pool-urile canonice derivate (CreatePoolEvent anterior benzii): canonical=True, base=token, quote=WSOL, index 0, marcate derived=True."""
+    P=dict(inv["pools"])
+    if os.path.exists(DERIV):
+        for d in json.load(open(DERIV))["pairs"]:
+            if d["canonical_pool"] not in P: P[d["canonical_pool"]]=dict(pool=d["canonical_pool"],index=0,creator=d["canonical_creator"],base_mint=d["token_mint"],quote_mint=WSOL,canonical=True,derived=True,ts=None,slot=None)
+    return P
+def stage_derive():
+    """(1) DERIVARE LOCALA ZERO-RPC: pentru fiecare CreatePoolEvent cu WSOL pe o parte si index>0, deriveaza pool-ul canonical si verifica-l in setul pool-urilor active."""
+    inv=load_inv(); P=inv["pools"]; active=set(inv["stats"].keys()); ok=0; bad=0
+    for p,m in P.items():   # validarea derivarii pe pool-urile canonice observate in banda
+        if m["canonical"]:
+            addr,_=canonical_pool_address(m["base_mint"]); ok+= (addr==p); bad+= (addr!=p)
+    rows=[]
+    for p,m in P.items():
+        if m["index"]<=0 or WSOL not in (m["base_mint"],m["quote_mint"]): continue
+        tok=m["quote_mint"] if m["base_mint"]==WSOL else m["base_mint"]; addr,creator=canonical_pool_address(tok)
+        rows.append(dict(sibling_pool=p,sibling_index=m["index"],sibling_creator=m["creator"],sibling_is_canonical_creator=(m["creator"]==creator),token_mint=tok,strict_orientation=(m["base_mint"]==tok and m["quote_mint"]==WSOL),canonical_creator=creator,canonical_pool=addr,canonical_in_tape_createpool=(addr in P),canonical_active=(addr in active),sibling_active=(p in active),canonical_events=(inv["stats"].get(addr,{}).get("n_buy",0)+inv["stats"].get(addr,{}).get("n_sell",0)),sibling_events=(inv["stats"].get(p,{}).get("n_buy",0)+inv["stats"].get(p,{}).get("n_sell",0))))
+    out=dict(built=time.strftime("%Y-%m-%d %H:%M:%S"),derivation_validation=dict(canonical_pools_in_tape=ok+bad,pda_matches=ok,pda_mismatches=bad),INDEX_GT0_SOL_POOLS=len(rows),DERIVED_CANONICAL_ADDRESSES=len({r["canonical_pool"] for r in rows}),DERIVED_CANONICAL_ACTIVE_MATCHES=sum(1 for r in rows if r["canonical_active"]),STRICT_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and r["strict_orientation"]),REVERSED_ORIENTATION_MATCHES=sum(1 for r in rows if r["canonical_active"] and not r["strict_orientation"]),PAIRS_WITH_BOTH_EVENT_STREAMS=sum(1 for r in rows if r["canonical_active"] and r["sibling_active"]),pairs=rows)
+    json.dump(out,open(DERIV,"w"),indent=1); print({k:v for k,v in out.items() if k!="pairs"}); print("DERIVE_DONE")
 def readlines(fp):
     try:
         with gzip.open(fp,"rt") as f:
@@ -36,7 +91,9 @@ def outages():
     last_hb=max(lt(l[:19]) for l in open(f"{TAPE}/collector.log") if "[HB]" in l); W.append((last_hb+600,time.time())); return W
 # ---------------- pass 2 ----------------
 def stage_pass2():
-    inv=load_inv(); dup,_=pairs_from_inventory(inv); want={p for ps in dup.values() for p in ps}; print("pool-uri in perechi duplicate",len(want),"perechi",len(dup),flush=True)
+    inv=load_inv(); dup,_=pairs_from_inventory(inv); want={p for ps in dup.values() for p in ps}
+    if os.path.exists(DERIV): want|={d["canonical_pool"] for d in json.load(open(DERIV))["pairs"] if d["canonical_active"]}|{d["sibling_pool"] for d in json.load(open(DERIV))["pairs"] if d["canonical_active"]}   # inclusiv orientarea inversa, pentru raportare
+    print("pool-uri in perechi duplicate",len(want),"perechi",len(dup),flush=True)
     if not want:
         with gzip.open(CACHE2,"wt") as f: pass
         print("PASS2_DONE 0 (fara pool-uri in perechi)"); return
@@ -111,15 +168,17 @@ def joint_windows(evA,evB,OUT_W,TR=()):
     return W
 # ---------------- fezabilitate ----------------
 def stage_feasibility():
-    inv=load_inv(); P=inv["pools"]; ST=inv["stats"]; dup,pinfo=pairs_from_inventory(inv); E=load_pass2(); OUT_W=outages(); TR=truncated_tails()
-    F=dict(inventory=dict(built=inv["built"],event_types=inv["event_types"],n_create_pool=inv["n_create_pool"],n_active_pools=inv["n_active_pools"],deposit_withdraw_events_present=any(k in inv["event_types"] for k in ("DepositEvent","WithdrawEvent")),n_canonical=sum(1 for m in P.values() if m["canonical"]),n_noncanonical=sum(1 for m in P.values() if not m["canonical"])),
+    inv=load_inv(); P=derived_pool_meta(inv); ST=inv["stats"]; dup,pinfo=pairs_from_inventory(inv); E=load_pass2(); OUT_W=outages(); TR=truncated_tails(); TPM=load_token_program_map()
+    DV=json.load(open(DERIV)) if os.path.exists(DERIV) else {}
+    F=dict(inventory=dict(built=inv["built"],event_types=inv["event_types"],n_create_pool=inv["n_create_pool"],n_active_pools=inv["n_active_pools"],deposit_withdraw_events_present=any(k in inv["event_types"] for k in ("DepositEvent","WithdrawEvent")),n_canonical=sum(1 for m in inv["pools"].values() if m["canonical"]),n_noncanonical=sum(1 for m in inv["pools"].values() if not m["canonical"]),n_derived_canonical_meta=sum(1 for m in P.values() if m.get("derived"))),
         pairs=dict(strict_token_base_wsol_quote_pairs_with_2plus_pools=len(dup),unordered_info_only=pinfo["unordered_pairs_with_2plus"],reversed_orientation_pools_excluded=pinfo["reversed_orientation_pools_excluded"]),gaps=dict(outage_windows=len(OUT_W),truncated_segments=len(TR)))
     pairs=[]; ptype=collections.Counter(); dates=set(); n_windows=0; n_windows_gt2=0; chain_bad=0; chain_pairs=0; vq_ok=0; vq_n=0; tokprog=collections.Counter(); win_by_date=collections.Counter(); excluded=collections.Counter()
     for tok,ps in dup.items():
         ps=sorted(set(ps)); metas=[P[p] for p in ps]; canon=[p for p in ps if P[p]["canonical"]]; nonc=[p for p in ps if not P[p]["canonical"]]
         assert all(P[p]["quote_mint"]==WSOL and P[p]["base_mint"]==tok for p in ps)
-        typ="CANONICAL+NONCANONICAL" if canon and nonc else ("NONCANONICAL+NONCANONICAL" if len(nonc)>=2 else "CANONICAL+CANONICAL")
-        pump_mint=False; tokprog["TOKEN_PROGRAM_UNOBSERVABLE_IN_EVENTS"]+=1   # (blocant 5) nu se presupune SPL Token clasic
+        if len(canon)>=2: excluded["CANONICAL+CANONICAL_IMPOSSIBLE"]+=1; continue   # un singur pool canonical per mint; doua = eroare de clasificare
+        typ="CANONICAL+NONCANONICAL" if canon and nonc else "NONCANONICAL+NONCANONICAL"
+        allowed,reason=pair_allowed_for_pnl(tok,TPM); pump_mint=allowed; tokprog[reason]+=1
         evs={p:E.get(p,[]) for p in ps}
         for p in ps:
             ev=evs[p]
@@ -140,13 +199,15 @@ def stage_feasibility():
             for m in metas: dates.add(datetime.datetime.utcfromtimestamp(m["ts"]).strftime("%Y-%m-%d"))
         n_windows+=pw; n_windows_gt2+=pw2; ptype[typ]+=1
         pairs.append(dict(token_mint=tok,n_pools=len(ps),type=typ,pump_mint=pump_mint,pools=[dict(pool=p,index=P[p]["index"],canonical=P[p]["canonical"],base_is_sol=(P[p]["base_mint"]==WSOL),created_ts=P[p]["ts"],created_slot=P[p]["slot"],n_events=len(evs[p]),implied_vq=implied_vq(evs[p])[0]) for p in ps],combos=combos,windows=pw,windows_gt2=pw2))
-    F["pairs_detail"]=pairs; F["pair_types"]=dict(ptype); F["token_program_observability"]=dict(tokprog,observable=False,note="programul tokenului (owner-ul mint-ului) NU este capturat in evenimentele PumpSwap; fara el Token-2022 (transfer fee/hooks) nu poate fi exclus => PREREQUISITE_MISSING = token_program_per_mint; recuperare minima = 1 getAccountInfo per mint (interzis acum)")
-    F["PREREQUISITE_MISSING"]="token_program_per_mint (owner-ul contului de mint)" ; F["MINIMAL_RECOVERY_REQUIRED"]="o citire getAccountInfo per mint din perechile duplicate (sau captura owner-ului la CreatePool) — NU se executa fara aprobare"
+    F["pairs_detail"]=pairs; F["pair_types"]=dict(ptype); F["excluded_pairs"]=dict(excluded); F["derivation"]={k:v for k,v in DV.items() if k!="pairs"}
+    F["token_program_observability"]=dict(tokprog,observable=(len(TPM)>0),mapped_mints=len(TPM),note="programul tokenului (owner-ul mint-ului) nu este in evenimentele PumpSwap; maparea explicita research/token_program_map.json este goala => toate perechile raman TOKEN_PROGRAM_UNKNOWN pentru PnL; NU blocheaza numararea perechilor")
+    F["PREREQUISITE_MISSING_FOR_PNL"]="token_program_per_mint (owner-ul contului de mint) pentru mint-urile din perechile recuperate"; F["MINIMAL_RECOVERY_REQUIRED"]="o citire getAccountInfo per mint (sau captura owner-ului la CreatePool) — NU se executa fara aprobare"
     F["overlap"]=dict(windows_total_dedup_pair_slot=n_windows,windows_gt2_slots=n_windows_gt2,windows_gt2_by_utc_date=dict(win_by_date),dates_with_pairs=sorted(dates))
     F["chain_consistency"]=dict(pairs=chain_pairs,mismatches=chain_bad,rate_ok=(1-chain_bad/chain_pairs) if chain_pairs else None); F["vq"]=dict(pools=vq_n,vq_computable=vq_ok)
     F["fee_resolver"]=json.load(open("research/external_review_remediation.json")).get("FEE_RESOLVER_VALID") if os.path.exists("research/external_review_remediation.json") else None
-    gate=dict(pairs_ge_20=len(dup)>=20,windows_gt2_ge_100=n_windows_gt2>=100,dates_ge_2=len(win_by_date)>=2,reserves_and_fee_resolver_valid=bool(F["fee_resolver"]) and (F["chain_consistency"]["rate_ok"] or 0)>0.99,no_gap_in_required_interval=(n_windows_gt2>0 and True),token_program_observable=False)
-    F["FEASIBILITY_GATE"]=dict(gate,PASS=all(v is True for v in gate.values()))
+    gate=dict(pairs_ge_20=len(pairs)>=20,windows_gt2_ge_100=n_windows_gt2>=100,dates_ge_2=len(win_by_date)>=2,reserves_and_fee_resolver_valid=bool(F["fee_resolver"]) and (F["chain_consistency"]["rate_ok"] or 0)>0.99,no_gap_in_required_interval=(n_windows_gt2>0))
+    F["FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM"]=dict(gate,PASS=all(v is True for v in gate.values()))
+    F["FEASIBILITY_GATE"]=dict(gate,token_program_known_for_pairs=(len(TPM)>0 and all(pair_allowed_for_pnl(p["token_mint"],TPM)[0] for p in pairs)),PASS=all(v is True for v in gate.values()) and len(TPM)>0)
     json.dump(F,open("research/atomic_same_mint_arb_feasibility.json","w"),indent=1,default=str); print(json.dumps({k:v for k,v in F.items() if k!="pairs_detail"},default=str)[:2500]); print("FEASIBILITY_DONE")
 # ---------------- motor ----------------
 def exec_buy(rb,rq,vq,q,lp,pr,cc):
@@ -176,7 +237,7 @@ def stage_freeze():
     F=json.load(open("research/atomic_same_mint_arb_feasibility.json")); assert F["FEASIBILITY_GATE"]["PASS"], "feasibility gate a picat; nu se ingheata motorul"
     inv=load_inv(); dup,_=pairs_from_inventory(inv)
     spec=dict(hypothesis="ATOMIC_SAME_MINT_PUMPSWAP_ARBITRAGE",label="POST_HOC_HISTORICAL",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),inputs=dict(inventory_sha256=sha(INV),pair_events_cache_sha256=sha(CACHE2),feasibility_sha256=sha("research/atomic_same_mint_arb_feasibility.json"),remediation_sha256=sha("research/external_review_remediation.json"),tape_day_manifests=dict(SEP02="844ce65dbcd2c15b4146591287789aba1d8262b99802b50c727e30b940fd6d67",SEP03="b49738b577bd9bdeb0a9426c57eeabda9f0b4b27b31c8e27730cb97276c4545b",SEP04="3068bfa383a398824b8837a9eafb77f6b9ea583a953fbe56c6c1256280a35def")),
-        population=dict(pairs=[dict(token=t,pools=sorted(set(ps))) for t,ps in sorted(dup.items())],rule="perechi neordonate {SOL, token} cu >=2 pool-uri PumpSwap create in banda; doar mint-uri pump.fun (SPL Token clasic); pool-urile cu vq implicit necalculabil sau lant de rezerve inconsistent >1 % sunt excluse; ferestrele care intersecteaza deconectari WSS sunt excluse"),
+        population=dict(pairs=[dict(token=t,pools=sorted(set(ps))) for t,ps in sorted(dup.items())],rule="perechi STRICTE (base_mint=token, quote_mint=WSOL) cu >=2 pool-uri: din CreatePoolEvent in banda si/sau pool canonical derivat zero-RPC (PDA) cu evenimente in banda; pool-urile cu base=WSOL sunt excluse (fara normalizare); doar mint-uri cu program cunoscut (research/token_program_map.json) egal cu SPL Token clasic intra in PnL; pool-uri cu vq implicit invalid (<5 obs., negativ, IQR mare) excluse; rupturi de lant in (decizie, landing s+2] exclud starea; ferestrele care intersecteaza deconectari WSS sau segmente trunchiate sunt excluse; o singura tranzactie per episod de dislocare; max o tranzactie per slot in portofoliu"),
         canonical_rule="index==0 AND creator==PDA(['pool-authority', base_mint], pump program) AND quote==WSOL",fee_resolver="canonical: tabel pumpswap_fees.py dupa mcap (creator/protocol fractionare rotunjite in sus la bp intreg, conservator); noncanonical: lp 25 + protocol 5 + creator 0 = 30 bps; nu se copiaza bps-urile evenimentelor",
         integer_math=dict(buy="q2=Q*10000//(10000+lp+pr+cc); lpf=q2*lp//10000; tok=rb*q2//(rq+vq+q2)",sell="brut=(rq+vq)*tok//(rb+tok); out=brut-brut*lp//10000-brut*pr//10000-brut*cc//10000; out<=rq real",invariants="(rb-tok)*(rq+vq+q2)>=rb*(rq+vq); (rb+tok)*(rq+vq-brut)>=rb*(rq+vq); rezerve nenegative"),
         directions=["A: SOL->token pool_1 -> SOL pool_2","B: SOL->token pool_2 -> SOL pool_1"],notionals_sol=NOTIONALS,primary_notional_sol=PRIMARY,
@@ -199,10 +260,12 @@ def stats(vals,hours=None):
 def stage_run():
     spec=json.load(open(SPEC)); assert spec["script_sha256"]!="PLACEHOLDER","spec neinghetata (hash script lipsa)"
     assert spec["script_sha256"]==sha(__file__),"hash-ul scriptului nu corespunde spec-ului inghetat"
-    inv=load_inv(); P=inv["pools"]; E=load_pass2(); OUT_W=outages(); dup,_=pairs_from_inventory(inv); rows=[]; viol=collections.Counter(); t0=time.time()
+    inv=load_inv(); P=derived_pool_meta(inv); E=load_pass2(); OUT_W=outages(); TR=truncated_tails(); TPM=load_token_program_map(); dup,_=pairs_from_inventory(inv); rows=[]; viol=collections.Counter(); t0=time.time()
     for tok,ps in dup.items():
-        ps=sorted(set(ps))
-        viol["PAIR_EXCLUDED_UNKNOWN_TOKEN_PROGRAM"]+=1; continue   # (blocant 5) programul tokenului nu este observabil in banda => nicio pereche nu intra in motor
+        ps=sorted(set(ps)); allowed,reason=pair_allowed_for_pnl(tok,TPM)
+        if not allowed: viol["PAIR_EXCLUDED_TOKEN_PROGRAM"]+=1; viol[f"PAIR_EXCLUDED_TOKEN_PROGRAM:{reason}"]+=1; continue
+        if any(P[p]["quote_mint"]!=WSOL or P[p]["base_mint"]!=tok for p in ps): viol["ORIENTATION_VIOLATION"]+=1; continue
+        if sum(1 for p in ps if P[p]["canonical"])>=2: viol["CANONICAL+CANONICAL_IMPOSSIBLE"]+=1; continue
         vqs={}
         for p in ps:
             ev=E.get(p,[]); vq,_=implied_vq(ev); vqs[p]=vq
@@ -210,7 +273,7 @@ def stage_run():
             for j in range(i+1,len(ps)):
                 a,b=ps[i],ps[j]; evA=E.get(a,[]); evB=E.get(b,[])
                 if not evA or not evB or vqs[a] is None or vqs[b] is None: viol["PAIR_COMBO_EXCLUDED_NO_EVENTS_OR_VQ"]+=1; continue
-                vqa=int(vqs[a]); vqb=int(vqs[b]); brA=chain_breaks(evA); brB=chain_breaks(evB); ptype="CANONICAL+NONCANONICAL" if (P[a]["canonical"]!=P[b]["canonical"]) else "NONCANONICAL+NONCANONICAL"
+                vqa=int(vqs[a]); vqb=int(vqs[b]); brA=chain_breaks(evA); brB=chain_breaks(evB); ptype="CANONICAL+NONCANONICAL" if (P[a]["canonical"]!=P[b]["canonical"]) else ("NONCANONICAL+NONCANONICAL" if not P[a]["canonical"] else "CANONICAL+CANONICAL")
                 slots=sorted({e[2] for e in evA}|{e[2] for e in evB}); start=max(evA[0][2],evB[0][2]); tmap={}
                 for e in evA+evB: tmap[e[2]]=max(tmap.get(e[2],0),e[0])
                 seen=set(); episode_open={}
@@ -230,8 +293,9 @@ def stage_run():
                             if pred is None: continue
                             if not pred["invariant_ok"]: viol["INVARIANT_VIOLATION_PREDICTED"]+=1; continue
                             pred_net=pred["out"]-Q-SIG_FEE-PRIO-TIPS["BASE"]; ek=(dname,N)
+                            first_in_episode=episode_first_flags([None if not episode_open.get(ek,False) else 1, pred_net])[1]==1 if False else None
                             if pred_net<=0: episode_open[ek]=False; continue
-                            first_in_episode=not episode_open.get(ek,False); episode_open[ek]=True   # (blocant 8) o singura tranzactie per episod de dislocare
+                            first_in_episode=(0 if episode_open.get(ek,False) else 1); episode_open[ek]=True   # (blocant 8) identic cu episode_first_flags (testat)
                             land=arb(P,pa,l1a[:2],va,pb,l1b[:2],vb,Q); land2=arb(P,pa,l2a[:2],va,pb,l2b[:2],vb,Q)
                             if land is None or not land["invariant_ok"]: viol["INVARIANT_VIOLATION_LANDING"]+=1; continue
                             rows.append(dict(token=tok,pool_1=pa,pool_2=pb,pair_type=ptype,direction=dname,decision_slot=s,decision_t=t1,utc_date=datetime.datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d"),utc_hour=int(t1//3600),notional_sol=N,pred_out_lamports=pred["out"],pred_fee1=pred["fee1"],pred_fee2=pred["fee2"],fee1_bps=pred["fee1_bps"],fee2_bps=pred["fee2_bps"],pred_net_base=pred_net/LAMP,
@@ -267,12 +331,8 @@ def stage_run():
             out[seg_name]=d
         R["by_notional"][str(N)]=out
     A=(R["by_notional"][str(PRIMARY)] or {}).get("ALL"); g=None; F=json.load(open("research/atomic_same_mint_arb_feasibility.json"))
-    if A and A["realized_net_base"]:
-        rb_=A["realized_net_base"]; BN=R["by_notional"][str(PRIMARY)]; segs=[k for k in ("CANONICAL+NONCANONICAL","NONCANONICAL+NONCANONICAL") if BN.get(k) and BN[k]["realized_net_base"]]
-        g=dict(N50=rb_["N"]>=50,days2=A["positive_days"]>=2,EV=rb_["EV"]>0,median=rb_["median"]>0,PF=rb_["PF"]>=1.5,CI_low=rb_.get("CI95_cluster_hour",(-1,0))[0]>0,exb1pct=rb_["EX_BEST_1PCT"]>0,top1=rb_["top1pct_contrib"]<=0.4,day_share=(A["max_day_share"] or 1)<=0.6,survival=A["survival_pred_to_realized_base"]>=0.6,landing_s2=((A["realized_landing_s2_base"] or {}).get("EV",-1))>0,stress2=(A["realized_net_stress2"]["EV"])>0,
-            zero_violations=all(viol.get(k,0)==0 for k in ("INVARIANT_VIOLATION_PREDICTED","INVARIANT_VIOLATION_LANDING","FEE_RESOLVER_NONE","TIMING_LANDING_BEFORE_DECISION","CHAIN_BREAK_DECISION_TO_LANDING","STATE_IN_OUTAGE_OR_TRUNCATION","PAIR_COMBO_EXCLUDED_NO_EVENTS_OR_VQ","PAIR_EXCLUDED_UNKNOWN_TOKEN_PROGRAM")) and F["token_program_observability"].get("observable") is True,
-            segments_positive=all(BN[k]["realized_net_base"]["EV"]>0 for k in segs) if segs else False,no_post_hoc=(spec["primary_notional_sol"]==PRIMARY and spec["notionals_sol"]==NOTIONALS and spec["final_gate"]["PF_min"]==1.5 and spec["final_gate"]["N_realized_min"]==50 and spec["costs"]["priority_fee_lamports"]==PRIO and spec["costs"]["jito_tip_scenarios_lamports"]==TIPS))
+    if A and A["realized_net_base"]: g=final_gate(A,R["by_notional"][str(PRIMARY)],viol,spec,F["token_program_observability"].get("observable"))
     R["final_gate_primary_0_25"]=g; R["FINAL_VERDICT"]="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if (g and all(g.values())) else "ATOMIC_ARB_NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open("research/atomic_same_mint_arb_results.json","w"),indent=1,default=str); print("rows",len(rows),"portfolio",len(port),"viol",dict(viol)); print("VERDICT",R["FINAL_VERDICT"],g); print("RUN_DONE")
 if __name__=="__main__":
-    {"pass2":stage_pass2,"feasibility":stage_feasibility,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
+    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()

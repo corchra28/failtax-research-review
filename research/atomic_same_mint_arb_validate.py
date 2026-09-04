@@ -1,12 +1,21 @@
 """Validatorul artefactelor ATOMIC_SAME_MINT_PUMPSWAP_ARBITRAGE: existenta, hash-uri, coerenta spec/rezultate, fara lookahead in selectie, fara incalcari."""
-import os,json,hashlib,gzip,csv,sys
+import os,json,hashlib,gzip,csv,sys,subprocess
 def sha(p): return hashlib.sha256(open(p,"rb").read()).hexdigest()
 fails=[]; notes=[]
+R=json.load(open("research/atomic_same_mint_arb_results.json")) if os.path.exists("research/atomic_same_mint_arb_results.json") else None
+# dependente reproductibile (pda, pumpswap_fees) si rularea efectiva a testelor comportamentale
+for dep in ("strategy_e/pda.py","pumpswap_fees.py"):
+    if not os.path.exists(dep): fails.append(f"MISSING_DEPENDENCY {dep}")
+t=subprocess.run([sys.executable,"research/atomic_same_mint_arb_tests.py"],capture_output=True,text=True); out=t.stdout
+if "ALL_TESTS_PASS = True" not in out or "PATCHED_BLOCKERS = 10/10" not in out: fails.append("BEHAVIORAL_TESTS_FAILED"); notes.append(out[-800:])
+else: notes.append("teste comportamentale: PATCHED_BLOCKERS = 10/10, ALL_TESTS_PASS = True")
+if os.path.exists("research/atomic_same_mint_arb_derivation.json"):
+    Dv=json.load(open("research/atomic_same_mint_arb_derivation.json")); notes.append(f"derivare zero-RPC: pda_matches {Dv['derivation_validation']['pda_matches']}/{Dv['derivation_validation']['canonical_pools_in_tape']} (nepotrivirile = pool-uri canonice cu quote != WSOL), index>0 {Dv['INDEX_GT0_SOL_POOLS']}, canonice active {Dv['DERIVED_CANONICAL_ACTIVE_MATCHES']}")
 req=["research/external_review_remediation.py","research/external_review_remediation.json","research/external_review_remediation_report.md","research/atomic_same_mint_arb.py","research/atomic_same_mint_arb_feasibility.json","research/atomic_same_mint_arb_report.md","research/atomic_arb_inventory_pass1.py"]
 for f in req:
     if not os.path.exists(f): fails.append(f"MISSING {f}")
 F=json.load(open("research/atomic_same_mint_arb_feasibility.json")) if os.path.exists("research/atomic_same_mint_arb_feasibility.json") else {}
-gate=F.get("FEASIBILITY_GATE",{}); notes.append(f"feasibility PASS={gate.get('PASS')}")
+gate=F.get("FEASIBILITY_GATE",{}); notes.append(f"feasibility PASS={gate.get('PASS')} | before_token_program PASS={F.get('FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM',{}).get('PASS')}")
 if gate.get("PASS"):
     for f in ["research/atomic_same_mint_arb_frozen_spec.json","research/atomic_same_mint_arb_results.json","research/atomic_same_mint_arb_opportunities.csv.gz"]:
         if not os.path.exists(f): fails.append(f"MISSING {f}")
@@ -40,7 +49,7 @@ if gate.get("PASS"):
                 if set(g)!=need: fails.append(f"GATE_CRITERIA_INCOMPLETE {sorted(need-set(g))}")
                 verdict_expected="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if all(g.values()) else "ATOMIC_ARB_NO_VERIFIED_EDGE"
                 if R["FINAL_VERDICT"]!=verdict_expected: fails.append("VERDICT_NOT_FROM_GATE")
-            R=json.load(open("research/atomic_same_mint_arb_results.json")); A=R["by_notional"].get("0.25",{}).get("ALL")
+            A=R["by_notional"].get("0.25",{}).get("ALL")
             pr=[float(r["realized_net_base"]) for r in port if r["notional_sol"]=="0.25"]
             if A and A["realized_net_base"] and (len(pr)!=A["realized_net_base"]["N"] or abs(sum(pr)/len(pr)-A["realized_net_base"]["EV"])>1e-12): fails.append("HEADLINE_NOT_REPRODUCIBLE_FROM_CSV")
             notes.append(f"opportunities {len(rows)} portfolio {len(port)}")

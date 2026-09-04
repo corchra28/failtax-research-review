@@ -1,38 +1,41 @@
-# ATOMIC_SAME_MINT_PUMPSWAP_ARBITRAGE — RAPORT (2026-09-04) — POST_HOC_HISTORICAL
+# ATOMIC_SAME_MINT_PUMPSWAP_ARBITRAGE — RAPORT (2026-09-04, revizuit după review-ul commit-ului 6dfce002) — POST_HOC_HISTORICAL
 
-FINAL_VERDICT = ATOMIC_ARB_INSUFFICIENT_EXISTING_DATA (poarta de fezabilitate a picat; niciun spread, profit sau outcome nu a fost calculat)
+FINAL_VERDICT = ATOMIC_ARB_INSUFFICIENT_EXISTING_DATA (poarta de fezabilitate picată și înainte de cerința de token program; niciun spread, profit sau outcome calculat)
 
 ## 0. Protocol
-Ipoteza înregistrată în research/hypothesis_ledger.md ca NEW_STRUCTURAL_LANE înainte de orice calcul. Auditul de taxe și de timing (research/external_review_remediation_report.md) a fost executat primul. Cele 10 blocante din revizuirea externă au fost corectate și testate sintetic înainte de fezabilitate (PATCHED_BLOCKERS = 10/10; research/atomic_same_mint_arb_tests.py). Nu s-a executat freeze și nici stage_run. Fără date noi, fără API/RPC/WSS, fără modificarea benzii.
+Ipoteza înregistrată ca NEW_STRUCTURAL_LANE înainte de orice calcul; auditul de taxe și timing executat primul (research/external_review_remediation_report.md). Cele 10 blocante ale primei revizuiri și cele 7 defecte ale celei de-a doua (TR nedefinit în stage_run, excludere necondiționată, canonical+canonical, regula populației din spec, ordinea încărcării în validator, dependențele pda/pumpswap_fees în pachet, validatorul rulează efectiv testele) sunt corectate. Testele 5, 8 și 9 sunt comportamentale (apelează pair_allowed_for_pnl, episode_first_flags, final_gate și eșuează dacă logica este eliminată). Fără RPC/API/WSS, fără date noi, fără PnL, fără live.
 
-## 1. Inventar (trecerea 1, fără PnL) — strategy_m/data/tape, 2026-09-02 13:18 → 09-04 08:01
-- Tipuri de evenimente PumpSwap în bandă: BuyEvent 20.978.631, SellEvent 21.291.584, CreatePoolEvent 6.763. DepositEvent/WithdrawEvent: **absente** (colectorul nu le-a decodat) ⇒ modificările de lichiditate sunt observabile doar ca rupturi ale lanțului de rezerve (tratate prin excludere per pool în intervalul decizie → landing s+2).
-- Pool-uri create în bandă: 6.763 (canonical 1.947 = index 0 și creator = PDA pool-authority pump.fun; noncanonical 4.816). Pool-uri active (cu Buy/Sell): 32.491, dintre care ~25.700 create înainte de bandă, fără mint-uri observabile (Buy/SellEvent nu conțin mint-urile) ⇒ nejoinabile pe perechi.
-- Orientare: 4.714 pool-uri au base_mint = WSOL (orientare inversă) și sunt excluse din populația primară (blocant 1; fără normalizare tacită); 1.911 au quote = WSOL.
+## 1. Inventar (trecerea 1) — banda 2026-09-02 13:18 → 09-04 08:01
+BuyEvent 20.978.631, SellEvent 21.291.584, CreatePoolEvent 6.763; Deposit/Withdraw absente (nedecodate de colector) ⇒ lichiditatea se observă doar ca rupturi de lanț (excludere per pool în (decizie, landing s+2]). Pool-uri create în bandă 6.763: canonical 1.947 (index 0 + creator = PDA pool-authority pump.fun; 1.839 cu quote WSOL, 108 cu quote USDC), noncanonical 4.816 (4.714 cu base = WSOL, orientare inversă). Pool-uri active 32.491, dintre care ~25.700 create înainte de bandă.
 
-## 2. Perechi duplicate
-- Perechi stricte (base_mint = token, quote_mint = WSOL) cu ≥ 2 pool-uri: **0**.
-- Informativ, neordonat {SOL, token} cu ≥ 2 pool-uri: **0**.
-- Pool-uri cu index = 1: 67, toate cu SOL pe o parte, niciunul cu contrapartea index 0 creată în bandă (creată înainte de 09-02 13:18 ⇒ mint necunoscut din evenimente).
-- Tipuri canonical+noncanonical / noncanonical+noncanonical: 0 / 0. Zile acoperite cu perechi: niciuna. Ferestre de suprapunere (dedup pe pereche și slot, > 2 sloturi, fără deconectări/trunchieri până la landing s+2): 0. Chain consistency pe perechi: n/a. VQ calculabil: n/a. Fee resolver: valid (vezi remediere).
-- Program token: **neobservabil în evenimente** (owner-ul mint-ului nu este capturat) ⇒ PREREQUISITE_MISSING = token_program_per_mint; MINIMAL_RECOVERY_REQUIRED = o citire getAccountInfo per mint (sau captura owner-ului la CreatePool) — interzisă acum, neexecutată.
+## 2. Derivare locală zero-RPC (research/atomic_same_mint_arb_derivation.json)
+Validare: PDA ["pool", u16_le(0), pool-authority(token), token, WSOL] sub PumpSwap reproduce adresa reală pentru **1.839/1.839** pool-uri canonice cu quote WSOL create în bandă (cele 108 nepotriviri sunt exact pool-urile canonice cu quote USDC, în afara regulii).
+| Câmp | Valoare |
+|---|---|
+| INDEX_GT0_SOL_POOLS | 67 (toate index 1, toate active, 66 cu mint sufix „pump", 1 cu orientare strictă) |
+| DERIVED_CANONICAL_ADDRESSES | 67 |
+| DERIVED_CANONICAL_ACTIVE_MATCHES | 0 (niciun pool canonical derivat nu are Buy/Sell în bandă) |
+| STRICT_ORIENTATION_MATCHES | 0 |
+| REVERSED_ORIENTATION_MATCHES | 0 |
+| PAIRS_WITH_BOTH_EVENT_STREAMS | 0 |
+| OVERLAP_WINDOWS_GT2 | 0 |
+| DATES_WITH_OVERLAP | 0 |
+Extindere informativă (în afara regulii index > 0): pentru toate cele 4.786 pool-uri noncanonice cu WSOL pe o parte, pool-ul canonical derivat este activ în bandă pentru **1** (orientare strictă, ambele active) ⇒ cel mult o pereche recuperabilă zero-RPC.
 
-## 3. FEASIBILITY_GATE
+## 3. FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM
 | Criteriu | Rezultat |
 |---|---|
-| ≥ 20 perechi duplicate | 0 → FAIL |
+| ≥ 20 perechi duplicate stricte | 0 → FAIL |
 | ≥ 100 ferestre de suprapunere > 2 sloturi | 0 → FAIL |
 | ≥ 2 date UTC | 0 → FAIL |
 | rezerve + fee resolver valide | resolver valid, chain n/a → FAIL |
-| fără gap/corupție în intervalul necesar (boolean) | fără ferestre → FAIL |
-| program token observabil | FALSE → FAIL |
-FEASIBILITY_GATE = FAIL ⇒ STOP conform protocolului (secțiunea 3): fără spec înghețată, fără motor, fără PnL, fără optimizare.
+| fără gap/corupție (boolean, până la landing s+2) | fără ferestre → FAIL |
+FEASIBILITY_GATE_BEFORE_TOKEN_PROGRAM = FAIL ⇒ STOP fără spec înghețată, motor sau PnL. Token program: neobservabil în evenimente; maparea explicită research/token_program_map.json este goală ⇒ rămâne prerechizit doar pentru PnL (PREREQUISITE_MISSING_FOR_PNL = token_program_per_mint), nu pentru numărarea perechilor.
 
-## 4. Ce ar fi necesar (nu se execută fără aprobare)
-Perechile duplicate există probabil (67 pool-uri index 1 dovedesc pool-uri secundare), dar identificarea contrapartei cere maparea pool → mint pentru pool-urile create înainte de bandă (o citire de cont per pool) și owner-ul mint-ului pentru excluderea Token-2022. Ambele sunt apeluri RPC, interzise în acest experiment.
+## 4. Prerechizite rămase (nu se execută fără aprobare)
+- maparea pool → mint pentru pool-urile create înainte de bandă (o citire de cont per pool) sau o bandă mai lungă în care pool-urile canonice ale celor 67 mint-uri cu pool secundar sunt active;
+- owner-ul mint-ului (program token) pentru mint-urile din perechile recuperate;
+- decodarea Deposit/Withdraw în colector pentru consistență 100 % a lanțului fără excluderi.
 
-## 5. Corecțiile celor 10 blocante (implementate în research/atomic_same_mint_arb.py, testate în research/atomic_same_mint_arb_tests.py)
-1 orientare strictă (base = token, quote = WSOL; pool inversat respins prin assert și exclus din populație); 2 rupturi de lanț per pool, consistență 100 % cerută în (decizie, landing s+2]; 3 gap/trunchiere ca criteriu boolean, ferestrele care intersectează deconectări sau segmente trunchiate (2 detectate) eliminate până la landing s+2; 4 data ferestrei din timestamp-ul slotului de început; 5 program token nepresupus (PREREQUISITE_MISSING); 6 VQ: ≥ 5 observații, mediană nenegativă, IQR ≤ max(0,02 SOL, 2 %), altfel exclus (fără max(0, ·)); 7 staleness = max(s − last_A, s − last_B), raportat și separat; 8 o singură tranzacție per episod de dislocare (prima stare cu predicted > 0 până la închiderea spread-ului), replay-ul counterfactual de portofoliu nu este implementat și este declarat; 9 poarta completă: segments_positive, zero_violations acoperă invarianți, fee, timing, gap, VQ, program token; no_post_hoc verificat programatic față de spec; 10 PF = +inf fără pierderi.
-
-## 6. Constrângeri
-LIVE_TRADING = FORBIDDEN respectat; fără acțiuni de portofel; fără date noi; artefacte noi, separate; rezultatele REGIME nemodificate.
+## 5. Corecțiile implementate (research/atomic_same_mint_arb.py, teste în research/atomic_same_mint_arb_tests.py, validator în research/atomic_same_mint_arb_validate.py)
+Orientare strictă cu assert în motor; rupturi de lanț per pool; gap/trunchiere boolean până la landing s+2; data ferestrei din slotul de început; token program prin mapare explicită (SPL Token permis, Token-2022 exclus, necunoscut exclus); VQ ≥ 5 observații, nenegativ, IQR ≤ max(0,02 SOL, 2 %); staleness = max(s − last_A, s − last_B) plus separat; o tranzacție per episod (episode_first_flags); poarta completă (final_gate) cu segments_positive, zero_violations extins și no_post_hoc verificat față de spec; PF = +inf fără pierderi; TR definit în stage_run; canonical+canonical exclus explicit; regula populației din spec aliniată cu implementarea; validatorul încarcă rezultatele înaintea utilizării, cere dependențele pda/pumpswap_fees și rulează efectiv testele.
