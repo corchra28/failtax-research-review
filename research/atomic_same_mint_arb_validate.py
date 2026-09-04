@@ -9,6 +9,26 @@ for dep in ("strategy_e/pda.py","pumpswap_fees.py"):
 t=subprocess.run([sys.executable,"research/atomic_same_mint_arb_tests.py"],capture_output=True,text=True); out=t.stdout
 if "ALL_TESTS_PASS = True" not in out or "PATCHED_BLOCKERS = 10/10" not in out: fails.append("BEHAVIORAL_TESTS_FAILED"); notes.append(out[-800:])
 else: notes.append("teste comportamentale: PATCHED_BLOCKERS = 10/10, ALL_TESTS_PASS = True")
+if "MULTIPOOL_EPISODE_TESTS = PASS" not in out: fails.append("MULTIPOOL_EPISODE_TESTS_FAILED")
+else: notes.append("MULTIPOOL_EPISODE_TESTS = PASS")
+if "SUPPLY=10**15" in open("research/atomic_same_mint_arb.py").read(): fails.append("HARDCODED_SUPPLY_PRESENT")
+# populatii inghetate inainte de PnL + poarta pe token-uri unice recalculata independent
+if os.path.exists("research/atomic_same_mint_arb_populations_frozen.json"):
+    Pp=json.load(open("research/atomic_same_mint_arb_populations_frozen.json"))
+    for kind in ("PRIMARY_MEME","SECONDARY_ALL_NONCANONICAL"):
+        rp=Pp[kind]["report"]; toks=Pp[kind]["tokens"]; g=rp["GATE"]
+        tsw=sum(v["clean_token_slot_windows"] for v in toks.values()); dates=set(); [dates.update(v["dates"]) for v in toks.values()]
+        exp=dict(UNIQUE_TOKEN_GATE=len(toks)>=20,TOKEN_SLOT_DEDUP_GATE=tsw>=100,DATES_GATE=len(dates)>=2)
+        if any(g.get(k)!=v for k,v in exp.items()) or rp["UNIQUE_TOKENS"]!=len(toks) or rp["CLEAN_TOKEN_SLOT_WINDOWS"]!=tsw: fails.append(f"POPULATION_GATE_RECOMPUTE_MISMATCH {kind}")
+        if any(v["clean_token_slot_windows"]>v["clean_pair_windows"] for v in toks.values()): fails.append(f"TOKEN_SLOT_DEDUP_EXCEEDS_PAIR_WINDOWS {kind}")
+        if kind=="PRIMARY_MEME" and any(c["pool_a"]==c["pool_b"] for c in Pp[kind]["combos"]): fails.append("SELF_PAIR")
+        notes.append(f"{kind}: tokens {rp['UNIQUE_TOKENS']} pools {rp['UNIQUE_POOLS']} token-slot windows {rp['CLEAN_TOKEN_SLOT_WINDOWS']} dates {rp['DATES']} PASS={g['PASS']}")
+    if os.path.exists("research/mint_metadata_recovery_manifest.json"):
+        Mm=json.load(open("research/mint_metadata_recovery_manifest.json"))
+        if Mm.get("max_calls")!=2 or Mm.get("n_batches",0)>2: fails.append("MINT_RPC_BUDGET_NOT_2")
+        if Mm.get("status","").startswith("FETCHED"): notes.append("mint fetch EXECUTAT")
+        else: notes.append(f"mint RPC pregatit, NEEXECUTAT: {Mm.get('n_mints')} mint-uri, {Mm.get('n_batches')} apeluri propuse")
+        if os.path.exists("research/mint_accounts_raw.jsonl.gz"): fails.append("RAW_MINT_CACHE_PUBLISHED")
 # PHASE 1 metadata recovery: manifest inghetat inainte de apeluri, buget respectat, control semantic, cache brut NEpublicat, normalizat publicat
 if os.path.exists("research/pool_metadata_recovery_manifest.json"):
     Mn=json.load(open("research/pool_metadata_recovery_manifest.json")); Rp=json.load(open("research/pool_metadata_recovery_report.json")) if os.path.exists("research/pool_metadata_recovery_report.json") else {}

@@ -4,7 +4,7 @@ Ruleaza: python research/atomic_same_mint_arb.py stage  (stage in: pass2 | feasi
 import gzip,json,base64,struct,os,glob,collections,sys,time,zlib,hashlib,bisect,math,random,statistics as S,datetime,csv
 sys.path.insert(0,'strategy_e'); import pda; from pda import b58e
 sys.path.insert(0,'.'); import pumpswap_fees as PF
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; TAPE="strategy_m/data/tape"; WSOL="So11111111111111111111111111111111111111112"; SUPPLY=10**15
+D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; TAPE="strategy_m/data/tape"; WSOL="So11111111111111111111111111111111111111112"   # SUPPLY hardcodat eliminat: supply validat per mint sau tier demonstrat din evenimente
 INV=f"{D}/pamm_pool_inventory.json.gz"; CACHE2=f"{D}/arb_pair_events.jsonl.gz"; SPEC="research/atomic_same_mint_arb_frozen_spec.json"; DERIV="research/atomic_same_mint_arb_derivation.json"; RPC_PAIRS=f"{D}/same_mint_pairs_rpc.json"; RPC_META="research/pool_metadata_normalized.jsonl.gz"
 PUMP="6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"; PAMM="pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"; TOKEN_PROGRAM_MAP_PATH="research/token_program_map.json"   # {mint: owner_program}; inexistent => necunoscut
 SPL_TOKEN="TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"; TOKEN_2022="TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
@@ -113,9 +113,9 @@ def stage_pass2():
                 raw=base64.b64decode(e["raw"]); pool=b58e(raw[120:152])
                 if pool not in want: continue
                 ts,=struct.unpack_from("<q",raw,8); amt,mx,ub,uq,rb,rq,q2=struct.unpack_from("<QQQQQQQ",raw,16); lpbp,lpf,prbp,prf,q3,uq2=struct.unpack_from("<QQQQQQ",raw,72)
-                if e["ev"]=="BuyEvent": rb_post=rb-amt; rq_post=rq+q3; cp_q=q3-lpf
-                else: rb_post=rb+amt; rq_post=rq-q3; cp_q=q3+lpf
-                EV[pool].append([r["t"],ts,r["slot"],seq,k,1 if e["ev"]=="BuyEvent" else 0,rb,rq,rb_post,rq_post,amt,cp_q,lpbp,prbp,r["sig"]])
+                if e["ev"]=="BuyEvent": rb_post=rb-amt; rq_post=rq+q3; cp_q=q3-lpf; gross=max(q2,uq2); cce=max(0,round((gross-cp_q-lpf-prf)*10000/cp_q)) if cp_q>0 else 0
+                else: rb_post=rb+amt; rq_post=rq-q3; cp_q=q3+lpf; net=min(q2,uq2); cce=max(0,round((cp_q-lpf-prf-net)*10000/cp_q)) if cp_q>0 else 0
+                EV[pool].append([r["t"],ts,r["slot"],seq,k,1 if e["ev"]=="BuyEvent" else 0,rb,rq,rb_post,rq_post,amt,cp_q,lpbp,prbp,cce,r["sig"]])
             seq+=1
         print(os.path.basename(fp),"ev",sum(len(v) for v in EV.values()),round(time.time()-t0),"s",flush=True)
     with gzip.open(CACHE2,"wt") as f:
@@ -257,14 +257,46 @@ def exec_buy(rb,rq,vq,q,lp,pr,cc):
 def exec_sell(rb,rq,vq,b,lp,pr,cc):
     if rb<=0 or b<=0: return 0,0,0,0,0
     brut=(rq+vq)*b//(rb+b); lpf=brut*lp//10000; prf=brut*pr//10000; ccf=brut*cc//10000; u=brut-lpf-prf-ccf; return min(u,max(0,rq)),brut,lpf,prf,ccf
-def resolve_fee(P,pool,rb,rq,vq):
+TIER_SET={(int(lp),int(math.ceil(pr)),int(math.ceil(cr))) for _,cr,pr,lp in PF.TIERS}   # (lp, protocol, creator) intregi, fractiile rotunjite in sus
+def resolve_fee(P,pool,rb,rq,vq,supply=None,ev_tier=None):
+    """(lp, protocol, creator) bps sau None (=stare exclusa). Canonical: (a) tier DEMONSTRAT din evenimente (ev_tier = tripletul observat nenul identic inainte si dupa stare), altfel (b) tabelul de tiere cu supply VALIDAT per mint (fara constanta hardcodata); fara niciuna => None. Noncanonical: 25/5/0."""
     m=P[pool]
-    if m["canonical"]: f=PF.fees_for(rb,rq,vq,SUPPLY); return int(f["lp_bp"]),int(math.ceil(f["protocol_bp"])),int(math.ceil(f["creator_bp"]))
-    return 25,5,0
+    if not m["canonical"]: return 25,5,0
+    if ev_tier is not None: return ev_tier if tuple(ev_tier) in TIER_SET else None
+    if supply is None: return None
+    f=PF.fees_for(rb,rq,vq,supply); return int(f["lp_bp"]),int(math.ceil(f["protocol_bp"])),int(math.ceil(f["creator_bp"]))
+def event_tier_at(ev,i):
+    """tierul demonstrat de evenimente pentru starea de dupa ev[i]: ultimul triplet nenul <= i si primul triplet nenul > i trebuie sa fie identice; altfel None."""
+    def trip(e): return (e[12],e[13],e[14]) if (len(e)>15 and isinstance(e[14],int)) else None
+    prev=None
+    for j in range(i,-1,-1):
+        t=trip(ev[j])
+        if t and t[0]>0: prev=t; break
+    nxt=None
+    for j in range(i+1,len(ev)):
+        t=trip(ev[j])
+        if t and t[0]>0: nxt=t; break
+    return prev if (prev is not None and nxt is not None and prev==nxt) else None
+def fee_schema_valid(pool_meta,ev):
+    """schema de taxe observata compatibila: canonical => toate tripletele nenule apartin tabelului de tiere; noncanonical => toate egale cu (25,5,0). Returneaza (ok, triplete_observate)."""
+    obs=collections.Counter((e[12],e[13],e[14]) for e in ev if len(e)>15 and isinstance(e[14],int) and e[12]>0)
+    if not obs: return False,{}
+    ok=all(t in TIER_SET for t in obs) if pool_meta["canonical"] else all(t==(25,5,0) for t in obs)
+    return ok,{f"{a}/{b}/{c}":n for (a,b,c),n in obs.items()}
+def token_episode_selection(routes_by_slot):
+    """(dedup economic la nivel de token) routes_by_slot: lista cronologica de (slot, {route_id: predicted_net}) pentru un token. Max o ruta per (token, slot);
+    un singur trade per EPISOD la nivel de token: episodul se deschide la primul slot cu max(predicted)>0 si se reseteaza doar cand max(predicted) intre toate rutele devine <=0.
+    Returneaza lista de (slot, route_id, predicted_net) selectate."""
+    sel=[]; open_=False
+    for slot,routes in routes_by_slot:
+        pos={r:v for r,v in routes.items() if v is not None and v>0}
+        if not pos: open_=False; continue
+        if not open_: r=max(pos.items(),key=lambda kv:(kv[1],kv[0]))[0]; sel.append((slot,r,pos[r])); open_=True
+    return sel
 def arb(P,pa,sa,vqa,pb,sb,vqb,Q):
     """SOL Q (lamports) -> token in pool a -> SOL in pool b. Stari s=(rb,rq). Ambele pool-uri trebuie sa aiba orientarea token=base, SOL=quote (blocant 1). Returneaza dict cu out, taxe, invarianti."""
     assert P[pa]["quote_mint"]==WSOL and P[pb]["quote_mint"]==WSOL and P[pa]["base_mint"]==P[pb]["base_mint"]!=WSOL, "orientare invalida"
-    rb1,rq1=sa; rb2,rq2=sb; fa=resolve_fee(P,pa,rb1,rq1,vqa); fb=resolve_fee(P,pb,rb2,rq2,vqb)
+    rb1,rq1=sa; rb2,rq2=sb; fa=resolve_fee(P,pa,rb1,rq1,vqa,supply=P[pa].get("supply"),ev_tier=P[pa].get("_ev_tier")); fb=resolve_fee(P,pb,rb2,rq2,vqb,supply=P[pb].get("supply"),ev_tier=P[pb].get("_ev_tier"))
     if fa is None or fb is None or sum(fa)<=0 or sum(fb)<=0: return None
     tok,q2,lpf1,prf1,ccf1=exec_buy(rb1,rq1,vqa,Q,*fa)
     if tok<=0 or tok>=rb1: return None
@@ -275,6 +307,45 @@ def state_after_slot(ev,slot):
     """starea dupa toate evenimentele cu slot <= slot; None daca niciunul."""
     i=bisect.bisect_right([e[2] for e in ev],slot)-1
     return (ev[i][8],ev[i][9],i) if i>=0 else None
+def stage_eligibility():
+    """PREFILTRARE INAINTE DE MINT RPC: ELIGIBLE_BEFORE_TOKEN_PROGRAM din date existente; poarta pe token-uri unice si ferestre (token, start_slot); doua populatii inghetate."""
+    M=load_rpc_meta(); groups=json.load(open(RPC_PAIRS))["pairs"]; E=load_pass2(); OUT_W=outages(); TR=truncated_tails()
+    pool_info={}
+    for tok,ps in groups.items():
+        for p in ps:
+            ev=E.get(p,[]); vq,nv=implied_vq(ev); fv,obs=fee_schema_valid(M[p],ev)
+            pool_info[p]=dict(token=tok,strict=(M[p]["orientation"]=="STRICT"),canonical=M[p]["canonical"],stream=bool(ev),n_events=len(ev),vq_valid=(vq is not None),vq=vq,fee_valid=fv,fee_observed=obs,breaks=len(chain_breaks(ev)))
+    def population(kind):
+        toks={}; combos=[]
+        for tok,ps in groups.items():
+            ok=[p for p in ps if pool_info[p]["strict"] and pool_info[p]["stream"] and pool_info[p]["vq_valid"] and pool_info[p]["fee_valid"]]
+            win_tok={}; pair_w=0; n_c=0
+            for i in range(len(ok)):
+                for j in range(i+1,len(ok)):
+                    a,b=ok[i],ok[j]; c=pool_info[a]["canonical"]+pool_info[b]["canonical"]
+                    if c==2: continue
+                    if kind=="PRIMARY_MEME" and c!=1: continue
+                    if kind=="SECONDARY_ALL_NONCANONICAL" and c!=0: continue
+                    W=[w for w in joint_windows_clean(E[a],E[b],OUT_W,TR,chain_breaks(E[a]),chain_breaks(E[b])) if w[2]>2]
+                    if not W: continue
+                    n_c+=1; pair_w+=len(W); combos.append(dict(token=tok,pool_a=a,pool_b=b,clean_windows=len(W)))
+                    for w in W: win_tok.setdefault(w[0],w[3])   # dedup (token, start_slot)
+            if n_c: toks[tok]=dict(pools=ok,combos=n_c,clean_pair_windows=pair_w,clean_token_slot_windows=len(win_tok),dates=sorted({datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%d") for t in win_tok.values()}),by_date=dict(collections.Counter(datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%d") for t in win_tok.values())))
+        tw=sorted((v["clean_token_slot_windows"] for v in toks.values()),reverse=True); tot=sum(tw) or 1; dates=collections.Counter()
+        for v in toks.values():
+            for d,n in v["by_date"].items(): dates[d]+=n
+        pools=sorted({p for v in toks.values() for p in v["pools"]})
+        rep_=dict(UNIQUE_TOKENS=len(toks),UNIQUE_POOLS=len(pools),PAIR_COMBINATIONS=sum(v["combos"] for v in toks.values()),CLEAN_PAIR_WINDOWS=sum(v["clean_pair_windows"] for v in toks.values()),CLEAN_TOKEN_SLOT_WINDOWS=tot if toks else 0,DATES=sorted(dates),by_date=dict(dates),VQ_VALID_POOLS=sum(1 for p in pools if pool_info[p]["vq_valid"]),FEE_VALID_POOLS=sum(1 for p in pools if pool_info[p]["fee_valid"]),TOP1_TOKEN_WINDOW_SHARE=(tw[0]/tot if tw else None),TOP3_TOKEN_WINDOW_SHARE=(sum(tw[:3])/tot if tw else None),top_tokens=sorted(((t,v["clean_token_slot_windows"]) for t,v in toks.items()),key=lambda kv:-kv[1])[:10])
+        gate=dict(UNIQUE_TOKEN_GATE=len(toks)>=20,TOKEN_SLOT_DEDUP_GATE=(tot if toks else 0)>=100,DATES_GATE=len(dates)>=2,VQ_GATE=(rep_["VQ_VALID_POOLS"]==len(pools) and len(pools)>0),FEE_GATE=(rep_["FEE_VALID_POOLS"]==len(pools) and len(pools)>0))
+        rep_["GATE"]=dict(gate,PASS=all(gate.values())); return rep_,toks,combos
+    out={}
+    allp=[p for p in pool_info]; out["pool_filter_summary"]=dict(pools_in_groups=len(allp),strict=sum(1 for p in allp if pool_info[p]["strict"]),stream=sum(1 for p in allp if pool_info[p]["stream"]),vq_valid=sum(1 for p in allp if pool_info[p]["vq_valid"]),fee_valid=sum(1 for p in allp if pool_info[p]["fee_valid"]),all_four=sum(1 for p in allp if pool_info[p]["strict"] and pool_info[p]["stream"] and pool_info[p]["vq_valid"] and pool_info[p]["fee_valid"]),fee_invalid_examples=[(p[:8],pool_info[p]["canonical"],pool_info[p]["fee_observed"]) for p in allp if pool_info[p]["stream"] and not pool_info[p]["fee_valid"]][:8])
+    for kind in ("PRIMARY_MEME","SECONDARY_ALL_NONCANONICAL"):
+        r,toks,combos=population(kind); out[kind]=dict(report=r,tokens=toks,combos=combos)
+    out["frozen_at"]=time.strftime("%Y-%m-%d %H:%M:%S %Z"); out["inputs"]=dict(rpc_meta_sha256=sha(RPC_META),pair_events_cache_sha256=sha(CACHE2),rpc_pairs_sha256=sha(RPC_PAIRS)); out["rule"]="ELIGIBLE_BEFORE_TOKEN_PROGRAM: ambele pool-uri STRICT (base=token, quote=WSOL), ambele fluxuri prezente, VQ valid separat (>=5 obs, nenegativ, IQR mic), schema de taxe observata compatibila (canonical: triplete in tabelul de tiere; noncanonical: 25/5/0), >=1 fereastra curata >2 sloturi cu lant 100 % si fara outage/trunchiere; poarta: >=20 token-uri unice, >=100 ferestre (token, start_slot), >=2 zile UTC; PRIMARY_MEME = doar canonical+noncanonical; SECONDARY = doar noncanonical+noncanonical, raportare separata"
+    out["proposed_mint_rpc"]=dict(eligible_mints=sorted(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),count=len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),calls_needed=(len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"]))+99)//100)
+    json.dump(out,open("research/atomic_same_mint_arb_populations_frozen.json","w"),indent=1,default=str)
+    print(json.dumps(out["pool_filter_summary"],default=str)); [print(k,json.dumps({kk:vv for kk,vv in out[k]["report"].items() if kk!="top_tokens"},default=str)) for k in ("PRIMARY_MEME","SECONDARY_ALL_NONCANONICAL")]; print("proposed_mint_rpc",out["proposed_mint_rpc"]["count"],"calls",out["proposed_mint_rpc"]["calls_needed"]); print("ELIGIBILITY_DONE")
 def stage_freeze():
     F=json.load(open("research/atomic_same_mint_arb_feasibility.json")); assert F["FEASIBILITY_GATE"]["PASS"], "feasibility gate a picat; nu se ingheata motorul"
     inv=load_inv(); dup,_=pairs_from_inventory(inv)
@@ -377,4 +448,4 @@ def stage_run():
     R["final_gate_primary_0_25"]=g; R["FINAL_VERDICT"]="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if (g and all(g.values())) else "ATOMIC_ARB_NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open("research/atomic_same_mint_arb_results.json","w"),indent=1,default=str); print("rows",len(rows),"portfolio",len(port),"viol",dict(viol)); print("VERDICT",R["FINAL_VERDICT"],g); print("RUN_DONE")
 if __name__=="__main__":
-    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
+    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"eligibility":stage_eligibility,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()

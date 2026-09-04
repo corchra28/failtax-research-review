@@ -1,0 +1,21 @@
+{
+ "frozen_at": "2026-09-04 17:54:43 EEST",
+ "source_commit": "36ea3a1c952b606d22dac459bdc8aefb20c31ad7",
+ "n_mints": 16,
+ "mint_list_sha256": "24d1d30378f149942328109b843340b840f0ca5ff4591c0bee896e4258ebbe4e",
+ "batch_size": 100,
+ "n_batches": 1,
+ "max_calls": 2,
+ "rpc_method": "getMultipleAccounts",
+ "params": {
+  "commitment": "finalized",
+  "encoding": "base64",
+  "dataSlice": {
+   "offset": 0,
+   "length": 82
+  }
+ },
+ "layout": "mint_authority option(4+32)@0 supply u64@36 decimals u8@44 is_initialized u8@45 freeze_authority option(4+32)@46",
+ "script_sha256": "5d03e4dd0070f3278573abab19bc0fd8a2699c3d230f6157a6bc62dda8fbc42e",
+ "status": "FROZEN_NOT_EXECUTED (fetch cere aprobare explicita)"
+}
