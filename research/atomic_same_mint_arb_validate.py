@@ -10,6 +10,19 @@ t=subprocess.run([sys.executable,"research/atomic_same_mint_arb_tests.py"],captu
 if "ALL_TESTS_PASS = True" not in out or "PATCHED_BLOCKERS = 10/10" not in out: fails.append("BEHAVIORAL_TESTS_FAILED"); notes.append(out[-800:])
 else: notes.append("teste comportamentale: PATCHED_BLOCKERS = 10/10, ALL_TESTS_PASS = True")
 if "MULTIPOOL_EPISODE_TESTS = PASS" not in out: fails.append("MULTIPOOL_EPISODE_TESTS_FAILED")
+t2=subprocess.run([sys.executable,"research/slow_atomic_revert_arb_tests.py"],capture_output=True,text=True); out2=t2.stdout
+if "SLOW_ARB_BEHAVIORAL_TESTS = PASS" not in out2: fails.append("SLOW_ARB_BEHAVIORAL_TESTS_FAILED"); notes.append(out2[-600:])
+else: notes.append("SLOW_ARB_BEHAVIORAL_TESTS = PASS (selectie pe episoade integrata in motor, populatie secundara inghetata, 3 pool-uri/6 rute -> max 1 tranzactie/episod, orientare inversa fara duplicate, fara lookahead)")
+src=open("research/atomic_same_mint_arb.py").read()
+if "def run_engine" not in src or "sel_fn(by_slot)" not in src: fails.append("ENGINE_NOT_USING_TOKEN_EPISODE_SELECTION")
+if "def load_frozen_secondary" not in src or 'L["pop"]()' not in src: fails.append("RUNNER_NOT_USING_FROZEN_POPULATION")
+if os.path.exists("research/slow_atomic_revert_arb_frozen_spec.json"):
+    Sp=json.load(open("research/slow_atomic_revert_arb_frozen_spec.json"))
+    if Sp.get("script_sha256")!=sha("research/atomic_same_mint_arb.py"): fails.append("SLOW_SPEC_SCRIPT_HASH_MISMATCH")
+    if Sp.get("inputs",{}).get("populations_sha256")!=sha("research/atomic_same_mint_arb_populations_frozen.json"): fails.append("SLOW_SPEC_POPULATION_HASH_MISMATCH")
+    if Sp.get("population",{}).get("population")!="SECONDARY_ALL_NONCANONICAL": fails.append("SLOW_SPEC_WRONG_POPULATION")
+    if os.path.exists("research/slow_atomic_revert_arb_results.json"): notes.append("ATENTIE: rezultate SLOW existente (PnL calculat)")
+    else: notes.append(f"SLOW spec inghetat (status {Sp.get('status')}), PnL NECALCULAT")
 else: notes.append("MULTIPOOL_EPISODE_TESTS = PASS")
 if "SUPPLY=10**15" in open("research/atomic_same_mint_arb.py").read(): fails.append("HARDCODED_SUPPLY_PRESENT")
 # populatii inghetate inainte de PnL + poarta pe token-uri unice recalculata independent

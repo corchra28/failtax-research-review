@@ -346,8 +346,104 @@ def stage_eligibility():
     out["proposed_mint_rpc"]=dict(eligible_mints=sorted(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),count=len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"])),calls_needed=(len(set(out["PRIMARY_MEME"]["tokens"])|set(out["SECONDARY_ALL_NONCANONICAL"]["tokens"]))+99)//100)
     json.dump(out,open("research/atomic_same_mint_arb_populations_frozen.json","w"),indent=1,default=str)
     print(json.dumps(out["pool_filter_summary"],default=str)); [print(k,json.dumps({kk:vv for kk,vv in out[k]["report"].items() if kk!="top_tokens"},default=str)) for k in ("PRIMARY_MEME","SECONDARY_ALL_NONCANONICAL")]; print("proposed_mint_rpc",out["proposed_mint_rpc"]["count"],"calls",out["proposed_mint_rpc"]["calls_needed"]); print("ELIGIBILITY_DONE")
+POPFILE="research/atomic_same_mint_arb_populations_frozen.json"; SPEC2="research/slow_atomic_revert_arb_frozen_spec.json"
+USDC="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+def load_frozen_secondary(path=POPFILE):
+    """populatia SECONDARY_ALL_NONCANONICAL inghetata (token -> pools); NU inventarul si NU derivarea."""
+    Pp=json.load(open(path)); sec=Pp["SECONDARY_ALL_NONCANONICAL"]
+    return dict(tokens={t:v["pools"] for t,v in sec["tokens"].items()},combos=sec["combos"],inputs=Pp["inputs"],rule=Pp["rule"],frozen_at=Pp["frozen_at"])
+def run_engine(population,meta,events,spec,selector=None,OUT_W=(),TR=()):
+    """SLOW_ATOMIC_REVERT_ARB — motor pur (fara I/O). population: {token: [pools]} (SECONDARY inghetat); meta: {pool: {orientation, canonical, base_mint, quote_mint, supply?}}; events: {pool: ev}.
+    Decizie = ultima stare completa observabila (dupa slotul s); rutele unui token = toate perechile ordonate (buy in a, sell in b); selectia = token_episode_selection (max o decizie per token si episod, exclusiv dupa predicted);
+    landing primar s+L1 (implicit 3), stres s+L2 (implicit 5); ambele leg-uri intr-o tranzactie atomica cu garda min_out = Q + costuri; garda picata => tranzactie REVERTATA: fara pierdere de inventar, dar taxa completa de retea+prioritate.
+    Fara Jito/relay privat. Taxe: noncanonical 25/5/0; canonical doar cu tier demonstrat din evenimente sau supply validat (niciodata hardcodat)."""
+    sel_fn=selector or token_episode_selection; L1=spec["landing"]["primary_slots"]; L2=spec["landing"]["stress_slots"]; SIG=spec["costs"]["base_signature_fee_lamports"]; PRI=spec["costs"]["priority_fee_lamports"]; Q=int(spec["notional_sol"]*LAMP)
+    rows=[]; viol=collections.Counter(); episodes=0; used_selector=[]
+    for tok,pools in population.items():
+        ok=[]
+        for p in pools:
+            m=meta.get(p)
+            if m is None or p not in events or not events[p]: viol["POOL_NOT_IN_META_OR_NO_EVENTS"]+=1; continue
+            if m["orientation"]!="STRICT" or m["quote_mint"]!=WSOL or m["base_mint"]!=tok: viol["ORIENTATION_VIOLATION"]+=1; continue
+            if m["canonical"]: viol["CANONICAL_POOL_IN_SECONDARY_POPULATION"]+=1; continue
+            if implied_vq(events[p])[0] is None: viol["VQ_INVALID"]+=1; continue   # eligibilitate globala (populatia inghetata); la decizie se foloseste doar trecutul
+            ok.append(p); m["_breaks"]=chain_breaks(events[p]); m["_slots"]=[e[2] for e in events[p]]; m["_vqcache"]={}
+        if len(ok)<2: viol["TOKEN_WITHOUT_2_ELIGIBLE_POOLS"]+=1; continue
+        routes=[(a,b) for a in ok for b in ok if a!=b]; slots=sorted({e[2] for p in ok for e in events[p]}); by_slot=[]; cache={}
+        def vq_at(p,idx):
+            """VQ implicit din evenimentele <= idx (fara lookahead); None daca insuficient/invalid."""
+            c=meta[p]["_vqcache"]
+            if idx not in c: c[idx]=implied_vq(events[p][:idx+1])[0]
+            return c[idx]
+        for s in slots:
+            st={p:state_after_slot(events[p],s) for p in ok}; preds={}
+            for a,b in routes:
+                if st[a] is None or st[b] is None: continue
+                va=vq_at(a,st[a][2]); vb=vq_at(b,st[b][2])
+                if va is None or vb is None: continue
+                pr=arb(meta,a,st[a][:2],int(va),b,st[b][:2],int(vb),Q)
+                if pr is None or not pr["invariant_ok"]: continue
+                preds[f"{a}>{b}"]=pr["out"]-Q-SIG-PRI
+            if preds: by_slot.append((s,preds)); cache[s]=st
+        selected=sel_fn(by_slot); used_selector.append(len(by_slot))
+        for ep_i,(s,route,pred) in enumerate(selected):
+            a,b=route.split(">"); st=cache[s]; t1=max(events[p][st[p][2]][0] for p in (a,b))
+            if not interval_clean(t1-1,t1+L2*0.4+1,OUT_W,TR): viol["STATE_IN_OUTAGE_OR_TRUNCATION"]+=1; continue
+            la1=state_after_slot(events[a],s+L1); lb1=state_after_slot(events[b],s+L1); la2=state_after_slot(events[a],s+L2); lb2=state_after_slot(events[b],s+L2)
+            if not (chain_ok_between(meta[a]["_breaks"],st[a][2],la2[2]) and chain_ok_between(meta[b]["_breaks"],st[b][2],lb2[2])): viol["CHAIN_BREAK_DECISION_TO_LANDING"]+=1; continue
+            va=int(vq_at(a,st[a][2])); vb=int(vq_at(b,st[b][2]))   # VQ de la decizie (constanta de protocol), nu re-estimat din viitor
+            def land(sa,sb):
+                r=arb(meta,a,sa[:2],va,b,sb[:2],vb,Q)
+                if r is None or not r["invariant_ok"]: return dict(status="REVERTED_GUARD",pnl=-(SIG+PRI)/LAMP,out=None)
+                min_out=Q+SIG+PRI   # garda de profit >= 0 pe leg-ul 2
+                if r["out"]>=min_out: return dict(status="SUCCESS",pnl=(r["out"]-Q-SIG-PRI)/LAMP,out=r["out"])
+                return dict(status="REVERTED_GUARD",pnl=-(SIG+PRI)/LAMP,out=r["out"])
+            r1=land(la1,lb1); r2=land(la2,lb2); episodes+=1
+            rows.append(dict(token=tok,episode_id=f"{tok}#{ep_i}",decision_slot=s,decision_t=t1,utc_date=datetime.datetime.utcfromtimestamp(t1).strftime("%Y-%m-%d"),route=route,pool_buy=a,pool_sell=b,n_routes_available=len(by_slot and [1]),predicted_net_sol=pred/LAMP,landing_primary_status=r1["status"],realized_primary_sol=r1["pnl"],landing_stress_status=r2["status"],realized_stress_sol=r2["pnl"],usdc_related=int(tok==USDC)))
+    # dedup portofoliu: cheia include token+episod (deja unic) si max o tranzactie per slot intre token-uri (dupa predicted)
+    best={}
+    for r in rows:
+        k=r["decision_slot"]
+        if k not in best or r["predicted_net_sol"]>best[k]["predicted_net_sol"]: best[k]=r
+    keep={(r["token"],r["episode_id"]) for r in best.values()}
+    for r in rows: r["in_portfolio"]=int((r["token"],r["episode_id"]) in keep)
+    return dict(rows=rows,violations=dict(viol),episodes=episodes,selector_calls=len(used_selector),selector_inputs=sum(used_selector))
+def evaluate_slow_arb(rows,spec):
+    """portile economice INGHETATE (spec['gates']); unitatea independenta = episodul la nivel de token."""
+    port=[r for r in rows if r["in_portfolio"]]; g=spec["gates"]
+    if not port: return dict(N=0,gate=None,verdict="SLOW_ATOMIC_REVERT_ARB_INSUFFICIENT_SAMPLE")
+    pn=[r["realized_primary_sol"] for r in port]; st=stats(pn); succ=sum(1 for r in port if r["landing_primary_status"]=="SUCCESS")
+    days=collections.defaultdict(float); [days.__setitem__(r["utc_date"],days[r["utc_date"]]+r["realized_primary_sol"]) for r in port]
+    toks=collections.defaultdict(float); [toks.__setitem__(r["token"],toks[r["token"]]+r["realized_primary_sol"]) for r in port]; gp=sum(max(0,v) for v in toks.values()) or 1e-12
+    cl=collections.defaultdict(list); [cl[(r["token"],r["utc_date"])].append(r["realized_primary_sol"]) for r in port]; groups=list(cl.values()); rng=random.Random(7); bs=[]
+    for _ in range(1000):
+        flat=[a for gg in [rng.choice(groups) for _ in groups] for a in gg]; bs.append(sum(flat)/len(flat))
+    bs.sort(); ci=(bs[25],bs[974]); nonusdc=[r["realized_primary_sol"] for r in port if not r["usdc_related"]]; s5=[r["realized_stress_sol"] for r in port]
+    gate=dict(episodes50=len(port)>=g["episodes_min"],tokens5=len({r["token"] for r in port})>=g["tokens_min"],EV=st["EV"]>0,PF=st["PF"]>=g["PF_min"],CI_low=ci[0]>0,days2of3=sum(1 for v in days.values() if v>0)>=g["positive_days_min"],exb1pct=st["EX_BEST_1PCT"]>0,token_share=max(toks.values())/gp<=g["token_share_max"],ev_ex_usdc=(sum(nonusdc)/len(nonusdc) if nonusdc else -1)>0,stress5=(sum(s5)/len(s5))>0)
+    return dict(N=len(port),success=succ,reverted=len(port)-succ,stats=st,CI95_token_day=ci,by_day=dict(days),by_token_share=max(toks.values())/gp,gate=gate,verdict=("SLOW_ATOMIC_REVERT_ARB_HISTORICAL_PAPER_CANDIDATE" if all(gate.values()) else "SLOW_ATOMIC_REVERT_ARB_NO_VERIFIED_EDGE"))
+def stage_freeze_slow():
+    """ingheata SLOW_ATOMIC_REVERT_ARB (spec + hash-uri) INAINTE de orice PnL; consuma populatia secundara inghetata."""
+    pop=load_frozen_secondary(); spec=dict(hypothesis="SLOW_ATOMIC_REVERT_ARB",label="POST_HOC_HISTORICAL",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),
+        rationale="studiu general de arbitraj multipool PumpSwap pe pool-uri noncanonice pentru acelasi token (SECONDARY_ALL_NONCANONICAL: 13 token-uri, 80 pool-uri, 477 combinatii, 3.807 ferestre curate (token, slot), 3 zile UTC); NU salveaza ipoteza primara meme (inchisa: INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE); proiectat fara a inspecta spread-uri, preturi sau PnL",
+        population=dict(source=POPFILE,population="SECONDARY_ALL_NONCANONICAL",tokens=sorted(pop["tokens"]),n_tokens=len(pop["tokens"]),n_pools=sum(len(v) for v in pop["tokens"].values()),rule=pop["rule"],frozen_at=pop["frozen_at"]),
+        inputs=dict(populations_sha256=sha(POPFILE),rpc_meta_sha256=sha(RPC_META),pair_events_cache_sha256=sha(CACHE2),rpc_pairs_sha256=sha(RPC_PAIRS)),
+        infrastructure=dict(access="Helius WSS/RPC obisnuit, fara Jito/relay privat",decision="ultima stare completa observabila (dupa slotul s)",landing=dict(primary_slots=3,stress_slots=5),transaction="ambele leg-uri PumpSwap intr-o singura tranzactie atomica; leg-ul 2 cu garda min_out = Q + taxa semnatura + prioritate (profit >= 0)",revert="garda picata => fara pierdere de inventar; se plateste integral taxa de retea + prioritate; tranzactiile reusite si revertate raportate separat"),
+        notional_sol=0.25,landing=dict(primary_slots=3,stress_slots=5),costs=dict(base_signature_fee_lamports=SIG_FEE,priority_fee_lamports=PRIO,jito_tip_lamports=0),
+        fees="noncanonical 25/5/0 bps; canonical (absent in populatie) doar tier demonstrat din evenimente sau supply validat per mint; niciodata supply hardcodat",
+        selection="token_episode_selection: max o decizie per token si episod de dislocare; ruta aleasa exclusiv dupa predicted net executabil; fara re-tranzactionare in sloturi consecutive pana cand toate rutele tokenului revin la predicted <= 0; combinatiile de perechi NU sunt observatii independente; cheia portofoliului = (token, episod) + max o tranzactie per slot",
+        gates=dict(episodes_min=50,tokens_min=5,EV_gt=0,PF_min=1.5,CI95_cluster="token x zi UTC, limita inferioara > 0",positive_days_min=2,ex_best_1pct_gt=0,token_share_max=0.40,ev_ex_usdc_gt=0,stress_slot5_ev_gt=0,note="INGHETATE inainte de orice PnL; nu se editeaza dupa"),
+        script_sha256=sha(__file__),status="FROZEN_NOT_EXECUTED")
+    json.dump(spec,open(SPEC2,"w"),indent=1,ensure_ascii=False); print("SLOW_ATOMIC_REVERT_ARB spec frozen; sha",sha(SPEC2))
+def stage_run_slow(dry_run=False,_loaders=None):
+    """calea REALA de executie: populatia secundara inghetata + maparea RPC + evenimentele pass2 -> run_engine -> evaluate. NU se ruleaza acum (fara PnL)."""
+    L=_loaders or dict(pop=load_frozen_secondary,meta=load_rpc_meta,events=load_pass2,spec=lambda:json.load(open(SPEC2)),outages=outages,truncated=truncated_tails)
+    spec=L["spec"](); assert spec["status"]=="FROZEN_NOT_EXECUTED" or dry_run
+    if not dry_run: assert spec["script_sha256"]==sha(__file__),"scriptul difera de spec-ul inghetat"
+    pop=L["pop"](); meta=L["meta"](); ev=L["events"](); res=run_engine(pop["tokens"],meta,ev,spec,OUT_W=L["outages"](),TR=L["truncated"]()); ev_=evaluate_slow_arb(res["rows"],spec)
+    if dry_run: return res,ev_
+    json.dump(dict(engine=res,evaluation=ev_,label="POST_HOC_HISTORICAL"),open("research/slow_atomic_revert_arb_results.json","w"),indent=1,default=str); print("VERDICT",ev_["verdict"]); return res,ev_
 def stage_freeze():
-    F=json.load(open("research/atomic_same_mint_arb_feasibility.json")); assert F["FEASIBILITY_GATE"]["PASS"], "feasibility gate a picat; nu se ingheata motorul"
+    raise SystemExit("INCHIS: ATOMIC_ARB_PRIMARY_MEME = INSUFFICIENT_EXISTING_DATA_UNIQUE_TOKEN_GATE (praguri si rezultate pastrate in atomic_same_mint_arb_populations_frozen.json); calea activa este freeze_slow/run_slow")
     inv=load_inv(); dup,_=pairs_from_inventory(inv)
     spec=dict(hypothesis="ATOMIC_SAME_MINT_PUMPSWAP_ARBITRAGE",label="POST_HOC_HISTORICAL",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),inputs=dict(inventory_sha256=sha(INV),pair_events_cache_sha256=sha(CACHE2),feasibility_sha256=sha("research/atomic_same_mint_arb_feasibility.json"),remediation_sha256=sha("research/external_review_remediation.json"),tape_day_manifests=dict(SEP02="844ce65dbcd2c15b4146591287789aba1d8262b99802b50c727e30b940fd6d67",SEP03="b49738b577bd9bdeb0a9426c57eeabda9f0b4b27b31c8e27730cb97276c4545b",SEP04="3068bfa383a398824b8837a9eafb77f6b9ea583a953fbe56c6c1256280a35def")),
         population=dict(pairs=[dict(token=t,pools=sorted(set(ps))) for t,ps in sorted(dup.items())],rule="perechi STRICTE (base_mint=token, quote_mint=WSOL) cu >=2 pool-uri: din CreatePoolEvent in banda si/sau pool canonical derivat zero-RPC (PDA) cu evenimente in banda; pool-urile cu base=WSOL sunt excluse (fara normalizare); doar mint-uri cu program cunoscut (research/token_program_map.json) egal cu SPL Token clasic intra in PnL; pool-uri cu vq implicit invalid (<5 obs., negativ, IQR mare) excluse; rupturi de lant in (decizie, landing s+2] exclud starea; ferestrele care intersecteaza deconectari WSS sau segmente trunchiate sunt excluse; o singura tranzactie per episod de dislocare; max o tranzactie per slot in portofoliu"),
@@ -371,6 +467,8 @@ def stats(vals,hours=None):
         bs.sort(); st["CI95_cluster_hour"]=(bs[25],bs[974])
     return st
 def stage_run():
+    raise SystemExit("INCHIS: calea veche pair-by-pair nu se mai executa; foloseste run_slow (episoade la nivel de token, populatie secundara inghetata)")
+def _legacy_stage_run():
     spec=json.load(open(SPEC)); assert spec["script_sha256"]!="PLACEHOLDER","spec neinghetata (hash script lipsa)"
     assert spec["script_sha256"]==sha(__file__),"hash-ul scriptului nu corespunde spec-ului inghetat"
     inv=load_inv(); P=derived_pool_meta(inv); E=load_pass2(); OUT_W=outages(); TR=truncated_tails(); TPM=load_token_program_map(); dup,_=pairs_from_inventory(inv); rows=[]; viol=collections.Counter(); t0=time.time()
@@ -448,4 +546,4 @@ def stage_run():
     R["final_gate_primary_0_25"]=g; R["FINAL_VERDICT"]="ATOMIC_ARB_HISTORICAL_PAPER_CANDIDATE" if (g and all(g.values())) else "ATOMIC_ARB_NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open("research/atomic_same_mint_arb_results.json","w"),indent=1,default=str); print("rows",len(rows),"portfolio",len(port),"viol",dict(viol)); print("VERDICT",R["FINAL_VERDICT"],g); print("RUN_DONE")
 if __name__=="__main__":
-    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"eligibility":stage_eligibility,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
+    {"derive":stage_derive,"pass2":stage_pass2,"feasibility":stage_feasibility,"feasibility_rpc":stage_feasibility_rpc,"eligibility":stage_eligibility,"freeze_slow":stage_freeze_slow,"run_slow":stage_run_slow,"freeze":stage_freeze,"run":stage_run}[sys.argv[1]]()
