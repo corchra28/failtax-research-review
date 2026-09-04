@@ -1,0 +1,205 @@
+{
+ "rows": {
+  "pool_master": 2514,
+  "pool_master_eligible": 1559,
+  "pool_master_excluded": 955,
+  "feature_panel": 6236,
+  "outcomes": 6236,
+  "shadow_ledger": 1559,
+  "regime_blocks": 308,
+  "executed_trades": 5,
+  "casebook": 110
+ },
+ "unique_pools": {
+  "master": 2514,
+  "features": 1559,
+  "outcomes": 1559,
+  "shadow": 1559
+ },
+ "duplicates": {
+  "master": 0,
+  "feature_panel": 0,
+  "outcomes": 0
+ },
+ "missingness": {
+  "feature_rows_without_features": 2676,
+  "reasons": {
+   "SEP01_NO_WALLET_IDENTITY_IN_POOL_TAPE": 2344,
+   "NO_CREATE_EVENT_IN_TAPE_OR_EXCLUDED_FROM_MASTER_POPULATION": 332
+  }
+ },
+ "timestamp_violations": {
+  "feature_after_decision": 0,
+  "outcome_before_entry": 0,
+  "shadow_resolution_before_entry": 0
+ },
+ "join_checks": {
+  "features_pools_in_master": true,
+  "outcomes_pools_in_master": true,
+  "shadow_pools_in_master": true
+ },
+ "reserve_consistency": {
+  "mean_chain_consistency": 0.9998059012187299,
+  "pools_below_0_99": 7
+ },
+ "corrupt_segment_exclusions": {
+  "NOT_BOOST_PROXY_INITIAL_STATE": 671,
+  "UNREADABLE_SEGMENT_IN_REQUIRED_INTERVAL": 108,
+  "NON_SOL_QUOTE": 79,
+  "NO_POOL_CREATION_OBSERVED": 14,
+  "NO_EVENTS_OR_VQ_UNVERIFIABLE_OR_FIRST_STATE_NOT_BOOST": 19,
+  "OUTAGE_IN_REQUIRED_INTERVAL": 64
+ },
+ "source_hashes": {
+  "regime_cache": {
+   "parser": "regime_cache_v1",
+   "built": "2026-09-04 15:13:36",
+   "N": 1559,
+   "by_day": {
+    "2026-09-01": 586,
+    "2026-09-02": 283,
+    "2026-09-03": 571,
+    "2026-09-04": 119
+   },
+   "by_source": {
+    "SEP01_HIST24_VAULT_BALANCES": 586,
+    "PROSPECTIVE_TAPE_EVENTS": 973
+   },
+   "exclusions": {
+    "SEP01_NOT_BOOST_VQ": 130,
+    "SEP01_NOT_BOOST_INITIAL_STATE": 14,
+    "SEP01_COVERAGE_LT_420S": 5,
+    "NOT_BOOST_PROXY_INITIAL_STATE": 671,
+    "UNREADABLE_SEGMENT_IN_REQUIRED_INTERVAL": 105,
+    "NON_SOL_QUOTE": 79,
+    "FIRST_EVENT_REAL_QUOTE_NOT_BOOST": 26,
+    "OUTAGE_IN_REQUIRED_INTERVAL": 60
+   },
+   "population_sha256": "45176582498236a36b52c84d31a788c69f288e34b1a9ee1c1fe4137662113210",
+   "content_sha256": "718133bfd27974ea1fc08b72048038b1604769be2177248be2dabf536bd85f37",
+   "pool_events": 3216300,
+   "outage_windows": 22,
+   "script_sha256": "a07e02cf12271e41d7b30c74ad242a69960e9c1204735512ddf1153f55985b11"
+  },
+  "m_cache": {
+   "parser": "m_cache_v1 (adaptor v3 al evaluarii sigilate: pool@173, q_net=@104-@80, taxa creator derivata)",
+   "built": "2026-09-04 14:00:26",
+   "N": 946,
+   "by_day": {
+    "2026-09-02": 235,
+    "2026-09-03": 531,
+    "2026-09-04": 180
+   },
+   "exclusions": {
+    "NO_CREATE_IN_TAPE": 203,
+    "NOT_BOOST_PROXY_INITIAL_STATE": 512,
+    "NON_SOL_QUOTE": 68,
+    "UNREADABLE_SEGMENT_IN_INTERVAL": 51,
+    "FIRST_EVENT_REAL_QUOTE_NOT_BOOST": 25,
+    "OUTAGE_IN_INTERVAL": 104,
+    "NO_POST_TAPE_300S": 5
+   },
+   "population_sha256": "d5a3c02a0bae4cd6bf40db06e224cc27f4f29b4ae208638154d8d36bcb250d9c",
+   "matches_sealed_population": true,
+   "content_sha256": "7f38b246725e67d468e69f02125a80e5b543eebeada7311750cf64e569e12ed2",
+   "curve_trades": 349683,
+   "pool_events": 1923520,
+   "outage_windows": 22,
+   "script_sha256": "09657f365f4e6a95a1c8b778790a0cddafc639f41caeab52c1cba3f0fd770172"
+  }
+ },
+ "leakage_tests": {
+  "tests": {
+   "T1_feature_timestamp_lt_decision": {
+    "status": "PASS",
+    "violations": 0,
+    "rows": 3784
+   },
+   "T2_partition_isolation": {
+    "status": "PASS",
+    "pools_in_multiple_partitions": 0,
+    "chronological": true
+   },
+   "T3_same_entity_grouping": {
+    "status": "PASS",
+    "max_duplicates": 1
+   },
+   "T4_future_field_blacklist": {
+    "status": "PASS",
+    "guard_rejects_injected_future_feature": true
+   },
+   "T5_normalization_fit_scope": {
+    "status": "PASS",
+    "note": "mu/sd ale modelului = statistici ale fold-ului de antrenare"
+   },
+   "T6_outcome_after_entry": {
+    "status": "PASS",
+    "violations": 0
+   },
+   "T7_no_duplicate_opportunity": {
+    "status": "PASS",
+    "unique_pools": 946
+   },
+   "T8_identifier_not_predictive": {
+    "status": "PASS",
+    "corr_hash_mint_vs_pnl": 0.0025232762468624637
+   },
+   "T9_row_order_not_predictive": {
+    "status": "PASS",
+    "corr_index_vs_pnl_DEV": 0.018558546822469504,
+    "note": "corelatie slaba = deriva cronologica, nu scurgere; prag 0,15"
+   },
+   "NC5_time_reversed_rejected_by_guard": {
+    "status": "PASS",
+    "note": "orice trasatura cu max_ts_used >= D pica testul T1 (garda de timestamp); nu se calculeaza outcome pe ea"
+   }
+  },
+  "negative_controls": {
+   "real": {
+    "label": "real",
+    "pr_auc": 0.09906200103134166,
+    "pr_auc_random": 0.05985915492957746,
+    "EV_top20": -1.3484409230769228,
+    "EV_all": -0.561115462676056,
+    "N_sel": 65
+   },
+   "NC1_permuted_outcomes_in_blocks": {
+    "label": "NC1",
+    "pr_auc": 0.0557663249634858,
+    "pr_auc_random": 0.05985915492957746,
+    "EV_top20": -1.4484841823529406,
+    "EV_all": -0.561115462676056,
+    "N_sel": 51
+   },
+   "NC2_features_shifted_next_pool": {
+    "label": "NC2",
+    "pr_auc": 0.04612095672975387,
+    "pr_auc_random": 0.06007067137809187,
+    "EV_top20": -1.753971609433962,
+    "EV_all": -0.5155036374558302,
+    "N_sel": 53
+   },
+   "NC3_identifier_only": {
+    "label": "NC3",
+    "pr_auc": 0.059151428263597906,
+    "pr_auc_random": 0.05985915492957746,
+    "EV_top20": -1.4099337595744679,
+    "EV_all": -0.561115462676056,
+    "N_sel": 47
+   },
+   "NC4_impossible_future_feature": {
+    "guard": "REJECTED",
+    "forced_pr_auc": 0.9411764705882353,
+    "forced_EV_top20": 12.513781303636364,
+    "note": "garda a respins numele; fortarea trasaturii viitoare produce PR-AUC ~1 => pipeline-ul ar detecta o scurgere reala"
+   },
+   "NC6_random_entry_placebo": {
+    "candidate_OOD_EV": 0.8783931447368425,
+    "placebo_EV": -1.2495778247368419
+   }
+  },
+  "flags": [],
+  "LEAKAGE_STATUS": "NO_LEAKAGE_DETECTED"
+ },
+ "row_count_explanation": "pool_master = eligibile + excluse (cu motiv); feature_panel/outcomes = eligibile x 4 orizonturi; trasaturile exista doar pentru pool-urile din populatia master (946: cu CreateEvent in banda si portofele); SEP01 nu are portofele in pool tapes => fara trasaturi de cohorta; shadow_ledger = eligibile cu shadow executabil"
+}

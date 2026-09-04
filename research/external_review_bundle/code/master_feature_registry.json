@@ -1,0 +1,129 @@
+{
+ "version": "master_feature_registry_v1",
+ "decision_rule": "toate trasaturile folosesc EXCLUSIV evenimente cu ts < D = T0+h (strict) si trade-uri de curba anterioare completarii; niciun camp derivat din stari/evenimente >= D",
+ "blacklist_substrings": [
+  "future",
+  "final",
+  "peak",
+  "max_after",
+  "min_after",
+  "outcome",
+  "tp_",
+  "sl_",
+  "pnl",
+  "ret_after",
+  "survive",
+  "migrated_after",
+  "lifetime",
+  "holder_count_after"
+ ],
+ "identifier_features_forbidden": [
+  "mint",
+  "pool",
+  "creator address",
+  "signature",
+  "row order",
+  "slot as feature"
+ ],
+ "families": {
+  "F1_T0_HOLDER_LIQUIDATION": {
+   "defs": [
+    "t0h_sell_share = volum quote vandut de detinatorii T0 (portofele cu sold net de curba > 0) / volum quote total in [T0, D)",
+    "t0h_sold_frac = tokeni vanduti de detinatorii T0 / inventarul lor total la T0",
+    "t0h_sellers_n = numar de detinatori T0 care au vandut"
+   ],
+   "mechanism": "lichidarea inventarului timpuriu = presiune de vanzare structurala; absenta ei = detinere"
+  },
+  "F2_FRESH_BUYER_ACCUMULATION": {
+   "defs": [
+    "fresh_buyers_n = portofele care cumpara in [T0,D) si NU sunt detinatori T0",
+    "fresh_buy_quote = volum quote al acestor cumparari",
+    "fresh_share = fresh_buy_quote / volum total de cumparare"
+   ],
+   "mechanism": "cerere noua, nu reciclare"
+  },
+  "F3_RETURNING_BUYERS": {
+   "defs": [
+    "ret_buy_share = volum de cumparare al detinatorilor T0 / volum total de cumparare",
+    "ret_buyers_n"
+   ],
+   "mechanism": "insider-ii isi maresc pozitia"
+  },
+  "F4_FLOW_PERSISTENCE": {
+   "defs": [
+    "buy_ratio = nr. cumparari / nr. evenimente",
+    "net_quote_flow = SOL cumparat - SOL vandut in [T0,D)",
+    "last5_buy_share = cota cumpararilor in ultimele 5 evenimente inainte de D",
+    "sign_runs = numar de schimbari de semn ale fluxului"
+   ],
+   "mechanism": "persistenta fluxului; inrudita cu seller exhaustion (agregat) => NU va fi promovata singura ca regula"
+  },
+  "F5_TRADE_SIZE_STRUCTURE": {
+   "defs": [
+    "size_median_sol",
+    "size_top1_share = cea mai mare tranzactie / volum total",
+    "repeat_size_share = cota evenimentelor cu marime quote identica cu o alta tranzactie (proxy wash)"
+   ],
+   "mechanism": "structura cererii; wash proxy"
+  },
+  "F6_SAME_SLOT_BURSTS": {
+   "defs": [
+    "max_wallets_per_slot",
+    "burst_event_share = cota evenimentelor din sloturi cu >=3 portofele distincte"
+   ],
+   "mechanism": "coordonare / boti (COORDINATION_BLIND)"
+  },
+  "F7_FLOW_PRICE_RESPONSE": {
+   "defs": [
+    "px_ret_bp = (pret la D / pret la deschidere - 1) x 1e4, pret = (rq+vq)/rb din ultima stare < D",
+    "impact_per_sol = px_ret_bp / |net_quote_flow|",
+    "absorption = volum vandut (SOL) / max(1 bp, scaderea maxima de pret de la deschidere)"
+   ],
+   "mechanism": "elasticitatea pretului la flux; absorbtia vanzarilor"
+  },
+  "F8_DRAWDOWN_RECOVERY": {
+   "defs": [
+    "max_dd_bp = minimul pretului in [T0,D) fata de deschidere",
+    "recovery_bp = pret la D fata de minim"
+   ],
+   "mechanism": "rezilienta"
+  },
+  "F9_RESERVE_TRAJECTORY": {
+   "defs": [
+    "rq_change_sol = rq(D-) - 67,41",
+    "n_events = numar de evenimente in [T0,D)",
+    "events_per_s"
+   ],
+   "mechanism": "activitate si adancime"
+  },
+  "F10_CREATOR_ACTIVITY": {
+   "defs": [
+    "creator_t0_share = soldul creatorului la T0 / inventarul total T0",
+    "creator_sold_pre_D = 1 daca creatorul a vandut in pool inainte de D",
+    "creator_sold_on_curve = tokeni vanduti de creator pe curba / cumparati"
+   ],
+   "mechanism": "lichidarea creatorului"
+  },
+  "F11_CURVE_CONTEXT": {
+   "defs": [
+    "curve_duration_s = complete_ts - create_t",
+    "curve_trades_n",
+    "curve_unique_buyers"
+   ],
+   "mechanism": "contextul lansarii (doar ablatiune; NU regula de sine statatoare)"
+  }
+ },
+ "excluded_features": {
+  "A_RAW_TRADE_DERIVED_TOP5_SHARE": "inchis (R1/R3)",
+  "E_RAW_LATE_BUYER_RETENTION": "inchis (R2 sigilat)"
+ },
+ "targets": {
+  "primary": "TP100_BEFORE_SL30_300S (binar) + PnL exact al politicii",
+  "secondary": [
+   "TP50_SL20",
+   "ret_60s",
+   "ret_180s"
+  ]
+ },
+ "normalization": "standardizare fit doar pe fold-ul de antrenare; transformare sign*log1p pe trasaturi cu coada lunga"
+}

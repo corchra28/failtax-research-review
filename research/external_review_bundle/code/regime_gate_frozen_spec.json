@@ -1,0 +1,176 @@
+{
+ "name": "REGIME_GATED_MIGRATION_TEST",
+ "classification_before_results": "PLAUSIBLE_REGIME_HYPOTHESIS",
+ "label": "POST_HOC_HISTORICAL_EXPLORATION (ipoteza formulata dupa observarea unui regim favorabil tarziu; nimic prospectiv)",
+ "frozen_at": "2026-09-04 15:00:19",
+ "script_sha256": "eaf2404dab17e688ccdeca16f120ff0fee43a8301086a7ef13f87a1f9b458c3c",
+ "max_verdict": "REGIME_GATE_HISTORICAL_PAPER_CANDIDATE",
+ "datasets": {
+  "SEP01_hist24": {
+   "pool_tapes.jsonl.gz": "fe96e2d81ba9618ebcde29b78bbfced6b7a35ceeb86405901cd2c2ebbc8b23af",
+   "events.jsonl.gz": "6612dbbbde4983fd317396cca87b7d521e5a2bcb65aea7c512ca912962e63d09",
+   "pool_vq.json": "3f73cecc319af4850db1f9db189234705d0e4b89be466fe65e7b387b4e3af62e",
+   "semantics": "solduri vault post-tx (blockTime, slot, txIndex, rb, rq); ordonare EXACTA; taxe = tabel de tiere pumpswap_fees.py (dupa mcap); fara portofele"
+  },
+  "SEP02_04_prospective_tape": {
+   "SEP02_manifest": "844ce65dbcd2c15b4146591287789aba1d8262b99802b50c727e30b940fd6d67",
+   "SEP03_manifest": "b49738b577bd9bdeb0a9426c57eeabda9f0b4b27b31c8e27730cb97276c4545b",
+   "SEP04_manifest": "3068bfa383a398824b8837a9eafb77f6b9ea583a953fbe56c6c1256280a35def",
+   "semantics": "Buy/SellEvent cu rezerve PRE-trade (post = pre urmator validat 99,98 %), ts on-chain 1 s + slot, FARA txIndex (ordinea de sosire WS); taxe = bps observate (lp/protocol/creator); portofele in evenimente"
+  },
+  "unified_cache": "scratchpad/derived/regime_pools.jsonl.gz (construit de research/regime_cache_build.py; hash in regime_cache_manifest.json; nu contine outcome-uri)"
+ },
+ "eligible_population": {
+  "regime": "BOOST_PROXY_17_58 (stare initiala 206.900.000 tokeni + ~84,99 SOL total / 67,41 SOL real; vq implicit 17,58±0,3 SOL)",
+  "requires": [
+   "CompleteEvent observabil (ts on-chain)",
+   "creare de pool canonic observabila (CreatePoolEvent / prima stare a pool-ului)",
+   "rezerve executabile complete (evenimente/stari pana la T0+420 s)",
+   "niciun interval necesar [Complete, T0+420 s] care intersecteaza o fereastra WSS de deconectare sau o coada de fisier corupta",
+   "consistenta rezervelor (post = pre urmator; vq implicit verificat)"
+  ],
+  "excluded": [
+   "vq=0 / non-BOOST",
+   "quote non-SOL",
+   "pool-uri fara evenimente",
+   "acoperire < 420 s dupa T0 (SEP01)"
+  ],
+  "report_by_day": [
+   "SEP01",
+   "SEP02",
+   "SEP03",
+   "SEP04"
+  ],
+  "no_gap_interpolation": true
+ },
+ "shadow_policy": {
+  "signal_time": "CompleteEvent ts (on-chain, secunde)",
+  "eligibility_time": "Complete + 5 s observare + 2 s latenta = Complete + 7 s",
+  "entry": "prima stare executabila DUPA eligibilitate cu ordonare conservatoare: starea de dupa toate evenimentele cu ts <= Complete+7 (evenimentele din secunda de eligibilitate se considera inaintea noastra; tx-ul nostru aterizeaza intr-un slot strict ulterior); SEP01: acelasi criteriu pe blockTime",
+  "notional_usd": 25,
+  "sol_usd": 100.0,
+  "exit": {
+   "TP": "prima stare de FINAL DE SLOT la care lichidarea exacta >= $50",
+   "SL": "prima stare de final de slot la care lichidarea exacta <= $17,50",
+   "same_slot_ambiguity": "SL primul",
+   "timeout": "lichidare exacta la starea de dupa toate evenimentele cu ts <= intrare+300 s"
+  },
+  "execution": "protocol-exact: cantitate cumparata (CP cu vq), taxe istorice (bps observate / tiere), impact, overlay pozitie proprie (rb-tok, rq+q_net+lp_fee), lichidare exacta; +0,0001 SOL/tx prioritate (2 tx)",
+  "resolution_time": "ts al iesirii (TP/SL/timeout); rezultatul devine cunoscut doar de la acest moment"
+ },
+ "regime_clock": {
+  "blocks": "UTC [HH:00,HH:15),[HH:15,HH:30),[HH:30,HH:45),[HH:45,HH+1:00)",
+  "decision_time": "inceputul blocului",
+  "window": "shadow-uri cu intrarea in [decizie-60 min, decizie) si resolution_time < decizie; nerezolvatele excluse",
+  "frozen_within_block": true
+ },
+ "regime_on_gate": {
+  "N_min": 30,
+  "trimmed_mean_10pct_gt": 0,
+  "PF_gt": 1.15,
+  "median_gt": 0,
+  "ex_best_1_trade_EV_gt": 0,
+  "EV_first_30min_of_window_gt": 0,
+  "EV_second_30min_of_window_gt": 0,
+  "trimmed_mean_rule": "sortare crescatoare a PnL; k = floor(0.10 * N); se elimina primele k si ultimele k observatii; media restului",
+  "subwindows": "prima jumatate = intrari in [decizie-60, decizie-30); a doua = [decizie-30, decizie)",
+  "no_loosening": true
+ },
+ "paper_strategy": {
+  "OFF": "nicio tranzactie",
+  "ON": "prima migrare BOOST eligibila cu Complete+7 s >= inceputul blocului (si < sfarsitul blocului), fara filtre de token/portofel; tie-break: slotul Complete observat conservator, apoi semnatura lexicografic; max o pozitie noua per bloc; max o pozitie activa; semnalele in timpul unei pozitii active se sar",
+  "entry_exit": "identic cu shadow policy",
+  "notional_before_sizing": 25
+ },
+ "sizing": {
+  "bankrolls": [
+   100,
+   500,
+   2000
+  ],
+  "risk_per_trade": "1 % din bankroll-ul curent la stop -30 %",
+  "notional": "min($25, bankroll disponibil, 0.01*bankroll/0.30)",
+  "exact_recompute_at_notional": true,
+  "no_reuse_of_committed_capital": true,
+  "no_leverage": true
+ },
+ "costs": {
+  "SEP02_04": "bps observate in ultimul eveniment <= momentul tranzactiei (lp+protocol+creator)",
+  "SEP01": "tabel de tiere pumpswap_fees.py dupa mcap (creator+protocol extern, lp in pool)",
+  "priority_fee": "0,0001 SOL/tx x 2",
+  "stress": [
+   1.25,
+   1.5
+  ],
+  "latency_stress_s": [
+   5
+  ],
+  "friction_not_modeled": [
+   "FAIL-1",
+   "Jito/MEV",
+   "probabilitate de umplere"
+  ]
+ },
+ "ordering": {
+  "primary": "CONSERVATOARE (stare dupa toate evenimentele cu ts <= X; evaluare TP/SL la final de slot; SL primul)",
+  "secondary": "OPTIMISTA (stare dupa evenimentele cu ts < X; TP/SL la fiecare eveniment in ordinea de sosire, TP primul)"
+ },
+ "baselines": {
+  "A": "blocuri OFF cu prima migrare eligibila, executie identica",
+  "B": "toate blocurile cu prima migrare eligibila, indiferent de stare",
+  "C": "etichete ON/OFF aleatoare cu acelasi numar si aceleasi durate ale rulajelor ON (permutare pe blocuri, 500 repetari)",
+  "D": "starea blocului anterior deplasata inainte cu un bloc",
+  "E": "starea deplasata inapoi cu un bloc = diagnostic INVALID de scurgere (neexecutabil)",
+  "F": "performanta shadow neconditionata a tuturor pool-urilor eligibile"
+ },
+ "stability": [
+  "leave-one-day-out",
+  "leave-one-hour-out",
+  "cvartile cronologice",
+  "prima vs a doua jumatate",
+  "fara blocul cel mai profitabil",
+  "fara ziua cea mai profitabila",
+  "fara top 1 % tranzactii",
+  "cost +25 %",
+  "cost +50 %",
+  "latenta +5 s (intrare Complete+12 s)",
+  "ordonare optimista vs conservatoare",
+  "bootstrap pe blocuri cluster ora",
+  "permutari pe blocuri pentru starile aleatoare"
+ ],
+ "candidate_gate": {
+  "ON_blocks_min": 15,
+  "ON_trades_min": 50,
+  "days_with_ON_min": 3,
+  "ON_EV_gt": 0,
+  "PF_min": 1.25,
+  "median_min": 0,
+  "trimmed_EV_gt": 0,
+  "CI95_low_gt": 0,
+  "ex_best_1pct_EV_gt": 0,
+  "top1pct_max": 0.4,
+  "ON_vs_OFF": "material (>= +$0.10 si p<0.05)",
+  "ON_vs_every_block": "material",
+  "permutation_adjusted": "p < 0.05 vs C",
+  "cost25_EV_gt": 0,
+  "conservative_EV_gt": 0,
+  "latency5_EV_gt": 0,
+  "positive_chrono_blocks_min": 3,
+  "no_single_dominant": "nicio zi/ora/bloc > 50 % din profitul brut",
+  "bankroll_drawdown_max": 0.15,
+  "bankroll100_ruin": "P(<50 %) < 5 %",
+  "leakage": "none"
+ },
+ "verdicts": [
+  "REGIME_GATE_HISTORICAL_PAPER_CANDIDATE",
+  "REGIME_GATE_NEVER_ACTIVATES",
+  "REGIME_GATE_INSUFFICIENT_SAMPLE",
+  "REGIME_GATE_NO_PERSISTENCE",
+  "REGIME_GATE_NO_ECONOMIC_EDGE",
+  "REGIME_GATE_TAIL_DEPENDENT",
+  "REGIME_GATE_REGIME_DEPENDENT",
+  "REGIME_GATE_COST_OR_LATENCY_ERASED"
+ ],
+ "cache_sha256": "2842d7062cdffe0730ec5762bdd9e1449e2b43d2527852b95a4b508bd971bc3b",
+ "FINAL_SPEC_FREEZE_TIME": "2026-09-04 15:14:13 EEST"
+}
