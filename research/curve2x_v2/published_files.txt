@@ -46,3 +46,4 @@ model_artifact.json
 reproducibility_manifest.json
 TAPE_SHA256SUMS.txt
 .gitignore
+SHA256SUMS.txt

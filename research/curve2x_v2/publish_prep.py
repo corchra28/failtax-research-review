@@ -1,7 +1,7 @@
 """CURVE2X V2 — pregatirea publicarii: scan secrete / termeni interzisi / RPC-WSS-sendTransaction-chei, SHA256SUMS, reproducibility_manifest.json. Nu publica nimic singur."""
 import os,sys,re,json,hashlib,subprocess,time,glob
 sys.path.insert(0,"research/curve2x_v2"); import curve2x_lib as L
-OUT="research/curve2x_v2"; files=[l.strip() for l in open(f"{OUT}/published_files.txt") if l.strip() and l.strip() not in ("validate_public.py","reproducibility_manifest.json")]
+OUT="research/curve2x_v2"; files=[l.strip() for l in open(f"{OUT}/published_files.txt") if l.strip() and l.strip() not in ("validate_public.py","reproducibility_manifest.json","SHA256SUMS.txt")]
 PATS={"private_key_b58_64":re.compile(r"\b[1-9A-HJ-NP-Za-km-z]{86,90}\b"),"api_key_param":re.compile(r"api[-_]?key=",re.I),"helius_url":re.compile(r"helius-rpc\.com",re.I),"wss":re.compile(r"wss://"),"send_tx":re.compile(r"sendTransaction|signTransaction"),"github_token":re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),"aws":re.compile(r"AKIA[0-9A-Z]{16}"),"env_key":re.compile(r"PRIVATE_KEY|SECRET_KEY|KEYPAIR")}
 ALLOW={"curve2x_paper_watcher.py":{"send_tx","env_key","wss"},"publish_prep.py":{"send_tx","env_key","wss","helius_url","api_key_param"},"README_AUTOMATION.md":{"send_tx","env_key"},"frozen_spec_V1_REJECTED.json":{"send_tx"},"amendments.md":set(),"model_card.md":{"send_tx"},"curve2x-paper.service.example":set()}
 FORBID=re.compile(r"\b(BUY|SAFE|GUARANTEED|MINIM_2X)\b")
