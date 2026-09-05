@@ -1,0 +1,24 @@
+{
+ "profitable_states_detected": 0,
+ "median_lifetime_slots": null,
+ "survival_pct": {
+  "1": null,
+  "2": null,
+  "3": null,
+  "5": null,
+  "8": null
+ },
+ "profit_decay_mean_sol": {
+  "1": null,
+  "2": null,
+  "3": null,
+  "5": null,
+  "8": null
+ },
+ "competition": {
+  "median_other_signatures_within_3_slots": null,
+  "share_states_with_identified_arber_within_3_slots": null
+ },
+ "plausible_at_3_slots": null,
+ "note": "descriptiv; orizonturile nu inlocuiesc alegerea inghetata +3; identificarea executorilor foloseste semnaturile recensamantului doar ca diagnostic"
+}

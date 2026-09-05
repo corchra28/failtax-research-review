@@ -1,0 +1,122 @@
+{
+ "V1": {
+  "N": 500,
+  "users": 52,
+  "tokens": 63,
+  "total_net_sol": 12.5883885,
+  "EV": 0.025176777,
+  "median": -9.60435e-05,
+  "PF": 295.1174539606957,
+  "win_rate": 0.082,
+  "by_day": {
+   "2026-09-02": 0.04300021950170648,
+   "2026-09-03": -4.908534920634921e-05,
+   "2026-09-04": -7.770461111111111e-05
+  },
+  "by_day_N": {
+   "2026-09-02": 293,
+   "2026-09-03": 189,
+   "2026-09-04": 18
+  },
+  "top_user_share": 0.8417048885703841,
+  "top_token_share": 0.8417048885703841,
+  "CI_user_day": [
+   0.0008926936100746268,
+   0.10275245418879056
+  ],
+  "CI_token_day": [
+   -7.879957958477509e-05,
+   0.10417562987254901
+  ],
+  "gate": {
+   "cycles50": true,
+   "tokens5": true,
+   "dates2": true,
+   "EV": true,
+   "PF": true,
+   "CI_user": true,
+   "CI_token": false,
+   "exb1pct": true,
+   "stress1": true,
+   "user_share": false,
+   "token_share": false,
+   "violations": true
+  },
+  "verdict": "EXECUTED_ARB_MECHANISM_NOT_CONFIRMED",
+  "rejected": {
+   "ORIENTATION_OR_QUOTE_NOT_STRICT_WSOL": 5444,
+   "BASE_CONSERVED_EXACT": 500,
+   "BASE_IMBALANCE_LE_1BP": 1
+  }
+ },
+ "V2": {
+  "N": 500,
+  "users": 52,
+  "tokens": 63,
+  "total_net_sol": 12.5883885,
+  "EV": 0.025176777,
+  "median": -9.60435e-05,
+  "PF": 295.1174539606957,
+  "win_rate": 0.082,
+  "by_day": {
+   "2026-09-02": 0.04300021950170648,
+   "2026-09-03": -4.908534920634921e-05,
+   "2026-09-04": -7.770461111111111e-05
+  },
+  "by_day_N": {
+   "2026-09-02": 293,
+   "2026-09-03": 189,
+   "2026-09-04": 18
+  },
+  "top_user_share": 0.8417048885703841,
+  "top_token_share": 0.8417048885703841,
+  "CI_user_day": [
+   0.0008926936100746268,
+   0.10275245418879056
+  ],
+  "CI_token_day": [
+   -7.879957958477509e-05,
+   0.10417562987254901
+  ],
+  "gate": {
+   "cycles50": true,
+   "tokens5": true,
+   "dates2": true,
+   "EV": true,
+   "PF": true,
+   "CI_user": true,
+   "CI_token": false,
+   "exb1pct": true,
+   "stress1": true,
+   "user_share": false,
+   "token_share": false,
+   "violations": true
+  },
+  "verdict": "EXECUTED_ARB_MECHANISM_NOT_CONFIRMED",
+  "rejected": {
+   "ORIENTATION_OR_QUOTE_NOT_STRICT_WSOL": 5444,
+   "BASE_CONSERVED_EXACT": 500,
+   "BASE_IMBALANCE_LE_1BP": 1
+  }
+ },
+ "cycles_removed_by_multi_user_rule": 0,
+ "cycles_added": 0,
+ "removed_examples_hashed": [],
+ "removed_total_net_sol": 0.0,
+ "dominant_cycle": {
+  "sig_id": "86c336727490d582906e646688b16c43",
+  "user_id": "a1aaf7ba26e8f0ccf8c4b76233a3c435",
+  "token_id": "d362a6d4cb1f00a08d12a8b8f84d72bc",
+  "day": "2026-09-02",
+  "net_primary_sol": 10.631733571,
+  "gross_sol": 10.631838571,
+  "paid_sol": 0.315875386,
+  "recv_sol": 10.947713957,
+  "n_swaps": 2,
+  "users_in_tx_v1": 1,
+  "users_for_token_v2": 1,
+  "retained_in_v2": true,
+  "why": "retinut: un singur utilizator distinct pe tokenul ciclului in tranzactie (users_for_token=1), base conservat exact, orientare stricta, invariante valide"
+ },
+ "FINAL_VERDICT_CHANGED": false
+}

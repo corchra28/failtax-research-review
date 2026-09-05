@@ -1,0 +1,235 @@
+{
+ "label": "POST_HOC_HISTORICAL_RESEARCH",
+ "N": 500,
+ "net_PRIMARY": {
+  "N": 500,
+  "EV": 0.025176777,
+  "median": -9.60435e-05,
+  "PF": 295.1174539606957,
+  "win_rate": 0.082,
+  "total": 12.5883885,
+  "EX_BEST_1": 0.003921152162324649,
+  "EX_BEST_3": 0.0009686002595573441,
+  "EX_BEST_1PCT": 0.00013506693535353536
+ },
+ "net_STRESS_1": {
+  "N": 500,
+  "EV": 0.024781777,
+  "median": -0.0004910435,
+  "PF": 55.20066358901294,
+  "win_rate": 0.04,
+  "total": 12.3908885,
+  "EX_BEST_1": 0.0035261521623246492,
+  "EX_BEST_3": 0.0005736002595573441,
+  "EX_BEST_1PCT": -0.0002599330646464646
+ },
+ "net_STRESS_2": {
+  "N": 500,
+  "EV": 0.024281777,
+  "median": -0.0009910435000000002,
+  "PF": 26.7751059087195,
+  "win_rate": 0.028,
+  "total": 12.1408885,
+  "EX_BEST_1": 0.0030261521623246492,
+  "EX_BEST_3": 7.360025955734412e-05,
+  "EX_BEST_1PCT": -0.0007599330646464647
+ },
+ "net_NEW_ACCOUNT_STRESS": {
+  "N": 500,
+  "EV": 0.023176777,
+  "median": -0.0020960435000000003,
+  "PF": 12.484704029273221,
+  "win_rate": 0.024,
+  "total": 11.588388499999999,
+  "EX_BEST_1": 0.0019211521623246494,
+  "EX_BEST_3": -0.0010313997404426559,
+  "EX_BEST_1PCT": -0.0018649330646464647
+ },
+ "gross": {
+  "N": 500,
+  "EV": 0.025281777,
+  "median": 8.956500000000001e-06,
+  "PF": 49621.75956820412,
+  "win_rate": 0.97,
+  "total": 12.640888499999999,
+  "EX_BEST_1": 0.004026152162324649,
+  "EX_BEST_3": 0.0010736002595573442,
+  "EX_BEST_1PCT": 0.00024006693535353534
+ },
+ "by_day": {
+  "2026-09-02": {
+   "N": 293,
+   "EV": 0.04300021950170648,
+   "median": -9.5592e-05,
+   "PF": 523.3628455847504,
+   "win_rate": 0.11604095563139932,
+   "total": 12.599064314,
+   "EX_BEST_1": 0.006737434051369863,
+   "EX_BEST_3": 0.0016967935965517243,
+   "EX_BEST_1PCT": 0.004191753161512028
+  },
+  "2026-09-03": {
+   "N": 189,
+   "EV": -4.908534920634921e-05,
+   "median": -9.6341e-05,
+   "PF": 0.4522680517549492,
+   "win_rate": 0.031746031746031744,
+   "total": -0.009277131000000001,
+   "EX_BEST_1": -7.45593085106383e-05,
+   "EX_BEST_3": -9.079698924731182e-05,
+   "EX_BEST_1PCT": -7.45593085106383e-05
+  },
+  "2026-09-04": {
+   "N": 18,
+   "EV": -7.770461111111111e-05,
+   "median": -0.0001017895,
+   "PF": 0.19792008349485612,
+   "win_rate": 0.05555555555555555,
+   "total": -0.001398683,
+   "EX_BEST_1": -0.00010257764705882353,
+   "EX_BEST_3": -0.00011041106666666666,
+   "EX_BEST_1PCT": -0.00010257764705882353
+  }
+ },
+ "top_token_share": 0.8417048885703841,
+ "top_user_share": 0.8417048885703841,
+ "top_pool_pair_share": 0.8417048885703841,
+ "unique_users": 52,
+ "cycles_per_user": {
+  "15": 2,
+  "245": 1,
+  "9": 2,
+  "41": 1,
+  "1": 26,
+  "4": 5,
+  "12": 2,
+  "16": 2,
+  "7": 1,
+  "5": 2,
+  "6": 1,
+  "29": 1,
+  "2": 6
+ },
+ "by_token_top10_hashed": [
+  [
+   "d362a6d4cb1f00a08d12a8b8f84d72bc",
+   10.6317
+  ],
+  [
+   "829280546952fb7a6cebc4516ef9690a",
+   1.9889
+  ],
+  [
+   "738059d5b3c05611681872a52a30eb49",
+   0.0047
+  ],
+  [
+   "e289b364aa65b3e41e5bb972839b12e0",
+   0.0027
+  ],
+  [
+   "af79cb47bee1df691969b3fa0976db79",
+   0.0012
+  ],
+  [
+   "5ad8cf3c49fd4abec31941ae911a83b7",
+   0.0008
+  ],
+  [
+   "a1ad7105a312d1ab60da63cee747898b",
+   0.0007
+  ],
+  [
+   "81990142ed081b81aab827306b57c093",
+   0.0004
+  ],
+  [
+   "d138a4cc61a742c251036fcfa0bfd263",
+   0.0001
+  ],
+  [
+   "fd183557bb2a44daba348fe3cdbf08d2",
+   0.0
+  ]
+ ],
+ "by_user_top10_hashed": [
+  [
+   "a1aaf7ba26e8f0ccf8c4b76233a3c435",
+   10.6317
+  ],
+  [
+   "ff240433733fc940c01e9dfa63b9cc4a",
+   0.7475
+  ],
+  [
+   "fad5240b5db6909657b9c0c0402d6463",
+   0.7277
+  ],
+  [
+   "e6680aa401775652f1850c8d384ad71f",
+   0.4749
+  ],
+  [
+   "bac49cb31f3ec9051d276e33dd04140f",
+   0.0401
+  ],
+  [
+   "fc68b7c75fb7f75c03a03d9dcd4be1a0",
+   0.0034
+  ],
+  [
+   "72b9239045c6ea18508599eeb94f1a35",
+   0.001
+  ],
+  [
+   "b2e235ece33dc24a02f7bf516abcbb2e",
+   0.001
+  ],
+  [
+   "69c73a76f65a69aacd1a734cca31ea49",
+   0.0009
+  ],
+  [
+   "f88cc51d66966ea24e69466c57f8cb75",
+   0.0008
+  ]
+ ],
+ "sizes_sol": {
+  "median_paid": 0.000149131,
+  "p90_paid": 0.008818843
+ },
+ "atomic_from_event_order": "DA: toate evenimentele unui ciclu sunt in aceeasi semnatura (o tranzactie), deci durata de detinere in tranzactie = 0 sloturi",
+ "bootstrap_user_day": {
+  "CI95": [
+   0.0008926936100746268,
+   0.10275245418879056
+  ],
+  "p_le_0": 0.007,
+  "clusters": 76
+ },
+ "bootstrap_token_day": {
+  "CI95": [
+   -7.879957958477509e-05,
+   0.10417562987254901
+  ],
+  "p_le_0": 0.1294,
+  "clusters": 87
+ },
+ "gate": {
+  "cycles50": true,
+  "tokens5": true,
+  "dates2": true,
+  "EV": true,
+  "PF": true,
+  "CI_user": true,
+  "CI_token": false,
+  "exb1pct": true,
+  "stress1": true,
+  "user_share": false,
+  "token_share": false,
+  "violations": true
+ },
+ "verdict": "EXECUTED_ARB_MECHANISM_NOT_CONFIRMED",
+ "violations_note": "incalcarile de invariant/decodare sunt raportate ca RESPINGERI de candidat (nu intra in populatie); poarta cere zero astfel de cazuri printre candidati",
+ "runtime_s": 1.1
+}

@@ -38,9 +38,11 @@ def stats(rows,key="pnl"):
     w=[a for a in v if a>0]; l=[a for a in v if a<=0]; srt=sorted(v,reverse=True); n=len(v); pos=collections.defaultdict(float); [pos.__setitem__(r.get("mint") or r.get("token"),pos[r.get("mint") or r.get("token")]+max(0,r[key])) for r in rows]; gp=sum(pos.values()) or 1e-12
     days=collections.defaultdict(list); [days[r["day"]].append(r[key]) for r in rows]
     return dict(N=n,mints=len(pos),EV=sum(v)/n,median=S.median(v),PF=((sum(w)/abs(sum(l))) if l and sum(l)<0 else (float("inf") if w else 0.0)),win_rate=len(w)/n,EX_BEST_1PCT=sum(srt[max(1,n//100):])/max(1,n-max(1,n//100)),max_mint_share=max(pos.values())/gp,by_day={d:sum(a)/len(a) for d,a in days.items()},by_day_N={d:len(a) for d,a in days.items()},total=sum(v))
+MIN_N=50; MIN_MINTS=20
 def boot(rows,key="pnl",reps=10000,seed=20260905,alpha=0.05):
+    """inferenta (CI/p) doar peste pragul minim de esantion (N>=50 si >=20 mint-uri); altfel None (n/a) — fara p-value/CI pe esantioane sub prag."""
     rows=[r for r in rows if r.get(key) is not None]
-    if not rows: return None
+    if not rows or len(rows)<MIN_N or len({(r.get("mint") or r.get("token")) for r in rows})<MIN_MINTS: return None
     rng=random.Random(seed); g=collections.defaultdict(list); [g[(r.get("mint") or r.get("token"),r["day"])].append(r[key]) for r in rows]; G=list(g.values()); bs=[]
     for _ in range(reps):
         tot=0.0; cnt=0

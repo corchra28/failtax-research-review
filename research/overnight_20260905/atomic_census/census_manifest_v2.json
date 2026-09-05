@@ -1,0 +1,44 @@
+{
+ "CENSUS_SPEC_SHA256": "2a994de0368939d41628e7ea18181af4b7fbf42a108aab9a0a49a603c4a9d5d6",
+ "TOTAL_SWAP_EVENTS_SCANNED": 42270215,
+ "multi_swap_transactions": 5096630,
+ "CANDIDATE_SIGNATURES": 5938,
+ "candidate_groups": 5945,
+ "EXACT_BASE_CONSERVED_CYCLES": 500,
+ "DUST_CYCLES": 1,
+ "rejected": {
+  "ORIENTATION_OR_QUOTE_NOT_STRICT_WSOL": 5444,
+  "BASE_CONSERVED_EXACT": 500,
+  "BASE_IMBALANCE_LE_1BP": 1
+ },
+ "UNIQUE_USERS_HASHED": 52,
+ "UNIQUE_TOKENS": 63,
+ "UNIQUE_POOL_PAIRS": 240,
+ "DATES": [
+  "2026-09-02",
+  "2026-09-03",
+  "2026-09-04"
+ ],
+ "by_day": {
+  "2026-09-02": 293,
+  "2026-09-03": 189,
+  "2026-09-04": 18
+ },
+ "swaps_per_cycle": {
+  "2": 500
+ },
+ "cycles_per_signature": {
+  "1": 500
+ },
+ "scan_manifest": {
+  "built": "2026-09-05 10:22:45",
+  "counters": {
+   "swap_events": 42270215,
+   "multi_swap_lines": 5096630,
+   "candidate_groups": 5945
+  },
+  "cache_sha256": "2f2f6ec92927569c21e946eb378d7432e76d5c6f4048c16220930fb7e69115e0",
+  "script_sha256": "1de208dd164fa5ac9652fa8634895dcba13327499f5becb0db590281e5c0ee9e",
+  "pools_in_metadata": 32491
+ }
+}

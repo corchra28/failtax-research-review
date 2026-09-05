@@ -3,10 +3,14 @@ import gzip,json,hashlib,collections,statistics as S,random,time,sys,os
 D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/overnight_20260905/atomic_census"; WSOL="So11111111111111111111111111111111111111112"; NS="external-review-v1"; LAMP=10**9
 COSTS={"PRIMARY":105000,"STRESS_1":500000,"STRESS_2":1000000,"NEW_ACCOUNT_STRESS":2105000}
 def hid(v): return hashlib.sha256(f"{NS}:{v}".encode()).hexdigest()[:32]
+def multi_user_same_token(users_for_token):
+    """spec (census_frozen_spec): fluxuri multi-user in aceeasi semnatura pentru ACELASI mint => grup ambiguu (exclus). Se foloseste numarul de utilizatori distincti PER TOKEN, nu agregat pe tranzactie."""
+    return users_for_token is not None and users_for_token>1
 def classify(c):
     """returneaza (clasa, motiv). clasa in EXACT | DUST | REJECT."""
     ev=c["events"]
     if c["duplicate_event_keys"]: return "REJECT","DUPLICATE_EVENT_KEYS"
+    if multi_user_same_token(c.get("users_for_token")): return "REJECT","MULTI_USER_SAME_TOKEN_IN_TX"
     if c["unknown_events_in_tx"]>0: return "REJECT","UNDECODED_OR_UNKNOWN_EVENT_IN_TX"
     if any(d["meta"] is None for d in ev): return "REJECT","POOL_METADATA_MISSING"
     if any(d["meta"]["quote_mint"]!=WSOL or d["meta"]["orientation"]!="STRICT" for d in ev): return "REJECT","ORIENTATION_OR_QUOTE_NOT_STRICT_WSOL"
@@ -42,17 +46,17 @@ def boot(rows,key,cluster,reps=10000,seed=20260905):
         bs.append(tot/cnt)
     bs.sort(); return dict(CI95=(bs[int(0.025*reps)],bs[int(0.975*reps)-1]),p_le_0=sum(1 for b in bs if b<=0)/reps,clusters=len(G))
 def main():
-    t0=time.time(); rows=[]; cls=collections.Counter(); reasons=collections.Counter(); scan=json.load(open(f"{D}/census_scan_manifest.json"))
-    for l in gzip.open(f"{D}/census_candidates.jsonl.gz","rt"):
+    t0=time.time(); rows=[]; cls=collections.Counter(); reasons=collections.Counter(); scan=json.load(open(f"{D}/census_scan_manifest_v2.json"))
+    for l in gzip.open(f"{D}/census_candidates_v2.jsonl.gz","rt"):
         c=json.loads(l); k,why=classify(c); cls[k]+=1; reasons[why]+=1; e=econ(c) if k in ("EXACT","DUST") else {}
-        rows.append(dict(sig=c["sig"],user=c["user"],token=c["token"],slot=c["slot"],t=c["t"],day=time.strftime("%Y-%m-%d",time.gmtime(c["t"])),cls=k,why=why,n_swaps=len(c["events"]),n_pools=len({d["pool"] for d in c["events"]}),pools=sorted({d["pool"] for d in c["events"]}),canon=sum(1 for d in c["events"] if d["meta"] and d["meta"]["canonical"]),n_swaps_in_tx=c["n_swaps_in_tx"],users_in_tx=c["users_in_tx"],first_pool_buy=next((d["pool"] for d in c["events"] if d["is_buy"]),None),**e))
+        rows.append(dict(sig=c["sig"],user=c["user"],token=c["token"],users_for_token=c.get("users_for_token"),slot=c["slot"],t=c["t"],day=time.strftime("%Y-%m-%d",time.gmtime(c["t"])),cls=k,why=why,n_swaps=len(c["events"]),n_pools=len({d["pool"] for d in c["events"]}),pools=sorted({d["pool"] for d in c["events"]}),canon=sum(1 for d in c["events"] if d["meta"] and d["meta"]["canonical"]),n_swaps_in_tx=c["n_swaps_in_tx"],users_in_tx=c["users_in_tx"],first_pool_buy=next((d["pool"] for d in c["events"] if d["is_buy"]),None),**e))
     # taxare conservatoare: fiecare ciclu de token dintr-o tranzactie plateste costul complet (deja per rand); numarul de cicluri per semnatura raportat
     per_sig=collections.Counter(r["sig"] for r in rows if r["cls"]=="EXACT")
-    with gzip.open(f"{D}/census_rows.jsonl.gz","wt") as f:
+    with gzip.open(f"{D}/census_rows_v2.jsonl.gz","wt") as f:
         for r in rows: f.write(json.dumps(r)+"\n")
     ex=[r for r in rows if r["cls"]=="EXACT"]; du=[r for r in rows if r["cls"]=="DUST"]
     census=dict(CENSUS_SPEC_SHA256=hashlib.sha256(open(f"{OUT}/census_frozen_spec.json","rb").read()).hexdigest(),TOTAL_SWAP_EVENTS_SCANNED=scan["counters"].get("swap_events"),multi_swap_transactions=scan["counters"].get("multi_swap_lines"),CANDIDATE_SIGNATURES=len({r["sig"] for r in rows}),candidate_groups=len(rows),EXACT_BASE_CONSERVED_CYCLES=len(ex),DUST_CYCLES=len(du),rejected=dict(reasons),UNIQUE_USERS_HASHED=len({hid(r["user"]) for r in ex}),UNIQUE_TOKENS=len({r["token"] for r in ex}),UNIQUE_POOL_PAIRS=len({tuple(r["pools"]) for r in ex}),DATES=sorted({r["day"] for r in ex}),by_day=dict(collections.Counter(r["day"] for r in ex)),swaps_per_cycle=dict(collections.Counter(r["n_swaps"] for r in ex)),cycles_per_signature=dict(collections.Counter(per_sig.values())),scan_manifest=scan)
-    json.dump(census,open(f"{OUT}/census_manifest.json","w"),indent=1); print(json.dumps({k:v for k,v in census.items() if k!="scan_manifest"}))
+    json.dump(census,open(f"{OUT}/census_manifest_v2.json","w"),indent=1); print(json.dumps({k:v for k,v in census.items() if k!="scan_manifest"}))
     # ---- economie (Faza 2) doar pe EXACT ----
     R=dict(label="POST_HOC_HISTORICAL_RESEARCH",N=len(ex))
     if ex:
@@ -68,5 +72,5 @@ def main():
         st=R["net_PRIMARY"]; g=dict(cycles50=len(ex)>=50,tokens5=census["UNIQUE_TOKENS"]>=5,dates2=len(census["DATES"])>=2,EV=st["EV"]>0,PF=st["PF"]>=2.0,CI_user=R["bootstrap_user_day"]["CI95"][0]>0,CI_token=R["bootstrap_token_day"]["CI95"][0]>0,exb1pct=st["EX_BEST_1PCT"]>0,stress1=R["net_STRESS_1"]["EV"]>0,user_share=R["top_user_share"]<=0.4,token_share=R["top_token_share"]<=0.4,violations=(reasons.get("RESERVE_INVARIANT_VIOLATION",0)==0 and reasons.get("INTRA_TX_CHAIN_INCONSISTENT",0)==0 and scan["counters"].get("undecodable_events",0)==0))
         R["gate"]=g; R["verdict"]="EXECUTED_ARB_MECHANISM_CONFIRMED" if all(g.values()) else "EXECUTED_ARB_MECHANISM_NOT_CONFIRMED"; R["violations_note"]="incalcarile de invariant/decodare sunt raportate ca RESPINGERI de candidat (nu intra in populatie); poarta cere zero astfel de cazuri printre candidati"
     else: R["verdict"]="NO_EXACT_CYCLES"
-    R["runtime_s"]=round(time.time()-t0,1); json.dump(R,open(f"{OUT}/census_results.json","w"),indent=1,default=str); print(json.dumps({k:v for k,v in R.items() if k in ("N","net_PRIMARY","gate","verdict","top_user_share","top_token_share","unique_users")},default=str)); print("CENSUS_ANALYZE_DONE")
+    R["runtime_s"]=round(time.time()-t0,1); json.dump(R,open(f"{OUT}/census_results_v2.json","w"),indent=1,default=str); print(json.dumps({k:v for k,v in R.items() if k in ("N","net_PRIMARY","gate","verdict","top_user_share","top_token_share","unique_users")},default=str)); print("CENSUS_ANALYZE_DONE")
 if __name__=="__main__": main()

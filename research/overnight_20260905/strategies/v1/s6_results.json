@@ -1,0 +1,159 @@
+{
+ "spec_sha256": "d19a7b7c07c70bf01da5e9f89a28abca2a08466446a5eaf0745328b4c7d68f25",
+ "decisions": 2604,
+ "tokens": 13,
+ "by_notional": {
+  "0.1": {
+   "buy_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.2805608530407892e-08,
+    "median_L5": 0.0,
+    "mean_L5": 1.2805608530407892e-08,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "buy_save_split": {
+    "N": 841,
+    "median_L3": -0.0020808556808483065,
+    "mean_L3": -0.0013914234556455557,
+    "median_L5": -0.002081137586980128,
+    "mean_L5": -0.0013918340735075971,
+    "ex_best_1pct_L3": -0.0015310468175271665,
+    "share_positive_L3": 0.3055885850178359
+   },
+   "sell_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.40653983353151e-08,
+    "median_L5": 0.0,
+    "mean_L5": 0.0,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "sell_save_split": {
+    "N": 841,
+    "median_L3": -0.00205538,
+    "mean_L3": -0.002507129953626635,
+    "median_L5": -0.0020556339999999998,
+    "mean_L5": -0.0025071350808561236,
+    "ex_best_1pct_L3": -0.0025644675318127253,
+    "share_positive_L3": 0.3055885850178359
+   },
+   "round_trip_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.7325802615933413e-08,
+    "median_L5": 0.0,
+    "mean_L5": 3.2604042806183118e-09,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0023781212841854932
+   },
+   "best_is_default_share": 0.9988109393579072
+  },
+  "0.25": {
+   "buy_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.2486133889316633e-08,
+    "median_L5": 0.0,
+    "mean_L5": 1.2486133889316633e-08,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "buy_save_split": {
+    "N": 841,
+    "median_L3": -0.012254687904057877,
+    "mean_L3": -0.009507138328300451,
+    "median_L5": -0.012254687904057877,
+    "mean_L5": -0.009508234883534155,
+    "ex_best_1pct_L3": -0.009794645801096522,
+    "share_positive_L3": 0.3258026159334126
+   },
+   "sell_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.121165279429251e-08,
+    "median_L5": 0.0,
+    "mean_L5": 0.0,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "sell_save_split": {
+    "N": 841,
+    "median_L3": -0.012162929,
+    "mean_L3": -0.011005043155766944,
+    "median_L5": -0.012165338,
+    "mean_L5": -0.011005153230677765,
+    "ex_best_1pct_L3": -0.011192481647058824,
+    "share_positive_L3": 0.3055885850178359
+   },
+   "round_trip_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.4348394768133175e-08,
+    "median_L5": 0.0,
+    "mean_L5": 3.1367419738406657e-09,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0023781212841854932
+   },
+   "best_is_default_share": 0.9988109393579072
+  },
+  "0.5": {
+   "buy_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.2379642342286215e-08,
+    "median_L5": 0.0,
+    "mean_L5": 1.2379642342286215e-08,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "buy_save_split": {
+    "N": 841,
+    "median_L3": -0.04470653572043397,
+    "mean_L3": -0.03285540894352052,
+    "median_L5": -0.0447029771723052,
+    "mean_L5": -0.032857491394114695,
+    "ex_best_1pct_L3": -0.03355473993209338,
+    "share_positive_L3": 0.34720570749108204
+   },
+   "sell_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.021165279429251e-08,
+    "median_L5": 0.0,
+    "mean_L5": 0.0,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0011890606420927466
+   },
+   "sell_save_split": {
+    "N": 841,
+    "median_L3": -0.044494274,
+    "mean_L3": -0.034712140676575506,
+    "median_L5": -0.04449495,
+    "mean_L5": -0.03471268368846611,
+    "ex_best_1pct_L3": -0.0352121787815126,
+    "share_positive_L3": 0.3055885850178359
+   },
+   "round_trip_save_best": {
+    "N": 841,
+    "median_L3": 0.0,
+    "mean_L3": 1.3305588585017835e-08,
+    "median_L5": 0.0,
+    "mean_L5": 3.093935790725327e-09,
+    "ex_best_1pct_L3": 0.0,
+    "share_positive_L3": 0.0023781212841854932
+   },
+   "best_is_default_share": 0.9988109393579072
+  }
+ },
+ "gate": {
+  "decisions50": true,
+  "tokens5": true,
+  "median_saving_gt_extra": false,
+  "positive_after_5": false,
+  "exb1pct": false
+ },
+ "verdict": "EXECUTION_COST_REDUCTION_NOT_CONFIRMED"
+}

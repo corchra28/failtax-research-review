@@ -1,0 +1,75 @@
+{
+ "spec_sha256": "fbea4c33fb996730d415e5551a4f40d26bf903cb2f3a21f519ed320a8a7cb8d0",
+ "creations_in_tape": 58648,
+ "creators": 15671,
+ "launches_with_3plus_prior": 101,
+ "eligible_creators": 65,
+ "q3_score": 0.5545454545454545,
+ "signals": 22,
+ "test": {
+  "N": 16,
+  "mints": 16,
+  "EV": -0.00570685225,
+  "median": -0.0014641575,
+  "PF": 0.4398229747654796,
+  "win_rate": 0.4375,
+  "EX_BEST_1PCT": -0.007524503666666667,
+  "max_mint_share": 0.3007028925138089,
+  "by_day": {
+   "2026-09-03": -0.007487744363636364,
+   "2026-09-04": -0.0017888896000000005
+  },
+  "by_day_N": {
+   "2026-09-03": 11,
+   "2026-09-04": 5
+  },
+  "total": -0.091309636
+ },
+ "bootstrap": null,
+ "stress5": {
+  "N": 16,
+  "mints": 16,
+  "EV": -0.0056750959375,
+  "median": -0.0010916880000000002,
+  "PF": 0.47447283976857474,
+  "win_rate": 0.5,
+  "EX_BEST_1PCT": -0.007490630266666667,
+  "max_mint_share": 0.2629647006437902,
+  "by_day": {
+   "2026-09-03": -0.008061325727272728,
+   "2026-09-04": -0.00042539040000000045
+  },
+  "by_day_N": {
+   "2026-09-03": 11,
+   "2026-09-04": 5
+  },
+  "total": -0.090801535
+ },
+ "cost125": {
+  "N": 16,
+  "mints": 16,
+  "EV": -0.0062891058125,
+  "median": -0.002094308,
+  "PF": 0.4002396712192846,
+  "win_rate": 0.4375,
+  "EX_BEST_1PCT": -0.008095396133333333,
+  "max_mint_share": 0.3098286939604336,
+  "by_day": {
+   "2026-09-03": -0.008084678363636364,
+   "2026-09-04": -0.0023388462
+  },
+  "by_day_N": {
+   "2026-09-03": 11,
+   "2026-09-04": 5
+  },
+  "total": -0.100625693
+ },
+ "top_creator_share": 0.30295172842602075,
+ "status_counts": {
+  "OK": 16,
+  "CHAIN_BREAK_IN_HOLD": 6
+ },
+ "gate": null,
+ "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+ "inference_note": "N sub pragul minim (50 semnale / 20 mint-uri): p-value si CI = n/a (V2, remediere de conformitate)"
+}

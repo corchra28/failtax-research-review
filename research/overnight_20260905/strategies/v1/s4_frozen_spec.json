@@ -1,0 +1,12 @@
+{
+ "strategy": "S4_RECURRING_WALLET_SWARM_V1",
+ "mechanism": "un grup recurent de portofele care au aparut impreuna inaintea unor miscari reusite anterioare contine mai multa informatie decat breadth-ul brut",
+ "who_loses": "vanzatorii care ofera lichiditate inaintea cererii coordonate; noi intram dupa al 3-lea membru",
+ "graph": "DEV only; muchie = doua portofele cumpara acelasi mint la <= 10 s distanta; recurenta pe >= 3 mint-uri DEV; excluse portofele cu > 50 lansari DEV si perechi cu aceeasi semnatura (indisponibil in m_pools => excludem cumparari in acelasi slot ale perechii); clustere = componente conexe cu >= 3 membri",
+ "quality": "EV mediu DEV al intrarii fixe pe mint-urile in care >= 3 membri au cumparat (fara mint-ul testat); eligibil daca > 0; inghetat",
+ "signal": "VAL/PH: al 3-lea membru distinct al unui cluster eligibil cumpara mint-ul; intrare la slotul cumpararii + 3 sloturi (worst-of), 0,10 SOL; iesire +60 s; stres +5; cost x1.25; max o pozitie per slot",
+ "rejects": [
+  "un portofel/cluster/token domina rezultatele"
+ ],
+ "frozen_at": "2026-09-04 23:30:19"
+}

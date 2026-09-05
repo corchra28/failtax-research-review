@@ -1,0 +1,93 @@
+{
+ "spec_sha256": "3f3ecd8c54066f6f827d73e132a794a0bc53e8118ff50b4289441a55803ab252",
+ "tokens_with_leader": 29,
+ "counts": {
+  "TOKEN_NO_DEV_ACTIVITY": 94,
+  "EXCL_ARB_SIG": 144,
+  "EXCL_COMMON_SIG": 247,
+  "VQ_INVALID": 255
+ },
+ "events": 86159,
+ "signals": 3627,
+ "chosen": 570,
+ "q9_flow_rel": 0.005325311208067906,
+ "dev_descriptive": {
+  "N": 1,
+  "mints": 1,
+  "EV": -0.000176617,
+  "median": -0.000176617,
+  "PF": 0.0,
+  "win_rate": 0.0,
+  "EX_BEST_1PCT": 0.0,
+  "max_mint_share": 0.0,
+  "by_day": {
+   "2026-09-02": -0.000176617
+  },
+  "by_day_N": {
+   "2026-09-02": 1
+  },
+  "total": -0.000176617
+ },
+ "test": {
+  "N": 2,
+  "mints": 1,
+  "EV": 0.0011463575,
+  "median": 0.0011463575,
+  "PF": Infinity,
+  "win_rate": 1.0,
+  "EX_BEST_1PCT": 0.001029924,
+  "max_mint_share": 1.0,
+  "by_day": {
+   "2026-09-03": 0.0011463575
+  },
+  "by_day_N": {
+   "2026-09-03": 2
+  },
+  "total": 0.002292715
+ },
+ "bootstrap": null,
+ "stress5": {
+  "N": 3,
+  "mints": 1,
+  "EV": 0.0011851686666666666,
+  "median": 0.001262791,
+  "PF": Infinity,
+  "win_rate": 1.0,
+  "EX_BEST_1PCT": 0.0011463575,
+  "max_mint_share": 1.0,
+  "by_day": {
+   "2026-09-03": 0.0011851686666666666
+  },
+  "by_day_N": {
+   "2026-09-03": 3
+  },
+  "total": 0.003555506
+ },
+ "cost125": {
+  "N": 2,
+  "mints": 1,
+  "EV": 0.001013911,
+  "median": 0.001013911,
+  "PF": Infinity,
+  "win_rate": 1.0,
+  "EX_BEST_1PCT": 0.000897443,
+  "max_mint_share": 1.0,
+  "by_day": {
+   "2026-09-03": 0.001013911
+  },
+  "by_day_N": {
+   "2026-09-03": 2
+  },
+  "total": 0.002027822
+ },
+ "status_counts": {
+  "NO_EXIT_STATE": 44,
+  "ENTRY_STATE_UNPROVABLE": 267,
+  "OK": 3,
+  "EXIT_UNANCHORED": 1
+ },
+ "gate": null,
+ "verdict": "INSUFFICIENT_CLEAN_SAMPLE",
+ "inference_note": "N sub pragul minim (50 semnale / 20 mint-uri): p-value si CI = n/a (V2, remediere de conformitate)",
+ "test_note": "N=2, 1 mint: statistica descriptiva doar; PF=inf pe 2 observatii NU este inferenta"
+}

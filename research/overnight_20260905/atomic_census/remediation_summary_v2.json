@@ -1,0 +1,30 @@
+{
+ "REMEDIATION_COMPLETE": "YES",
+ "MULTI_USER_SPEC_ENFORCED": "YES",
+ "V1_CYCLES": 500,
+ "V2_CYCLES": 500,
+ "V1_TOTAL_NET_SOL": 12.5883885,
+ "V2_TOTAL_NET_SOL": 12.5883885,
+ "DOMINANT_CYCLE_RETAINED": true,
+ "RESERVE_GATE_BUG_FIXED": "YES",
+ "ACTUAL_EVALUATED_POOLS": 83,
+ "ACTUAL_EVALUATED_TOKENS": 13,
+ "CANONICAL_POPULATION_ACTUALLY_EVALUATED": "NO",
+ "S3_INVALID_INFERENCE_FIXED": "YES",
+ "FINAL_VERDICT_CHANGED": false,
+ "recon": {
+  "pools_passing_all_four_prefilters": 127,
+  "pools_listed_in_frozen_populations": {
+   "PRIMARY_MEME": 6,
+   "SECONDARY": 80,
+   "total": 86
+  },
+  "pools_loaded_into_engine": 86,
+  "pools_with_pass2_events": 86,
+  "pools_noncanonical_strict_eligible_in_engine": 83,
+  "canonical_pools_excluded_by_engine": 3,
+  "tokens_listed": 16,
+  "tokens_with_2plus_eligible_pools": 13,
+  "explanation": "127 = pool-uri care au trecut cele patru prefiltre (strict, flux, VQ, schema de taxe) in toate grupurile; 86 = pool-urile efectiv listate in cele doua populatii inghetate (6 PRIMARY_MEME + 80 SECONDARY) \u2014 diferenta 41 = pool-uri eligibile individual dar fara o a doua pereche eligibila cu ferestre curate in grupul lor; 16 = token-uri listate (3 + 13); motorul V2 a evaluat efectiv doar pool-urile noncanonice stricte, excluzand cele 3 canonice, deci PRIMARY_MEME nu a fost evaluat"
+ }
+}

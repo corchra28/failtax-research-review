@@ -1,10 +1,10 @@
 {
- "stage": "ALL_QUEUES_COMPLETE",
- "timestamp": "2026-09-04 23:34:23 EEST",
+ "stage": "COMPLIANCE_REMEDIATION_V2_DONE",
+ "timestamp": "2026-09-05 10:27:48 EEST",
  "commit": "fe55a933f127c5f8c1e193a8b346889ef5b37a15",
- "result": "census + S1-S7 complete; no candidate; global Holm: none pass",
+ "result": "multi-user per-token exclusion enforced (0 cycles removed), reserve gate fixed, S2-S5 inference nulled, 127/86/16 reconciled, canonical evaluation redefined as secondary; verdicts unchanged",
  "blocker": null,
- "next": "commit/push, STOP",
+ "next": "commit + publish V2; STOP",
  "helius_calls": 0,
  "rpc_calls": 0,
  "new_data": false

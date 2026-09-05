@@ -1,0 +1,8 @@
+{
+ "strategy": "S2_POST_ARB_RESIDUAL_SPREAD",
+ "mechanism": "un arbitraj atomic real reduce dar nu elimina complet discrepanta cross-pool (marime limitata, taxe, rezerve); un al doilea participant mai lent ar putea captura reziduul",
+ "who_loses": "LP-urile pool-urilor cu pret ramas divergent; nu depinde de activitatea ulterioara a botului",
+ "population": "cele 500 cicluri exacte din recensamant (independent verificat), pool-urile lor din cache-ul pass2",
+ "rule": "stare = post-starea ambelor pool-uri imediat dupa ciclu; rute ordonate; ruta cu predicted maxim; predicted<=0 => 0 oportunitate; intrare +3 sloturi (worst-of pre/post, stari ancorate), buy exact-B sub 0,10 SOL cu max_quote=Q, sell exact B cu min_out=Q+cost; stres +5; un episod per token pana cand predicted<=0",
+ "frozen_at": "2026-09-04 23:29:01"
+}

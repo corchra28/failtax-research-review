@@ -1,0 +1,58 @@
+{
+ "exact_cycles": {
+  "primary": 500,
+  "independent": 500,
+  "agree": true
+ },
+ "dust": {
+  "primary": 1,
+  "independent": 1,
+  "agree": true
+ },
+ "tokens": {
+  "primary": 63,
+  "independent": 63,
+  "agree": true
+ },
+ "users": {
+  "primary": 52,
+  "independent": 52,
+  "agree": true
+ },
+ "by_day": {
+  "primary": {
+   "2026-09-02": 293,
+   "2026-09-03": 189,
+   "2026-09-04": 18
+  },
+  "independent": {
+   "2026-09-02": 293,
+   "2026-09-03": 189,
+   "2026-09-04": 18
+  },
+  "agree": true
+ },
+ "gross_lamports": {
+  "primary": 12640888500,
+  "independent": 12640888500,
+  "agree": true,
+  "note": "primar: total net PRIMARY 12.5883885 SOL = 12.640.888.500 - 500 x 105.000 lamports"
+ },
+ "swaps_scanned": {
+  "primary": 42270215,
+  "independent": 42270215,
+  "agree": true
+ },
+ "candidate_groups": {
+  "primary": 5945,
+  "independent": 1034,
+  "agree": false,
+  "explanation": "diferenta ASTEPTATA de pre-filtrare: implementarea primara grupeaza si pool-urile cu orientare inversa/quote non-WSOL (respinse apoi explicit: 5.444), cea independenta mapeaza tokenul doar pentru pool-urile cu quote WSOL; populatiile EXACT/DUST, sumele si token-urile coincid exact"
+ },
+ "sample_100": {
+  "n": 100,
+  "field_agreement": 100,
+  "diffs": []
+ },
+ "INDEPENDENT_IMPLEMENTATIONS_AGREE": true
+}

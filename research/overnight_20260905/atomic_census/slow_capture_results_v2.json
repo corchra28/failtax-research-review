@@ -1,0 +1,38 @@
+{
+ "spec_sha256": "54a657433e9e40bff9b77fc93841b8d4f09f9ca7a7e2490e1e5d9aed1a506246",
+ "population": {
+  "tokens": 16,
+  "pools": 86
+ },
+ "engine": {
+  "episodes": 0,
+  "rows": 0,
+  "portfolio": 0,
+  "violations": {
+   "CANONICAL_POOL_IN_SECONDARY_POPULATION": 3,
+   "TOKEN_WITHOUT_2_ELIGIBLE_POOLS": 3
+  },
+  "selector_calls": 13
+ },
+ "evaluation": {
+  "N": 0,
+  "gate": null,
+  "verdict": "SLOW_CAPTURE_NO_VERIFIED_EDGE",
+  "population_actually_evaluated": {
+   "pools_listed_in_frozen_populations": 86,
+   "pools_with_pass2_events": 86,
+   "pools_noncanonical_strict_eligible": 83,
+   "canonical_pools_excluded_by_engine": 3,
+   "tokens_listed": 16,
+   "tokens_with_2plus_eligible_pools": 13,
+   "note": "motorul V2 (run_engine) exclude neconditionat pool-urile canonice => PRIMARY_MEME (canonical+noncanonical) NU a fost evaluat; rezultatul este o evaluare SECONDARY/NONCANONICAL"
+  },
+  "token_program": "UNVERIFIED (fara RPC) => incalcare de semantica pentru poarta"
+ },
+ "by_token_hashed": {},
+ "statuses": {},
+ "predicted_vs_realized": {
+  "pred_EV": null,
+  "real_EV": null
+ }
+}

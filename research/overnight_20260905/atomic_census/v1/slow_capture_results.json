@@ -1,0 +1,29 @@
+{
+ "spec_sha256": "54a657433e9e40bff9b77fc93841b8d4f09f9ca7a7e2490e1e5d9aed1a506246",
+ "population": {
+  "tokens": 16,
+  "pools": 86
+ },
+ "engine": {
+  "episodes": 0,
+  "rows": 0,
+  "portfolio": 0,
+  "violations": {
+   "CANONICAL_POOL_IN_SECONDARY_POPULATION": 3,
+   "TOKEN_WITHOUT_2_ELIGIBLE_POOLS": 3
+  },
+  "selector_calls": 13
+ },
+ "evaluation": {
+  "N": 0,
+  "gate": null,
+  "verdict": "SLOW_CAPTURE_NO_VERIFIED_EDGE",
+  "token_program": "UNVERIFIED (fara RPC) => incalcare de semantica pentru poarta"
+ },
+ "by_token_hashed": {},
+ "statuses": {},
+ "predicted_vs_realized": {
+  "pred_EV": null,
+  "real_EV": null
+ }
+}

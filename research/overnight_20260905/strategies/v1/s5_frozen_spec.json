@@ -1,0 +1,14 @@
+{
+ "strategy": "S5_CREATOR_TRACK_RECORD_PERSISTENCE",
+ "mechanism": "unii creatori produc repetat lansari cu lichiditate reala, altii extrag repetat; doar lansarile anterioare definesc calitatea",
+ "who_loses": "cumparatorii lansarilor creatorilor extractivi (evitati) / vanzatorii timpurii ai lansarilor creatorilor cu istoric bun",
+ "history_source": "toate CreateEvent din banda (creator, create_ts, complete_ts, trade-uri curba, cumparatori, top1, vanzari creator) + outcome-ul intrarii fixe la 60 s pentru lansarile migrate anterioare (m_pools)",
+ "eligibility": ">= 3 lansari anterioare complet observate (create_ts_anterior + 420 s < create_ts curent); fara informatie din lansarea curenta; creatorii distincti raman distincti",
+ "score": "medie egal ponderata a rangurilor DEV: +rata migrare anterioara, -timp median pana la migrare, -top1 anterior median, -cota vanzarilor creatorului anterioara, +EV anterior al intrarii la 60 s (None => rang median)",
+ "signal": "scor >= Q3 DEV; decizie T0+60 s; intrare +3 sloturi worst-of, 0,10 SOL exact-B; iesire +60 s; stres +5; cost x1.25",
+ "rejects": [
+  "< 20 creatori eligibili",
+  "rezultat purtat de un singur creator (> 40 % din profitul brut)"
+ ],
+ "frozen_at": "2026-09-04 23:34:15"
+}

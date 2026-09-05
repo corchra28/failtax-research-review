@@ -1,0 +1,6 @@
+{"hypothesis":"ARBER_PERSISTENCE_V1","label":"POST_HOC_HISTORICAL_RESEARCH","frozen_before_results":true,
+ "rank_rule":"executorii ciclurilor EXACTE sunt clasati EXCLUSIV dupa EV-ul net PRIMARY al ciclurilor din PRIMA lor zi observata (zi UTC); cuartila superioara (>= Q3 al EV-urilor din prima zi, calculata pe toti executorii cu prima zi < ultima zi a benzii)",
+ "test":"executorii din cuartila superioara pastreaza EV net pozitiv pe ciclurile din zilele ULTERIOARE primei zile",
+ "requirements":{"eligible_prior_day_executors_min":10,"subsequent_exact_cycles_min":30,"subsequent_EV_gt":0,"PF_min":1.5,"cluster_CI95_low_gt_0":"bootstrap 10.000, cluster user x zi","ex_best_1pct_gt":0,"positive_on_every_subsequent_day":true},
+ "forbidden":"inversarea unui rezultat esuat; schimbarea regulii de rang dupa vederea rezultatelor",
+ "cost_scenario":"PRIMARY 0.000105 SOL per ciclu"}

@@ -1,0 +1,72 @@
+{
+ "base": {
+  "N": 500,
+  "EV": 0.025176777,
+  "PF": 295.1174539606957
+ },
+ "ex_top1pct": {
+  "N": 495,
+  "EV": 0.00013506693535353536,
+  "PF": 2.562085874178857
+ },
+ "ex_top3": {
+  "N": 497,
+  "EV": 0.0009686002595573441,
+  "PF": 12.247386780015368
+ },
+ "leave_one_day_out": {
+  "2026-09-02": {
+   "N": 207,
+   "EV": -5.15739806763285e-05,
+   "PF": 0.4285255917507549
+  },
+  "2026-09-03": {
+   "N": 311,
+   "EV": 0.0405069634437299,
+   "PF": 488.0885675639508
+  },
+  "2026-09-04": {
+   "N": 482,
+   "EV": 0.026119890421161827,
+   "PF": 307.6436973827116
+  }
+ },
+ "leave_one_token_out_min_EV": 0.003953589775757576,
+ "leave_one_executor_out_min_EV": 0.003921152162324649,
+ "cost_stresses": {
+  "PRIMARY": {
+   "N": 500,
+   "EV": 0.025176777,
+   "PF": 295.1174539606957
+  },
+  "STRESS_1": {
+   "N": 500,
+   "EV": 0.024781777,
+   "PF": 55.20066358901294
+  },
+  "STRESS_2": {
+   "N": 500,
+   "EV": 0.024281777,
+   "PF": 26.7751059087195
+  },
+  "NEW_ACCOUNT_STRESS": {
+   "N": 500,
+   "EV": 0.023176777,
+   "PF": 12.484704029273221
+  }
+ },
+ "multi_token_full_fee_each": "aplicat: fiecare ciclu de token plateste costul complet",
+ "negative_conservation_anomalies": {
+  "ORIENTATION_OR_QUOTE_NOT_STRICT_WSOL": 5444
+ },
+ "user_shuffle_within_day_token": {
+  "observed_top_user_share": 0.8417048885703841,
+  "perm_mean": 0.8582024683601107,
+  "p_perm_ge_obs": 1.0
+ },
+ "pool_shuffle_within_token_groups": {
+  "note": "profitul brut e calculat din sumele executate ale utilizatorului, independent de eticheta pool-ului; permutarea etichetelor de pool in interiorul tokenului nu schimba nicio suma",
+  "gross_invariant": true
+ },
+ "no_result_depends_on_raw_wallets": true
+}

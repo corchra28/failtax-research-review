@@ -1,0 +1,11 @@
+{
+ "N": 500,
+ "spread_measured": 500,
+ "share_reduced_spread": 0.996,
+ "median_residual_spread_after": 0.0066487372372820985,
+ "cycles_with_pass2_coverage": 500,
+ "share_acting_in_first_dislocation_slot": 0.2,
+ "share_following_other_wallet_prev_slot": 0.454,
+ "share_same_slot_competition": 1.0,
+ "note": "descriptiv; nu creeaza nicio regula de copy-trading; fara txIndex ordinea intra-slot este necunoscuta"
+}
