@@ -1,0 +1,50 @@
+{
+ "V3_COMPLETE": "YES",
+ "N_ANCHORED": 2381,
+ "N_PULLBACKS": 1869,
+ "N_RECLAIMS": 1268,
+ "N_TRAIN": 492,
+ "N_CAL": 262,
+ "N_VAL": 385,
+ "N_CONF": 101,
+ "MODEL_SELECTED": "A",
+ "POLICY_SELECTED": {
+  "p_tp_min": 0.25
+ },
+ "TP_FIRST_RATE": 0.3387096774193548,
+ "SL_FIRST_RATE": 0.6290322580645161,
+ "EV_025_SOL": 0.0044499272258064475,
+ "PF_025_SOL": 1.0517645910538693,
+ "CI95": [
+  -0.043066311951612896,
+  0.05256934335483871
+ ],
+ "EV_EX_BEST_1PCT": -0.0014740157540983623,
+ "STRESS_5_SLOT_EV": -0.008240663693548384,
+ "STRESS_COST_125_EV": 0.004153487096774193,
+ "CALIBRATION_GAP_SELECTED_REGION": 0.03522517211858173,
+ "FINAL_VERDICT": "NO_VERIFIED_EDGE",
+ "POLICY_ENABLED": false,
+ "READY_FOR_FRESH_FORWARD": "NO",
+ "READY_FOR_REAL_MONEY": "NO",
+ "LIVE_TRADING_ENABLED": "NO",
+ "gates": {
+  "min_mints_val_conf_100": false,
+  "min_mints_conf_30": false,
+  "ev_combined_positive": true,
+  "ci95_lower_positive": false,
+  "pf_ge_1_30": false,
+  "ev_positive_val_and_conf": false,
+  "ex_best_1pct_positive": false,
+  "no_concentration_gt_20pct": false,
+  "stress_land5_ev_positive": false,
+  "stress_cost125_ev_positive": true,
+  "calibration_region_min_30": true,
+  "calibration_gap_le_8pp": true,
+  "beats_state_headroom_baseline": false,
+  "hour_diversity_ge_50pct": true,
+  "policy_feasible_on_cal": false
+ },
+ "N_VAL_USABLE_SIGNALS": 52,
+ "N_CONF_USABLE_SIGNALS": 10
+}

@@ -1,0 +1,42 @@
+feature,definition,window,block
+pullback_depth,"1 - trough/max_pb pe valoarea executabila a pozitiei de referinta 0,25 SOL",pullback,PULLBACK
+pullback_duration_s,secunde de la startul pullback-ului la trough,pullback,PULLBACK
+pullback_slots,sloturi pb->trough,pullback,PULLBACK
+pullback_trades,trade-uri pb->trough,pullback,PULLBACK
+reclaim_duration_s,secunde trough->decizie,reclaim,RECLAIM
+reclaim_slots,sloturi trough->decizie,reclaim,RECLAIM
+reclaim_trades,trade-uri trough->decizie,reclaim,RECLAIM
+recovery_fraction,(V_dec - trough)/(max_pb - trough),reclaim,RECLAIM
+recovery_speed,"recovery_fraction / max(0,4 s, durata reclaim)",reclaim,RECLAIM
+time_since_anchor_s,secunde de la anchor la decizie,anchor->dec,STATE
+anchor_progress,progresul la anchor,anchor,STATE
+buy_vol_pre,volum quote cumparari pb->trough (SOL),pullback,FLOW
+sell_vol_pre,volum quote vanzari pb->trough,pullback,FLOW
+buy_vol_post,volum quote cumparari trough->dec,reclaim,FLOW
+sell_vol_post,volum quote vanzari trough->dec,reclaim,FLOW
+sell_intensity_change,SOL/s vanzari post - pre,window,ABSORPTION
+sell_intensity_ratio,intensitate post / pre,window,ABSORPTION
+uniq_sellers_window,vanzatori unici pb->dec,window,ABSORPTION
+seller_inventory_decline,tokens vandute / tokens cumparate de vanzatori (istoric intreg),history,ABSORPTION
+uniq_buyers,cumparatori unici (istoric),history,BREADTH
+new_buyers_post,cumparatori noi in reclaim (nevazuti inainte),reclaim,BREADTH
+buyer_retention,cota cumparatorilor de dinaintea pullback-ului care nu au vandut,history,BREADTH
+imbalance_window,(buy - sell)/(buy + sell) pb->dec,window,FLOW
+net_quote_flow_window,buy - sell (SOL) pb->dec,window,FLOW
+top1_share,cota top 1 portofel din volumul de cumparare,history,COORDINATION
+top3_share,top 3,history,COORDINATION
+top10_share,top 10,history,COORDINATION
+hhi,HHI al volumului de cumparare,history,COORDINATION
+wallet_reuse_share,cota cumparatorilor din reclaim vazuti cumparand alte lansari in ultimele 60 min (doar trecut),cross-mint 60 min,COORDINATION
+same_slot_max_wallets,max portofele cumparatoare in acelasi slot in reclaim,reclaim,COORDINATION
+same_slot_share,cota cumpararilor din slotul modal al reclaim-ului,reclaim,COORDINATION
+creator_inventory_share,inventarul net al creatorului / oferta neta cumparata,history,CREATOR
+creator_sold_flag,creatorul a vandut,history,CREATOR
+creator_sell_share,tokens vandute / cumparate de creator,history,CREATOR
+progress,rezerva reala / 85 SOL la decizie,state,STATE
+dist_to_migration_sol,85 - rezerva reala,state,STATE
+rs_sol,rezerva reala,state,STATE
+vs_sol,rezerva virtuala SOL,state,STATE
+headroom_025,"plafon mecanic curve-only pentru 0,25 SOL",state,STATE
+slippage_bp_025,"impact propriu 0,25 SOL",state,STATE
+n_trades_total,trade-uri pana la decizie,history,STATE

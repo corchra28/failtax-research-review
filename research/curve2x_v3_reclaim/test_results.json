@@ -1,0 +1,50 @@
+{
+ "label": "HISTORICAL_DEV_NOT_SEALED",
+ "tests": {
+  "detect_anchor_pullback_reclaim": {
+   "pass_": true,
+   "detail": "{'anchor': 34, 'pb': 39, 'trough': 41, 'dec': 46, 'h_ref': 1899218792818, 'ds_ref': 246913580, 'maxpb': 251329123, 'trough_v': 207506889, 'v_dec': 243269094}"
+  },
+  "reclaim_after_120s_rejected": {
+   "pass_": true,
+   "detail": "None"
+  },
+  "one_decision_per_mint": {
+   "pass_": true,
+   "detail": "46"
+  },
+  "future_mutation_no_feature_change": {
+   "pass_": true,
+   "detail": "41"
+  },
+  "TP_first": {
+   "pass_": true,
+   "detail": "{'state': 'TP_FIRST', 'venue': 'curve', 't_exit': 20, 'pnl': 0.285131163, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 2.141364652, 'trigger_value_ratio': 2.05522346}"
+  },
+  "SL_first": {
+   "pass_": true,
+   "detail": "{'state': 'SL_FIRST', 'venue': 'curve', 't_exit': 9, 'pnl': -0.132386718, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 0.471293128, 'trigger_value_ratio': 0.557593472}"
+  },
+  "timeout": {
+   "pass_": true,
+   "detail": "{'state': 'TIMEOUT_OTHER', 'venue': 'curve', 't_exit': 576, 'pnl': -0.006428722, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 0.975125112}"
+  },
+  "same_slot_SL_wins": {
+   "pass_": true,
+   "detail": "SL_FIRST"
+  },
+  "migration_without_splice_flagged": {
+   "pass_": true,
+   "detail": "CURVE_RESOLVED_BEFORE_MIGRATION"
+  },
+  "label_independent_of_features": {
+   "pass_": true,
+   "detail": "determinist"
+  },
+  "same_fold_per_mint": {
+   "pass_": true,
+   "detail": "split per create_ts"
+  }
+ },
+ "all_pass": true
+}

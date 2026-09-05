@@ -1,0 +1,15 @@
+{
+ "label": "HISTORICAL_DEV_NOT_SEALED",
+ "future_mutation": {
+  "sampled": 65,
+  "identical": 65,
+  "missing": 0,
+  "diff_features": {},
+  "PASS": true
+ },
+ "label_independent_of_features": true,
+ "same_slot_ordering": true,
+ "one_decision_per_mint": true,
+ "no_identifier_features": true,
+ "PASS": true
+}

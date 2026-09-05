@@ -1,0 +1,37 @@
+{
+ "label": "HISTORICAL_DEV_NOT_SEALED",
+ "built": "2026-09-05 14:59:20 EEST",
+ "mints_in_cache": 58648,
+ "N_ANCHORED": 2381,
+ "N_PULLBACKS": 1869,
+ "N_RECLAIMS": 1268,
+ "by_split": {
+  "TRAIN": 492,
+  "CAL": 262,
+  "EMBARGO": 28,
+  "VAL": 385,
+  "CONF": 101
+ },
+ "by_day": {
+  "2026-09-02": 492,
+  "2026-09-03": 675,
+  "2026-09-04": 101
+ },
+ "gap_rows": 136,
+ "status_base": {
+  "SL_FIRST": 900,
+  "TP_FIRST": 293,
+  "TIMEOUT_OTHER": 70,
+  "NO_FILL_MIGRATED": 5
+ },
+ "migrated": 284,
+ "splice_ok": 275,
+ "splice_unavailable": 9,
+ "rows_sha256": "1656a6d80a0a5d99e5ebfe2e9068a185ee5b51cfb0ac6041399d27d4b2d4b75c",
+ "inputs": {
+  "curves_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
+  "stream_sha256": "b57afd91478412b9b7fa26100beab31d79201a0b36f4fb967de988445bf40d3c"
+ },
+ "runtime_s": 87.4,
+ "rpc_calls": 0
+}

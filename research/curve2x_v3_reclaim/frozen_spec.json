@@ -1,0 +1,189 @@
+{
+ "name": "CURVE2X_V3_RECLAIM_AFTER_ABSORBED_PULLBACK",
+ "label": "HISTORICAL_DEV_NOT_SEALED",
+ "frozen_at": "2026-09-05 14:57:38 EEST",
+ "sealed": false,
+ "preregistered_in_the_strict_sense": false,
+ "data": {
+  "source": "cache-uri locale V2 derivate din banda existenta (curve + evenimente pool + flux)",
+  "tape_sha256sums": "63e2655234c77b09ad513efb3c05c5ac9cd2b1a5f5dd17791b83b6eb813488ae",
+  "tape_integrity_recheck": "sha256sum -c: 0 nepotriviri (derived_v3/tape_integrity.log)",
+  "v2_sha256sums": "a4ecccfa4cd43348801380d1b267fbeaec0d53b3ebee334aedf3c190061386b3",
+  "v2_lib_sha256": "4dd10653f817ac3f70206524953a76ff05175aee4e1f70b1717f512d203f1bb3",
+  "v2_curves_cache_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
+  "v2_stream_sha256": "b57afd91478412b9b7fa26100beab31d79201a0b36f4fb967de988445bf40d3c",
+  "day_2026_09_01": "ABSENT LOCAL (0 fisiere)",
+  "rpc_calls": 0,
+  "new_data": false
+ },
+ "code_sha256": {
+  "v3_lib.py": "3b3d7af0d914d186d19e2450c6f80c360ab74e5bf971342d90bb2b82ebaf6a4f",
+  "build_v3.py": "44647b588af4ed025b38177ab9099ab106ae64563a2cd7b99c9a7524c699d897",
+  "tests_v3.py": "c6a2281c798469b4e86a51588725fcf3741f784084fcd13beba2aca56ce7d908",
+  "model_v3.py": "29f1b1e01e60e483856145119b1161338729685bceb1c1ff1aeab646aa8b582d",
+  "watcher_v3.py": "92ea7755541741ee648d242556c96bfbbda543db864bdac6fa2e832e6e3c3f03",
+  "replay_v3.py": "69c768802998343d457b3ae5fbebf04fb6bdd4d6af8561d781e4a3c943d3c947",
+  "freeze_v3.py": "f03bce2668004e63432c293ddf05a4ef2eb2d4143ffea9b5ec47043e87787085"
+ },
+ "definitions": {
+  "reference_position": "0,25 SOL cumparati (exec_buy) la anchor; valoarea executabila V(t) = exec_sell cu overlay static al pozitiei de referinta la fiecare stare ulterioara",
+  "anchor": "primul trade (post-stare) cu rezerva reala >= 40 % x 85 SOL, in fereastra create+1860 s, inainte de CompleteEvent",
+  "pullback": "prima stare cu V <= 0,90 x maximul curent al lui V (de la anchor)",
+  "trough": "minimul lui V dupa startul pullback-ului",
+  "reclaim": "prima stare cu V >= trough + 0,75 x (max_pb - trough), in maximum 120 s de la startul pullback-ului; daca cele 120 s expira, episodul este abandonat, maximul curent se reseteaza la V si urmarirea continua",
+  "decision": "o singura decizie per mint, la primul reclaim valid",
+  "entry": "exec_buy 0,25 SOL la ultima stare cu slot <= decision_slot+3 (stres +5); NO_FILL_MIGRATED daca migrarea precede aterizarea",
+  "multi_state_same_slot": "ordinea benzii (slot, seq, k)"
+ },
+ "label_def": {
+  "kind": "FIRST_PASSAGE",
+  "tp": "valoare neta executabila >= +100 % (2,0 x gross)",
+  "sl": "valoare neta executabila <= -35 % (0,65 x gross)",
+  "timeout_s": 900,
+  "same_slot": "SL castiga",
+  "exit_latency": "+3 sloturi (stres +5), PnL la valoarea de aterizare",
+  "fees": "curba 125 bp (mostenita V2); pool lp+protocol+creator observate per stare",
+  "network_cost_lamports": 210000,
+  "network_cost_status": "PRESUPUNERE, declarat separat",
+  "cost_stress": 1.25,
+  "migration": "continuare in pool canonic cu splice demonstrabil (pool_prepare V2); altfel CROSS_MIGRATION_LABEL_UNAVAILABLE (exclus din evaluare, numarat)",
+  "gap": "randuri cu orizont suprapus peste deconectari excluse"
+ },
+ "features": {
+  "list": [
+   "pullback_depth",
+   "pullback_duration_s",
+   "pullback_slots",
+   "pullback_trades",
+   "reclaim_duration_s",
+   "reclaim_slots",
+   "reclaim_trades",
+   "recovery_fraction",
+   "recovery_speed",
+   "time_since_anchor_s",
+   "anchor_progress",
+   "buy_vol_pre",
+   "sell_vol_pre",
+   "buy_vol_post",
+   "sell_vol_post",
+   "sell_intensity_change",
+   "sell_intensity_ratio",
+   "uniq_sellers_window",
+   "seller_inventory_decline",
+   "uniq_buyers",
+   "new_buyers_post",
+   "buyer_retention",
+   "imbalance_window",
+   "net_quote_flow_window",
+   "top1_share",
+   "top3_share",
+   "top10_share",
+   "hhi",
+   "wallet_reuse_share",
+   "same_slot_max_wallets",
+   "same_slot_share",
+   "creator_inventory_share",
+   "creator_sold_flag",
+   "creator_sell_share",
+   "progress",
+   "dist_to_migration_sol",
+   "rs_sol",
+   "vs_sol",
+   "headroom_025",
+   "slippage_bp_025",
+   "n_trades_total"
+  ],
+  "state_baseline": [
+   "progress",
+   "dist_to_migration_sol",
+   "rs_sol",
+   "vs_sol",
+   "headroom_025",
+   "slippage_bp_025",
+   "anchor_progress",
+   "time_since_anchor_s"
+  ],
+  "forbidden": [
+   "mint",
+   "pool",
+   "user",
+   "signature",
+   "timestamp absolut",
+   "alte identificatoare"
+  ],
+  "cross_mint_context": "wallet_reuse_share: cumparatorii din reclaim vazuti cumparand alte lansari in ultimele 60 min (doar trecut)"
+ },
+ "split": {
+  "requested": "09-01 TRAIN / 09-02 CAL / 09-03 VAL / 09-04 CONF",
+  "deviation": "09-01 NU exista local; pentru a pastra ordinea stricta cronologica si patru roluri: TRAIN = 09-02 (de la inceputul benzii), CAL = 09-03 00:00-12:00 UTC, VAL = 09-03 12:00-24:00 UTC, CONF = 09-04 (pana la oprirea colectorului). Niciun rand nu este mutat intre zile; ziua 09-03 este subdivizata dupa ora UTC (nu aleator). Un singur rand per mint.",
+  "train_end_utc": "2026-09-03 00:00",
+  "cal_end_utc": "2026-09-03 12:00",
+  "val_end_utc": "2026-09-04 00:00",
+  "embargo_s": 1800,
+  "random_split": false
+ },
+ "models": {
+  "A": "multinomial logistic L2 (V2 lib)",
+  "B": "GBM depth-2 multiclass (V2 lib)",
+  "C": "baseline logit doar state/headroom",
+  "calibration": "vector scaling pe CAL",
+  "expected_net": "GBM regresie pe PnL exact (TRAIN), LCB90 din sd rezidual pe chintile CAL",
+  "drivers": "contributii standardizate din logit-ul companion (TP vs SL)"
+ },
+ "model_selection": {
+  "on": "CAL",
+  "order": [
+   "log loss",
+   "gap de calibrare in regiunea p_tp >= min(grila)",
+   "EV realizat in regiune"
+  ],
+  "tolerance_rel": 0.005,
+  "tolerance_gap_abs": 0.01
+ },
+ "policy": {
+  "p_tp_grid": [
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5
+  ],
+  "universal": [
+   "EXPECTED_NET > 0"
+  ],
+  "min_mints_cal": 30,
+  "choice": "max LCB90 (bootstrap mint) al EV per mint pe CAL",
+  "actions": [
+   "REJECT",
+   "WATCH"
+  ],
+  "policy_enabled": false,
+  "paper_candidate_possible": false
+ },
+ "gates": {
+  "min_mints_val_conf": 100,
+  "min_mints_conf": 30,
+  "ev_combined_positive": true,
+  "ci95_lower_positive": true,
+  "pf_min": 1.3,
+  "ev_positive_val_and_conf": true,
+  "ex_best_1pct_positive": true,
+  "max_share_mint_creator_hour": 0.2,
+  "stress_land5_positive": true,
+  "stress_cost125_positive": true,
+  "calibration_region_min_obs": 30,
+  "calibration_gap_max_pp": 8,
+  "beats_state_headroom_baseline": true,
+  "hour_diversity": "max 50 % din semnale in aceeasi ora",
+  "tests": "leakage, future mutation, same-slot ordering, one-decision-per-mint PASS"
+ },
+ "max_verdict": "HISTORICAL_PAPER_CANDIDATE_REQUIRES_FRESH_FORWARD",
+ "forbidden": [
+  "RPC/API/WSS/date noi",
+  "live trading",
+  "modificarea V1/V2",
+  "alte strategii in paralel",
+  "adrese brute"
+ ]
+}

@@ -1,0 +1,6 @@
+derived_v3/
+replay_signals.jsonl
+watcher_signals.jsonl
+STOP*
+__pycache__/
+signals_val_conf.json

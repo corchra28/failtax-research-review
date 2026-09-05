@@ -1,0 +1,21 @@
+{
+ "label": "HISTORICAL_DEV_NOT_SEALED",
+ "watcher_rc": 0,
+ "batch_decisions": 1268,
+ "replay_decisions": 1268,
+ "matching": 1268,
+ "AUTOMATION_REPLAY_AGREEMENT": 1.0,
+ "paper_candidates_emitted": 0,
+ "fields_compared": [
+  "mint",
+  "dec_i",
+  "p_tp",
+  "p_sl",
+  "p_to",
+  "action",
+  "reason"
+ ],
+ "mismatches": [],
+ "model_hash": "5fc8dfc4486afbdb4c14ce00a243c8616516892478c5c875de1edf9cf9ab3e1c",
+ "runtime_s": 229.5
+}
