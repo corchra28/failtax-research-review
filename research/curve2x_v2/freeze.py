@@ -1,4 +1,4 @@
-"""CURVE2X V2 — scrie frozen_spec.json INAINTE de orice etichetare/outcome (FAZA 0.3). Hash-uri: banda (TAPE_SHA256SUMS.txt), V1 (SHA256SUMS_v1.txt), cod, split, grila de progres, modele, grila de politica, teste, porti."""
+"""CURVE2X V2 — scrie frozen_spec_V1_REJECTED.json INAINTE de orice etichetare/outcome (FAZA 0.3). Hash-uri: banda (TAPE_SHA256SUMS.txt), V1 (SHA256SUMS_v1.txt), cod, split, grila de progres, modele, grila de politica, teste, porti."""
 import json,hashlib,os,sys,time
 sys.path.insert(0,"research/curve2x_v2"); import curve2x_lib as L
 OUT="research/curve2x_v2"; sha=L.sha256_file
@@ -29,4 +29,4 @@ spec=dict(name="CURVE2X_V2",label="HISTORICAL_REMEDIATION_NOT_SEALED",frozen_at=
  tests=dict(synthetic=["TP_before_SL","SL_before_TP","SL_and_TP_same_slot_SL_wins","TP_after_prior_SL_is_SL_FIRST","timeout","migration_then_TP_in_pool","missing_pumpswap_state_unavailable","ambiguous_vq_rejects_splice","nonzero_virtual_reserves","impact_worse_larger_notional","one_signal_per_mint","future_mutation_no_feature_change","same_fold_per_mint"],label_check="a doua implementare independenta pe >= 500 cazuri stratificate (zi, progres, migrare, outcome); LABEL_AGREEMENT trebuie = 100 %",automation="AUTOMATION_REPLAY_AGREEMENT trebuie = 100 % (replay pe banda existenta vs evaluatorul batch)"),
  automation=dict(mode="replay only (--mode replay --source <tape> --paper-only --model-hash <hash> --stop-file <path>)",actions=["REJECT","WATCH","PAPER_CANDIDATE"],guards=["fara sendTransaction","fara chei private / env wallet","fara endpoint RPC/WSS","model hash obligatoriu","stale-data","unknown-schema","gap","max un semnal per mint","jurnal append-only","SQLite fara duplicate la restart","stop file","resurse limitate"],live=False),
  forbidden_terms=["BUY","SAFE","GUARANTEED","MINIM_2X"],forbidden=["RPC/API/WSS/Helius/browser/date noi","tranzactii","live trading","modificarea benzii brute","instalare pachete","modificarea V1","alte praguri dupa VAL/CONF"])
-json.dump(spec,open(f"{OUT}/frozen_spec.json","w"),indent=1,ensure_ascii=False); print("frozen_spec sha256",sha(f"{OUT}/frozen_spec.json"))
+json.dump(spec,open(f"{OUT}/frozen_spec_V1_REJECTED.json","w"),indent=1,ensure_ascii=False); print("frozen_spec sha256",sha(f"{OUT}/frozen_spec_V1_REJECTED.json"))

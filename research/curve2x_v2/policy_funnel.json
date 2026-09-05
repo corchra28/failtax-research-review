@@ -1,0 +1,106 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED / DIAGNOSTIC_POST_HOC (fara modificarea politicii)",
+ "policy": {
+  "band": [
+   20,
+   60
+  ],
+  "p_sl_max": 0.4,
+  "p_tp_min": 0.3
+ },
+ "funnel": {
+  "CAL": {
+   "funnel_rows": {
+    "rows": 6342,
+    "in_band": 3401,
+    "headroom_ge_2": 2305,
+    "no_known_gap": 2002,
+    "p_tp_ge_min": 450,
+    "p_sl_le_max": 4,
+    "ev_gt_0": 3,
+    "ev_lcb_gt_0": 3
+   },
+   "funnel_mints": {
+    "rows": 2259,
+    "in_band": 1181,
+    "headroom_ge_2": 1034,
+    "no_known_gap": 906,
+    "p_tp_ge_min": 229,
+    "p_sl_le_max": 3,
+    "ev_gt_0": 3,
+    "ev_lcb_gt_0": 3
+   },
+   "in_band_pred": {
+    "n": 3401,
+    "ev_mean": -0.020615418056135648,
+    "ev_pos_share": 0.37400764481034987,
+    "ev_lcb_pos_share": 0.23228462216995002,
+    "p_tp_q50": 0.27031448465371555,
+    "p_tp_q90": 0.36266756015169616,
+    "p_sl_q10": 0.4975999808946586,
+    "p_sl_q50": 0.6548725685568737,
+    "share_p_tp_ge_030_and_p_sl_le_040": 0.0020582181711261394
+   }
+  },
+  "VAL": {
+   "funnel_rows": {
+    "rows": 9065,
+    "in_band": 4457,
+    "headroom_ge_2": 3331,
+    "no_known_gap": 3222,
+    "p_tp_ge_min": 687,
+    "p_sl_le_max": 11,
+    "ev_gt_0": 9,
+    "ev_lcb_gt_0": 7
+   },
+   "funnel_mints": {
+    "rows": 3828,
+    "in_band": 1744,
+    "headroom_ge_2": 1601,
+    "no_known_gap": 1556,
+    "p_tp_ge_min": 365,
+    "p_sl_le_max": 9,
+    "ev_gt_0": 7,
+    "ev_lcb_gt_0": 6
+   },
+   "in_band_pred": {
+    "n": 4457,
+    "ev_mean": -0.02594241442872152,
+    "ev_pos_share": 0.2961633385685439,
+    "ev_lcb_pos_share": 0.18375588961184652,
+    "p_tp_q50": 0.25055938080545176,
+    "p_tp_q90": 0.3531712941285401,
+    "p_sl_q10": 0.4975999808946586,
+    "p_sl_q50": 0.6838320211039822,
+    "share_p_tp_ge_030_and_p_sl_le_040": 0.003141126318151223
+   }
+  },
+  "CONF": {
+   "funnel_rows": {
+    "rows": 2508,
+    "in_band": 1376,
+    "headroom_ge_2": 913,
+    "no_known_gap": 878,
+    "p_tp_ge_min": 158
+   },
+   "funnel_mints": {
+    "rows": 853,
+    "in_band": 476,
+    "headroom_ge_2": 409,
+    "no_known_gap": 396,
+    "p_tp_ge_min": 83
+   },
+   "in_band_pred": {
+    "n": 1376,
+    "ev_mean": -0.02093633513742552,
+    "ev_pos_share": 0.3800872093023256,
+    "ev_lcb_pos_share": 0.22311046511627908,
+    "p_tp_q50": 0.26654086951516776,
+    "p_tp_q90": 0.3412764171794606,
+    "p_sl_q10": 0.4975999808946586,
+    "p_sl_q50": 0.6635203983282449,
+    "share_p_tp_ge_030_and_p_sl_le_040": 0.0
+   }
+  }
+ }
+}

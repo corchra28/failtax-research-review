@@ -5,7 +5,7 @@ Iesiri (cache local, nepublicat): derived/curve2x_curves.jsonl.gz (un mint per l
 folosite de motorul de decizie in batch si in replay), derived/curve2x_pass_manifest.json. Nu modifica banda bruta."""
 import gzip,json,os,glob,sys,time,zlib,collections,hashlib,base64,struct,datetime
 sys.path.insert(0,"strategy_e"); import pda
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; TAPE="strategy_m/data/tape"; WINDOW=3720
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); TAPE="strategy_m/data/tape"; WINDOW=3720
 PAMM="pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"; PUMP="6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"; WSOL="So11111111111111111111111111111111111111112"; WSOL_B=pda.b58d(WSOL)
 META={}
 for l in gzip.open("research/pool_metadata_normalized.jsonl.gz","rt"): _r=json.loads(l); META[_r["pool"]]=_r["canonical"]

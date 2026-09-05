@@ -1,6 +1,6 @@
 # CURVE2X V2 — model card (HISTORICAL_REMEDIATION_NOT_SEALED)
 
-Generat 2026-09-05 13:20 EEST. Remediere a ranker_2x V1 (pastrat in `research/ranker_2x/v1/`). Toate zilele fusesera inspectate anterior: VAL/CONF NU sunt sealed. Zero RPC, zero date noi, zero tranzactii.
+Generat 2026-09-05 14:09 EEST. Remediere a ranker_2x V1 (pastrat in `research/ranker_2x/v1/`). Toate zilele fusesera inspectate anterior: VAL/CONF NU sunt sealed. Zero RPC, zero date noi, zero tranzactii.
 
 ## Definitie
 - Unitate: (mint, landmark de progres [10, 20, 30, 40, 50, 60, 70, 80] %), o singura decizie per mint (primul landmark eligibil in banda [20, 60] ∩ [20,70]).
@@ -95,7 +95,7 @@ Constatare structurala: in banda de intrare, mediana P(SL_FIRST) este ~0,65 si d
 | stress_land5_ev_positive | PASS |
 | stress_cost125_ev_positive | PASS |
 | calibration_gap_le_5pp | FAIL |
-| beats_state_headroom_baseline | PASS |
+| beats_state_headroom_baseline | N/A (baseline sau politica fara semnale) |
 | positive_after_mint_dedup | FAIL |
 | policy_feasible_on_cal | FAIL |
 
@@ -103,4 +103,4 @@ Constatare structurala: in banda de intrare, mediana P(SL_FIRST) este ~0,65 si d
 
 ## Limitari
 - VAL/CONF nu sunt sealed (post-hoc); un singur regim de 2 zile; 09-01 lipseste local; costul de retea este o presupunere; taxa curbei mostenita din V1; overlay static (fara reactia altor participanti la propria pozitie); latenta +3 sloturi presupusa; VQ implicit din evenimente; probabilitatile pentru 0,50/1,00 SOL vin din modele separate (fara extrapolare).
-- Automatizare: replay-only; AUTOMATION_REPLAY_AGREEMENT = 1.0 (batch 13 vs replay 13).
+- Automatizare: replay-only; AUTOMATION_REPLAY_AGREEMENT = 1.0 (eligibile batch 13 vs replay 13); PAPER_CANDIDATE emise in replay = 0 (politica dezactivata in artefact: policy_enabled=false, final_verdict=NO_VERIFIED_EDGE).

@@ -1,7 +1,7 @@
 """CURVE2X V2 — determinism: refit-ul configuratiei selectate (acelasi cod, aceleasi date) si rescorarea deciziilor batch trebuie sa produca hash-uri identice."""
 import gzip,json,sys,os,hashlib,numpy as np
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))); import curve2x_lib as L, model_stage as MS
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/curve2x_v2"
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); OUT="research/curve2x_v2"
 art=json.load(open(f"{OUT}/model_artifact.json")); rows=[json.loads(l) for l in gzip.open(f"{D}/curve2x_rows.jsonl.gz","rt")]; H=art["H"]; N=art["N_primary"]
 tr=[r for r in rows if r["split"]=="TRAIN" and MS.usable(r,N,H)]; pct=MS.fit_pct([r for r in rows if r["split"]=="TRAIN"]); MS.add_composite(rows,pct)
 X,fill=L.X_of(tr,art["features"]); Y=MS.Y_of(tr,N,H); fits=[]

@@ -2,7 +2,7 @@
 construieste explicit seria valorii nete (curba + pool), apoi determina prima trecere cu o logica diferita (scanare pe sloturi grupate). Compara pe >= 500 cazuri stratificate."""
 import gzip,json,sys,os,collections,random
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))); import curve2x_lib as L
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/curve2x_v2"
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); OUT="research/curve2x_v2"
 def buy_tokens(vs,vt,gross,fee):
     net=gross*10000//(10000+fee); return vt-(vs*vt)//(vs+net),net
 def sell_value(vs,vt,rs,h,fee):

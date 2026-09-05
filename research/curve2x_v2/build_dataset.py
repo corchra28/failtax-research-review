@@ -3,13 +3,17 @@
 Iesire: derived/curve2x_rows.jsonl.gz (local) + research/curve2x_v2/build_manifest.json. Zero RPC."""
 import gzip,json,sys,os,time,collections,datetime,hashlib,multiprocessing as mp
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))); import curve2x_lib as L
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/curve2x_v2"
-SPEC=json.load(open(f"{OUT}/frozen_spec.json")); SPL=SPEC["split"]
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); OUT="research/curve2x_v2"
+SPEC=json.load(open(f"{OUT}/frozen_spec_V1_REJECTED.json")); SPL=SPEC["split"]
 def utc(s): return datetime.datetime.strptime(s,"%Y-%m-%d %H:%M").replace(tzinfo=datetime.timezone.utc).timestamp()
 B_TRAIN=utc(SPL["train_end_utc"]); B_CAL=utc(SPL["cal_end_utc"]); B_VAL=utc(SPL["val_end_utc"]); EMB=SPL["embargo_s"]
-MAN=json.load(open(f"{D}/curve2x_pass_manifest.json")); OUT_W=[tuple(w) for w in MAN["outage_windows"]]
-def in_outage(a,b): return any(not (e<=a or s>=b) for s,e in OUT_W)
+MAN=None; OUT_W=[]
+def load_manifest():
+    global MAN,OUT_W
+    if MAN is None: MAN=json.load(open(f"{D}/curve2x_pass_manifest.json")); OUT_W=[tuple(w) for w in MAN["outage_windows"]]
+def in_outage(a,b): load_manifest(); return any(not (e<=a or s>=b) for s,e in OUT_W)
 def truncated(a,b):
+    load_manifest()
     for fn,last in MAN["file_last_t"].items():
         if last is None: continue
         h=datetime.datetime.strptime(fn[7:17],"%Y%m%d%H").timestamp(); end=h+3600
@@ -30,7 +34,7 @@ def label_mint(args):
         Hmax=max(L.HORIZONS.values()); r["gap"]=bool(in_outage(r["ts"],r["ts"]+Hmax) or truncated(r["ts"],r["ts"]+Hmax)); r["lab"]=lab; out.append(r)
     return out
 def main():
-    t0=time.time(); E=L.Engine(); n=0
+    load_manifest(); t0=time.time(); E=L.Engine(); n=0
     for line in gzip.open(f"{D}/curve2x_stream.jsonl.gz","rt"):
         E.on_event(json.loads(line)); n+=1
     rows_by=collections.defaultdict(list)

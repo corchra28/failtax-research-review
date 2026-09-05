@@ -1,0 +1,8 @@
+state.sqlite
+replay_state.sqlite
+signals.jsonl
+replay_signals.jsonl
+STOP*
+__pycache__/
+derived/
+.compliance_hashes.json

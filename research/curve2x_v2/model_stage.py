@@ -5,8 +5,8 @@ INGHETARE; evaluare VAL si CONF o singura data la nivel de mint. Zero RPC."""
 import gzip,json,sys,os,time,collections,math,datetime,hashlib,multiprocessing as mp
 import numpy as np
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))); import curve2x_lib as L
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/curve2x_v2"; CLASSES=["TP_FIRST","SL_FIRST","TIMEOUT_OTHER"]
-SPEC=json.load(open(f"{OUT}/frozen_spec.json")); TOL=SPEC["model_selection"]["tolerance_rel"]
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); OUT="research/curve2x_v2"; CLASSES=["TP_FIRST","SL_FIRST","TIMEOUT_OTHER"]
+SPEC=json.load(open(f"{OUT}/frozen_spec_V1_REJECTED.json")); TOL=SPEC["model_selection"]["tolerance_rel"]
 def key(N,var="base"): return f"{N}|{var}"
 def usable(r,N,H,var="base"):
     x=r["lab"][key(N,var)]; return x.get("status")=="OK" and x[H]["state"] is not None and not r["gap"]
@@ -159,10 +159,10 @@ def main():
     g["ex_best_1pct_positive"]=(a_.get("EX_BEST_1PCT") or -1)>0; g["no_concentration_gt_20pct"]=all((a_.get(k) or 1)<=0.20 for k in ("max_mint_share","max_creator_share","max_hour_share"))
     g["stress_land5_ev_positive"]=(P25["VAL+CONF"][str(N)]["stress_land5"].get("EV") or -1)>0; g["stress_cost125_ev_positive"]=(P25["VAL+CONF"][str(N)]["stress_cost125"].get("EV") or -1)>0
     trc=P25["VAL+CONF"][str(N)].get("traded_region_calibration") or {}; g["calibration_gap_le_5pp"]=(trc.get("gap_tp") is not None and trc["gap_tp"]<=0.05)
-    bl=P25["VAL+CONF"][str(N)].get("baseline_M0_same_policy") or {}; g["beats_state_headroom_baseline"]=((a_.get("EV") or -1)>(bl.get("EV") or -1)) if bl.get("usable") else ((a_.get("EV") or -1)>0)
+    bl=P25["VAL+CONF"][str(N)].get("baseline_M0_same_policy") or {}; g["beats_state_headroom_baseline"]=((a_.get("EV") or -1)>(bl.get("EV") or -1)) if (bl.get("usable") and a_.get("usable")) else "N/A (baseline sau politica fara semnale)"
     g["positive_after_mint_dedup"]=g["ev_positive_val"] and g["ev_positive_conf"]   # evaluarea este deja la nivel de mint (o decizie per mint)
     g["policy_feasible_on_cal"]=len(ok)>0
-    R["gates"]=g; R["FINAL_VERDICT"]="PAPER_CANDIDATE" if all(g.values()) else "NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
+    R["gates"]=g; R["FINAL_VERDICT"]="PAPER_CANDIDATE" if all(v is True for v in g.values()) else "NO_VERIFIED_EDGE"; R["runtime_s"]=round(time.time()-t0,1)
     json.dump(R,open(f"{OUT}/results.json","w"),indent=1,default=float); print(json.dumps(dict(selected=R["selection"]["selected"],policy=pol,gates=g,verdict=R["FINAL_VERDICT"],val=v,conf=c_),default=float)[:3000]); print("MODEL_DONE",flush=True)
 def regstats_of(reg,Xc,yc):
     p=L.pred_gbm_reg(reg,Xc); edges=np.quantile(p,np.linspace(0,1,11)[1:-1]).tolist(); dec=np.clip(np.searchsorted(edges,p,side="right"),0,9); sd=[]; n=[]

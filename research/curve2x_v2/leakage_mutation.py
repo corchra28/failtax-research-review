@@ -3,7 +3,7 @@ in contextul trailing de regim/portofele/viteza al altui rand esantionat), toate
 emita trasaturi identice (58/58) pentru randul respectiv. 15 treceri x ~21 randuri. Zero RPC."""
 import gzip,json,sys,os,random,collections
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))); import curve2x_lib as L
-D="/tmp/claude-1000/-home-rares/9402e14b-8644-49bd-ba9f-068396501bcc/scratchpad/derived"; OUT="research/curve2x_v2"; SPACING=7300; PASSES=15
+D=os.environ.get("CURVE2X_DERIVED_DIR",os.path.join(os.path.dirname(os.path.abspath(__file__)),"derived")); OUT="research/curve2x_v2"; SPACING=7300; PASSES=15
 rows=[json.loads(l) for l in gzip.open(f"{D}/curve2x_rows.jsonl.gz","rt")]; rng=random.Random(7); order=sorted(rows,key=lambda r:r["ts"])
 def pick(seed):
     rr=random.Random(seed); cand=order[:]; rr.shuffle(cand); chosen=[]; taken=[]

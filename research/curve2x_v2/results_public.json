@@ -3574,10 +3574,11 @@
   "stress_land5_ev_positive": true,
   "stress_cost125_ev_positive": true,
   "calibration_gap_le_5pp": false,
-  "beats_state_headroom_baseline": true,
+  "beats_state_headroom_baseline": "N/A (baseline sau politica fara semnale)",
   "positive_after_mint_dedup": false,
   "policy_feasible_on_cal": false
  },
  "FINAL_VERDICT": "NO_VERIFIED_EDGE",
- "runtime_s": 79.1
+ "runtime_s": 79.1,
+ "compliance_note": "COMPLIANCE_ONLY: poarta baseline marcata N/A (baseline M0 si politica au 0 semnale utilizabile pe VAL+CONF); nicio cifra recalculata"
 }

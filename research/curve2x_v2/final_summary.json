@@ -49,7 +49,7 @@
   "stress_land5_ev_positive": true,
   "stress_cost125_ev_positive": true,
   "calibration_gap_le_5pp": false,
-  "beats_state_headroom_baseline": true,
+  "beats_state_headroom_baseline": "N/A (baseline sau politica fara semnale)",
   "positive_after_mint_dedup": false,
   "policy_feasible_on_cal": false
  }

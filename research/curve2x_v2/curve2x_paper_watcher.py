@@ -42,10 +42,12 @@ def main():
     art_path=os.path.join(HERE,cfg.get("model_artifact","model_artifact.json")); s=open(art_path,"rb").read(); mh=hashlib.sha256(s).hexdigest()
     if mh!=a.model_hash: die(f"MODEL_HASH_MISMATCH: artefact {mh[:16]}.. != cerut {a.model_hash[:16]}..")
     art=json.loads(s); S=Scorer(art); pol=S.pol; N=S.N; watch_thr=cfg.get("watch_p_tp_min",0.20)
+    POLICY_ARMED=bool(art.get("policy_enabled") is True and art.get("final_verdict")=="PAPER_CANDIDATE" and (art.get("grid_feasible") or 0)>0)
+    print(f"POLICY | enabled={art.get('policy_enabled')} final_verdict={art.get('final_verdict')} grid_feasible={art.get('grid_feasible')} => PAPER_CANDIDATE_ARMED={POLICY_ARMED}",flush=True)
     files=sorted(glob.glob(os.path.join(a.source,"events_*.jsonl.gz"))) if os.path.isdir(a.source) else sorted(glob.glob(a.source))
     if not files: die("NO_SOURCE_FILES")
     state=a.state or os.path.join(HERE,"state.sqlite"); db=sqlite3.connect(state); db.executescript(open(os.path.join(HERE,"schema.sql")).read())
-    decided={r[0] for r in db.execute("select mint from signals where action='PAPER_CANDIDATE'")}; ck=db.execute("select file,seq from checkpoint where id=1").fetchone()
+    decided={r[0] for r in db.execute("select mint from signals where action='PAPER_CANDIDATE' or reason='ELIGIBLE_POLICY_DISABLED'")}; ck=db.execute("select file,seq from checkpoint where id=1").fetchone()
     log=open(a.signal_log or os.path.join(HERE,"signals.jsonl"),"a")
     print(f"START | mode={a.mode} paper_only=True model_hash={mh[:16]}.. policy={json.dumps(pol)} files={len(files)} resume={ck} decided_before={len(decided)} stop_file={a.stop_file}",flush=True)
     OUT_W=[]; clog=os.path.join(os.path.dirname(files[0]),"collector.log")
@@ -91,7 +93,8 @@ def main():
                 row=E.rows.pop(0); row["gap_known"]=L.known_gap(row["ts"],windows); counts["rows"]+=1
                 if row["mint"] in decided: counts["ALREADY_DECIDED"]+=1; continue
                 sc=S.score(row); sr=dict(landmark=row["landmark"],f=row["f"],gap_known=row["gap_known"],**sc); ok,why=L.eligible(sr,pol,N)
-                if ok: decided.add(row["mint"]); emit(row,sc,"PAPER_CANDIDATE",why); counts["PAPER_CANDIDATE"]+=1
+                if ok and POLICY_ARMED: decided.add(row["mint"]); emit(row,sc,"PAPER_CANDIDATE",why); counts["PAPER_CANDIDATE"]+=1
+                elif ok: decided.add(row["mint"]); emit(row,sc,"WATCH","ELIGIBLE_POLICY_DISABLED"); counts["WATCH"]+=1; counts["ELIGIBLE_POLICY_DISABLED"]+=1
                 elif sc["p_tp"]>=watch_thr and L.ENTRY_MIN<=row["landmark"]<=L.ENTRY_MAX: emit(row,sc,"WATCH",why); counts["WATCH"]+=1
                 else: counts["REJECT"]+=1; counts["REJECT_"+why]+=1
             seq+=1
@@ -103,5 +106,5 @@ def main():
             if a.max_events and n_ev>=a.max_events: break
         db.execute("insert or replace into checkpoint(id,file,seq) values(1,?,?)",(fn,seq)); db.commit()
         if a.max_events and n_ev>=a.max_events: break
-    db.commit(); print(f"DONE | events={n_ev} rows={counts['rows']} PAPER_CANDIDATE={counts['PAPER_CANDIDATE']} WATCH={counts['WATCH']} REJECT={counts['REJECT']} reasons={ {k:v for k,v in counts.items() if k.startswith('REJECT_')} } unknown={dict(unknown)} elapsed={time.time()-t0:.0f}s | LIVE_TRADING_ENABLED=NO",flush=True)
+    db.commit(); print(f"DONE | events={n_ev} rows={counts['rows']} PAPER_CANDIDATE={counts['PAPER_CANDIDATE']} ELIGIBLE_POLICY_DISABLED={counts['ELIGIBLE_POLICY_DISABLED']} WATCH={counts['WATCH']} REJECT={counts['REJECT']} reasons={ {k:v for k,v in counts.items() if k.startswith('REJECT_')} } unknown={dict(unknown)} elapsed={time.time()-t0:.0f}s | LIVE_TRADING_ENABLED=NO",flush=True)
 if __name__=="__main__": main()
