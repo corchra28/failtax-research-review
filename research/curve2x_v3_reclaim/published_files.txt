@@ -31,3 +31,8 @@ reproducibility_manifest.json
 SHA256SUMS.txt
 .gitignore
 amendments_v3.md
+reevaluate_v3.py
+results_remediated.json
+remediation_report.md
+results_original.json
+dataset_manifest_original.json

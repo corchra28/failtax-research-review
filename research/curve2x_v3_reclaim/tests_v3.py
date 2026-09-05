@@ -40,6 +40,15 @@ Tmig=mk(base+pb+rc+buys(80,60,130,1*LAMP,"p")); ci=next(i for i,t in enumerate(T
 o=V.simulate_v3(rec(Tmig,(c[0],c[1],c[2])),dm["dec"],Tmig[dm["dec"]][0]); check("migration_without_splice_flagged",o["splice_ok"] is False and o["15M"]["label_kind"] in ("CROSS_MIGRATION_LABEL_UNAVAILABLE","CURVE_RESOLVED_BEFORE_MIGRATION"),o["15M"]["label_kind"])
 # eticheta nu depinde de trasaturi (mutarea trasaturilor nu schimba simularea) — trivial prin constructie; verificam ca simularea nu citeste f
 o2=V.simulate_v3(rec(Ttp),dtp["dec"],Ttp[dtp["dec"]][0]); check("label_independent_of_features",o2["15M"]==V.simulate_v3(rec(Ttp),dtp["dec"],Ttp[dtp["dec"]][0])["15M"],"determinist")
+# CompleteEvent la horizon+100 s fara pool => CURVE_ONLY: TIMEOUT_OTHER, unavailable=false, migrated_in_window=false
+Tl=mk(base+pb+rc+[(60+i*30,130+i*75,(0.05*LAMP if i%2 else -0.05*LAMP),f"m{i}") for i in range(20)]); dl=V.detect(Tl,Tl[0][0]-1); dts=Tl[dl["dec"]][0]; last=Tl[-1]
+cts=dts+V.H_PRIMARY+100; o=V.simulate_v3(rec(Tl,(cts,last[1]+5000,last[2]+5000)),dl["dec"],dts)
+check("complete_after_horizon_is_curve_only",o["status"]=="OK" and o["15M"]["state"]=="TIMEOUT_OTHER" and not o["15M"].get("unavailable") and o["migrated_in_window"] is False and o["15M"]["label_kind"]=="CURVE_ONLY",{k:o["15M"].get(k) for k in ("state","unavailable","label_kind")}|{"mig":o["migrated_in_window"]})
+# limite de ordine in slotul de aterizare: conservative <= midpoint <= optimistic; slotul de aterizare cu 3 trade-uri
+Tb=mk(base+pb+rc+[(56,Tl[dl["dec"]][1]-1000+3,2*LAMP,"q1"),(56,Tl[dl["dec"]][1]-1000+3,-1*LAMP,"q2"),(56,Tl[dl["dec"]][1]-1000+3,3*LAMP,"q3")]+buys(60,60,130,2*LAMP,"p")); db=V.detect(Tb,Tb[0][0]-1); ob=V.simulate_v3_bounds(rec(Tb),db["dec"],Tb[db["dec"]][0])
+check("landing_bounds_ordered",ob["status"]=="OK" and ob["n_entry_positions"]==4 and ob["conservative"]["pnl"]<=ob["midpoint"]["pnl"]<=ob["optimistic"]["pnl"],{k:ob.get(k) for k in ("n_entry_positions","conservative","midpoint","optimistic")})
+# ruptura de lant in slotul de aterizare => exclus
+Tc=[list(t) for t in Tb]; j=db["dec"]+2; Tc[j][10]+=5*LAMP; Tc[j][8]+=5*LAMP; oc=V.simulate_v3_bounds(rec([tuple(t) for t in Tc]),db["dec"],Tb[db["dec"]][0]); check("chain_break_excluded",oc["status"]=="CHAIN_BREAK",oc["status"])
 try:
     import build_v3 as B; check("same_fold_per_mint",len({B.split_of(t) for t in [Ttp[0][0]]*3})==1,"split per create_ts")
 except Exception as ex: check("same_fold_per_mint",False,ex)

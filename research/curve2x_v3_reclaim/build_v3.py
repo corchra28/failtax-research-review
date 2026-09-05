@@ -67,7 +67,7 @@ def main():
             m=line[9:60].split('"')[0]
             if m not in dec: continue
             r=json.loads(line); x=dec[m]; T=r["trades"]; d=x["d"]; f_=V.features(T,r["create_ts"],r["creator"],d,reuse.get(m,0.0)); pool=L.pool_prepare(r.get("pool")) if r.get("pool") else None
-            lab={vn:V.simulate_v3(r,d["dec"],x["ts"],pool=pool,**kw) for vn,kw in VAR.items()}
+            lab={vn:V.simulate_v3(r,d["dec"],x["ts"],pool=pool,**kw) for vn,kw in VAR.items()}; lab["bounds"]=V.simulate_v3_bounds(r,d["dec"],x["ts"],pool=pool); lab["bounds_land5"]=V.simulate_v3_bounds(r,d["dec"],x["ts"],pool=pool,land=V.LAND_STRESS); lab["bounds_cost125"]=V.simulate_v3_bounds(r,d["dec"],x["ts"],pool=pool,cost_mult=V.COST_STRESS)
             rows.append(dict(mint=m,creator=r["creator"],create_ts=r["create_ts"],ts=x["ts"],slot=x["slot"],seq=x["seq"],k=x["k"],dec_i=d["dec"],anchor_i=d["anchor"],pb_i=d["pb"],trough_i=d["trough"],f=f_,lab=lab,gap=bool(in_outage(x["ts"],x["ts"]+V.H_PRIMARY)),split=split_of(r["create_ts"]),day=datetime.datetime.utcfromtimestamp(r["create_ts"]).strftime("%Y-%m-%d"),hour=int(x["ts"]//3600)))
     rows.sort(key=lambda r:(r["create_ts"],r["mint"])); h=hashlib.sha256()
     os.makedirs(D3,exist_ok=True)
@@ -75,7 +75,7 @@ def main():
         for r in rows: s=json.dumps(r,separators=(",",":"),default=str)+"\n"; f.write(s); h.update(s.encode())
     st=lambda r:(r["lab"]["base"].get("status") if r["lab"]["base"].get("status")!="OK" else (r["lab"]["base"]["15M"]["state"] or "UNAVAILABLE"))
     man3=dict(label="HISTORICAL_DEV_NOT_SEALED",built=time.strftime("%Y-%m-%d %H:%M:%S %Z"),mints_in_cache=n_mints,N_ANCHORED=n_anch,N_PULLBACKS=n_pb,N_RECLAIMS=len(rows),by_split=dict(collections.Counter(r["split"] for r in rows)),by_day=dict(collections.Counter(r["day"] for r in rows)),
-        gap_rows=sum(r["gap"] for r in rows),status_base=dict(collections.Counter(st(r) for r in rows)),migrated=sum(1 for r in rows if r["lab"]["base"].get("migrated_in_window")),splice_ok=sum(1 for r in rows if r["lab"]["base"].get("splice_ok")),splice_unavailable=sum(1 for r in rows if r["lab"]["base"].get("splice_ok") is False),
+        gap_rows=sum(r["gap"] for r in rows),status_base=dict(collections.Counter(st(r) for r in rows)),migrated=sum(1 for r in rows if r["lab"]["base"].get("migrated_in_window")),splice_ok=sum(1 for r in rows if r["lab"]["base"].get("splice_ok")),splice_unavailable=sum(1 for r in rows if r["lab"]["base"].get("splice_ok") is False),bounds_status=dict(collections.Counter(r["lab"]["bounds"].get("status") for r in rows)),bounds_entry_positions_hist=dict(collections.Counter(r["lab"]["bounds"].get("n_entry_positions") for r in rows if r["lab"]["bounds"].get("status")=="OK")),
         rows_sha256=h.hexdigest(),inputs=dict(curves_sha256=man["curves_sha256"],stream_sha256=man["stream_sha256"]),runtime_s=round(time.time()-t0,1),rpc_calls=0)
     json.dump(man3,open(os.path.join(HERE,"dataset_manifest.json"),"w"),indent=1)
     with open(os.path.join(HERE,"feature_dictionary.csv"),"w",newline="") as fh:

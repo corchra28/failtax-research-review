@@ -1,6 +1,6 @@
 {
  "label": "HISTORICAL_DEV_NOT_SEALED",
- "built": "2026-09-05 15:43:08 EEST",
+ "built": "2026-09-05 14:59:20 EEST",
  "mints_in_cache": 58648,
  "N_ANCHORED": 2381,
  "N_PULLBACKS": 1869,
@@ -24,44 +24,14 @@
   "TIMEOUT_OTHER": 70,
   "NO_FILL_MIGRATED": 5
  },
- "migrated": 243,
- "splice_ok": 237,
- "splice_unavailable": 6,
- "bounds_status": {
-  "OK": 1260,
-  "NO_FILL_MIGRATED": 5,
-  "CHAIN_BREAK": 3
- },
- "bounds_entry_positions_hist": {
-  "1": 428,
-  "3": 159,
-  "6": 54,
-  "2": 256,
-  "5": 76,
-  "4": 107,
-  "7": 44,
-  "13": 8,
-  "8": 32,
-  "11": 20,
-  "9": 23,
-  "16": 4,
-  "22": 2,
-  "15": 10,
-  "18": 3,
-  "10": 11,
-  "19": 1,
-  "17": 2,
-  "14": 7,
-  "12": 10,
-  "30": 1,
-  "31": 1,
-  "20": 1
- },
- "rows_sha256": "cee13b2a1c610c40ad314826d58846f4329b9b404e4f8eaa31c58a1b287dc39a",
+ "migrated": 284,
+ "splice_ok": 275,
+ "splice_unavailable": 9,
+ "rows_sha256": "1656a6d80a0a5d99e5ebfe2e9068a185ee5b51cfb0ac6041399d27d4b2d4b75c",
  "inputs": {
   "curves_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
   "stream_sha256": "b57afd91478412b9b7fa26100beab31d79201a0b36f4fb967de988445bf40d3c"
  },
- "runtime_s": 105.8,
+ "runtime_s": 87.4,
  "rpc_calls": 0
 }

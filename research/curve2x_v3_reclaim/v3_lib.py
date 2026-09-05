@@ -64,7 +64,8 @@ def features(trades,create_ts,creator,d,wallet_reuse_share):
 def simulate_v3(rec,i_trig,dec_ts,N=N_REF,land=LAND,cost_mult=1.0,pool=None):
     """first-passage propriu: TP la valoare neta >= TP_MULT x gross, SL la <= SL_MULT x gross; SL castiga in acelasi slot; orizont 15 min; +land sloturi la intrare si iesire."""
     T=rec["trades"]; trig=T[i_trig]; land_slot=trig[1]+land; gross=int(N*LAMP); fee=int(round(L.FEE_CURVE*cost_mult)); net_cost=int(L.NET_COST*cost_mult)
-    comp_key=(rec["complete_slot"],rec["complete_seq"],10**9) if rec.get("complete_ts") is not None else None; j=i_trig
+    comp_key=(rec["complete_slot"],rec["complete_seq"],10**9) if (rec.get("complete_ts") is not None and rec["complete_ts"]<=dec_ts+H_PRIMARY) else None   # migrare relevanta doar in orizont; altfel eticheta este CURVE_ONLY
+    j=i_trig
     for q in range(i_trig+1,len(T)):
         if T[q][1]<=land_slot: j=q
         else: break
@@ -103,3 +104,69 @@ def simulate_v3(rec,i_trig,dec_ts,N=N_REF,land=LAND,cost_mult=1.0,pool=None):
         res["state"]=kind; res["pnl"]=(ex[4]-net_cost-gross)/LAMP; res["venue"]=ex[5]; res["t_exit"]=p[0]-dec_ts; res["exit_value_ratio"]=ex[4]/gross; res["trigger_value_ratio"]=p[4]/gross
     return dict(status="OK",entry_i=j,tokens=h,migrated_in_window=migrated,splice_ok=splice_ok,**{"15M":res})
 def mint_id(m): return hashlib.sha256(("external-review-v1:"+m).encode()).hexdigest()[:16]
+
+def chain_ok(T,i0,i1):
+    """integritatea lantului de rezerve intre starile T[i0..i1] (post-stare[i] -> post-stare[i+1] consistenta cu trade-ul i+1: buy => vs creste cu sol net, sell => vs scade cu sol)."""
+    for q in range(i0+1,i1+1):
+        a,b=T[q-1],T[q]
+        if b[7]==1:
+            if b[10]-a[10]!=b[5] and abs((b[10]-a[10])-b[5])>b[5]*0.0130+2: return False   # sol brut vs net (taxa <= 1,3 %)
+        else:
+            if abs((a[10]-b[10])-b[5])>b[5]*0.0130+2: return False
+        if b[8]-a[8]!=b[10]-a[10]: return False   # rezerva reala si virtuala se misca identic
+    return True
+def entry_positions(T,i_trig,land,comp_key):
+    """pozitiile plauzibile ale tranzactiei noastre in slotul de aterizare (fara transactionIndex): inainte de primul trade din slot si dupa fiecare trade din slot.
+    Returneaza lista de indici de stare j (starea de dinaintea tranzactiei noastre) sau None daca lantul de rezerve nu permite limite corecte."""
+    land_slot=T[i_trig][1]+land; pre=i_trig; inslot=[]
+    for q in range(i_trig+1,len(T)):
+        if comp_key is not None and (T[q][1],T[q][2],T[q][3])>=comp_key: break
+        if T[q][1]<land_slot: pre=q
+        elif T[q][1]==land_slot: inslot.append(q)
+        else: break
+    pos=[pre]+inslot
+    if inslot and not chain_ok(T,pre,inslot[-1]): return None
+    return pos
+def simulate_v3_bounds(rec,i_trig,dec_ts,N=N_REF,land=LAND,cost_mult=1.0,pool=None):
+    """rezultatul pentru toate pozitiile plauzibile ale tranzactiei in slotul de intrare si in slotul de iesire. Returneaza optimistic / midpoint / conservative (primar = conservative),
+    fiecare cu (state, pnl). Exclude (status=CHAIN_BREAK) cand lantul de rezerve nu permite limite."""
+    T=rec["trades"]; gross=int(N*LAMP); fee=int(round(L.FEE_CURVE*cost_mult)); net_cost=int(L.NET_COST*cost_mult)
+    comp_key=(rec["complete_slot"],rec["complete_seq"],10**9) if (rec.get("complete_ts") is not None and rec["complete_ts"]<=dec_ts+H_PRIMARY) else None
+    land_slot=T[i_trig][1]+land
+    if comp_key is not None and rec["complete_slot"]<=land_slot: return dict(status="NO_FILL_MIGRATED")
+    pos=entry_positions(T,i_trig,land,comp_key)
+    if pos is None: return dict(status="CHAIN_BREAK")
+    hmax=dec_ts+H_PRIMARY; outcomes=[]
+    for j in pos:
+        st=T[j]; h,ds=L.curve_buy(st[10],st[11],gross,fee)
+        if h<=0: continue
+        # traiectoria: starile de dupa pozitia noastra (in slotul de aterizare, starile ulterioare pozitiei; apoi tot restul), plus pool
+        path=[(st[0],st[1],st[2],st[3],L.curve_liq(st[10],st[11],st[8],h,ds,fee),"curve")]
+        for t in T[j+1:]:
+            if comp_key is not None and L.order_key(t)>=comp_key: break
+            if t[0]>hmax: break
+            path.append((t[0],t[1],t[2],t[3],L.curve_liq(t[10],t[11],t[8],h,ds,fee),"curve"))
+        migrated=comp_key is not None; splice_ok=None
+        if migrated:
+            if pool is not None:
+                splice_ok=True
+                for s_ in pool["states"]:
+                    if s_[0]>hmax: break
+                    path.append((s_[0],s_[1],s_[2],s_[3],L.pool_liq(s_[4],s_[5],pool["vq"],h,int(round(s_[6]*cost_mult))),"pool"))
+            else: splice_ok=False
+        path.sort(key=lambda p:(p[1],p[2],p[3])); trigger=None; lastv=path[0]
+        for p in path:
+            if p[0]>hmax: break
+            lastv=p; nv=p[4]-net_cost
+            if nv<=SL_MULT*gross: trigger=("SL_FIRST",p); break
+            if nv>=TP_MULT*gross:
+                same=[q for q in path if q[1]==p[1] and q[0]<=hmax]; trigger=("SL_FIRST",p) if any(q[4]-net_cost<=SL_MULT*gross for q in same) else ("TP_FIRST",p); break
+        if migrated and not splice_ok and (trigger is None or (trigger[1][1],trigger[1][2],trigger[1][3])>=comp_key): outcomes.append(dict(state=None,unavailable=True)); continue
+        if trigger is None: outcomes.append(dict(state="TIMEOUT_OTHER",pnl_lo=(lastv[4]-net_cost-gross)/LAMP,pnl_hi=(lastv[4]-net_cost-gross)/LAMP,pnl_mid=(lastv[4]-net_cost-gross)/LAMP,venue=lastv[5],entry_pos=j)); continue
+        kind,p=trigger; exit_slot=p[1]+land; vals=[q[4] for q in path if (q[1],q[2],q[3])>=(p[1],p[2],p[3]) and q[1]<=exit_slot]   # toate pozitiile plauzibile de iesire in slotul de aterizare (inclusiv 'inainte de primul trade' = starea de declansare)
+        inx=[q for q in path if q[1]==exit_slot]; vals=[p[4]]+[q[4] for q in path if p[1]<q[1]<exit_slot]+[q[4] for q in inx] if exit_slot>p[1] else [p[4]]
+        lo=min(vals); hi=max(vals); mid=sorted(vals)[len(vals)//2]; outcomes.append(dict(state=kind,pnl_lo=(lo-net_cost-gross)/LAMP,pnl_hi=(hi-net_cost-gross)/LAMP,pnl_mid=(mid-net_cost-gross)/LAMP,venue=p[5],entry_pos=j,n_exit_positions=len(vals)))
+    if not outcomes: return dict(status="NO_FILL")
+    if all(o.get("unavailable") for o in outcomes): return dict(status="OK",unavailable=True,migrated_in_window=comp_key is not None,n_entry_positions=len(pos))
+    ok=[o for o in outcomes if not o.get("unavailable")]; cons=min(ok,key=lambda o:o["pnl_lo"]); opt=max(ok,key=lambda o:o["pnl_hi"]); mid=sorted(ok,key=lambda o:o["pnl_mid"])[len(ok)//2]
+    return dict(status="OK",migrated_in_window=comp_key is not None,n_entry_positions=len(pos),conservative=dict(state=cons["state"],pnl=cons["pnl_lo"],venue=cons["venue"]),midpoint=dict(state=mid["state"],pnl=mid["pnl_mid"],venue=mid["venue"]),optimistic=dict(state=opt["state"],pnl=opt["pnl_hi"],venue=opt["venue"]),states=collections.Counter(o["state"] for o in ok))

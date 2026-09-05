@@ -41,6 +41,18 @@
    "pass_": true,
    "detail": "determinist"
   },
+  "complete_after_horizon_is_curve_only": {
+   "pass_": true,
+   "detail": "{'state': 'TIMEOUT_OTHER', 'unavailable': None, 'label_kind': 'CURVE_ONLY', 'mig': False}"
+  },
+  "landing_bounds_ordered": {
+   "pass_": true,
+   "detail": "{'n_entry_positions': 4, 'conservative': {'state': 'TP_FIRST', 'pnl': 0.254165224, 'venue': 'curve'}, 'midpoint': {'state': 'TP_FIRST', 'pnl': 0.28594244, 'venue': 'curve'}, 'optimistic': {'state': 'TP_FIRST', 'pnl': 0.290765495, 'venue': 'curve'}}"
+  },
+  "chain_break_excluded": {
+   "pass_": true,
+   "detail": "CHAIN_BREAK"
+  },
   "same_fold_per_mint": {
    "pass_": true,
    "detail": "split per create_ts"
