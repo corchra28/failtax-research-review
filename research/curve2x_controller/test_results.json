@@ -59,7 +59,52 @@
   "forward_gates_fail_empty": {
    "pass_": true,
    "detail": "Bonferroni: 2 challengere incercate => alpha 0.0250"
+  },
+  "cross_file_state_persistence_one_prediction": {
+   "pass_": true,
+   "detail": "{'npred': 1, 'logs': [(0, 'FORWARD | files=1 events=37 journal=0 decided=0 clock=2027-01-15T08:00:35Z state_saved=True'), (0, 'FORWARD | files=1 events=12 journal=1 decided=1 clock=2027-01-15T08:00:55"
+  },
+  "label_forward_one_matured_outcome": {
+   "pass_": true,
+   "detail": "[('TIMEOUT_OTHER', 'GAP', 'CURVE_ONLY')]"
+  },
+  "restart_no_duplicates": {
+   "pass_": true,
+   "detail": "FORWARD | niciun fisier nou de procesat"
+  },
+  "modified_processed_file_refused": {
+   "pass_": true,
+   "detail": "PROCESSED_FILE_MODIFIED_OR_MISSING ['events_2026091000.jsonl.gz'] \u2014 refuz"
+  },
+  "tampered_journal_refuses_append": {
+   "pass_": true,
+   "detail": "JOURNAL_CHAIN_BROKEN la inregistrarea 0 \u2014 append refuzat"
+  },
+  "spec_sha_mismatch_refused": {
+   "pass_": true,
+   "detail": ""
+  },
+  "evaluate_forward_uses_frozen_gates": {
+   "pass_": true,
+   "detail": "eline sau politica fara semnale)\", \"MULTIPLE_TESTING_CORRECTION\": \"Bonferroni: 0 challengere incercate => alpha 0.0500\", \"HUMAN_APPROVAL_REQUIRED\": \"PENDING\"}, \"all_pass\": false}\nEVALUATE_FORWARD_DONE"
+  },
+  "gates_forward_prints": {
+   "pass_": true,
+   "detail": ""
+  },
+  "verify_forward_ok": {
+   "pass_": true,
+   "detail": "{'spec_sha256': 'OK', 'journal': {'ok': True, 'records': 1}, 'state': 'OK', 'files_done': 3, 'files_modified': [], 'outcomes': 1, 'duplicate_predictions': 0}"
+  },
+  "promote_rejects_replay_report": {
+   "pass_": true,
+   "detail": "REFUSED: se accepta exclusiv evaluation_report_forward.json"
+  },
+  "promote_rejects_forward_report_with_failed_gates": {
+   "pass_": true,
+   "detail": "REFUSED: porti forward nepromovabile: ['MIN_SIGNALS_300', 'MIN_UTC_DAYS_7', 'MIN_DAYS_WITH_SIGNALS_5', 'CI_LOWER_EV_GT_0"
   }
  },
+ "n_tests": 26,
  "all_pass": true
 }

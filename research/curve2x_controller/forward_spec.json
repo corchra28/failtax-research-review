@@ -1,6 +1,7 @@
 {
+ "baseline_sha256": "6d479a747e91b6f6c313c39b137a531b3320a908ec935a48575c286b37687f30",
  "name": "CURVE2X_FORWARD_PAPER_SPEC",
- "frozen_at": "2026-09-05 15:43:06 EEST",
+ "frozen_at": "2026-09-05 16:21:25 EEST",
  "status": "FROZEN_BEFORE_NEW_DATA",
  "model_hash": "5fc8dfc4486afbdb4c14ce00a243c8616516892478c5c875de1edf9cf9ab3e1c",
  "feature_schema_hash": "c19cbcf7a448f898e918e519c7d950f43e45cbc9b9401f1324941e208e4a529f",
@@ -81,5 +82,5 @@
  "data_source": "director local de colectare scris de un colector extern (WSS) aprobat separat; controller-ul NU deschide RPC/WSS; replay-ul istoric NU conteaza ca forward",
  "collection_started": false,
  "LIVE_TRADING_ENABLED": false,
- "spec_sha256": "a22369540bc24ff74d17568aa07c9f8857dff50859a5663c3d1c1b80d4e625a1"
+ "spec_sha256": "8355210c8513613c73ac60fa104a7fec1998188e5afe6e302e0585b419f2edeb"
 }

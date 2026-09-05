@@ -2,7 +2,7 @@
 """Validator PUBLIC controller (fara date private, fara /tmp/claude): sume, absenta cailor efemere/adreselor brute/cheilor, teste (ruleaza integral fara date private), champion imuabil (hash fixat,
 policy_enabled=false), watcher/controller fara PAPER_CANDIDATE si fara cai de trimitere de tranzactii, un singur challenger per ciclu (registru), promovare fara aprobare umana refuzata, forward spec inghetat."""
 import os,sys,re,json,hashlib,subprocess,tempfile
-HERE=os.path.dirname(os.path.abspath(__file__)); ok=True
+HERE=os.path.dirname(os.path.abspath(__file__)); ok=True; sys.path.insert(0,HERE)
 def rep(n,c,d=""):
     global ok; ok=ok and bool(c); print("PASS" if c else "FAIL",n,d)
 def sha(p):
@@ -17,7 +17,14 @@ hits=[(f,n) for f in sums for n,p in PATS.items() if f not in ("validate_public.
 c=json.load(open(os.path.join(HERE,"champion.json"))); rep("champion_immutable_and_policy_disabled",c.get("immutable") is True and c.get("policy_enabled") is False and re.fullmatch(r"[0-9a-f]{64}",c.get("artifact_sha256","")) is not None,c.get("artifact_sha256","")[:16])
 src=open(os.path.join(HERE,"controller_lib.py")).read()+open(os.path.join(HERE,"controller.py")).read(); rep("no_paper_candidate_and_no_tx_paths","PAPER_CANDIDATE" not in src.replace("PAPER_CANDIDATE_possible","") and ("send"+"Transaction") not in src and ("sign"+"Transaction") not in src and ("wss:"+"//") not in src,"")
 rep("single_challenger_per_cycle","models=[champ,ch]" in src and src.count("train_challenger(")>=1,"")
+before={f:sha(os.path.join(HERE,f)) for f in sums if os.path.exists(os.path.join(HERE,f))}
 with tempfile.TemporaryDirectory() as td:
-    env=dict(os.environ,CURVE2X_CTRL_STATE=td,CURVE2X_DERIVED_DIR=td,CURVE2X_V3_DERIVED_DIR=td); r=subprocess.run([sys.executable,os.path.join(HERE,"tests_controller.py")],capture_output=True,text=True,env=env,cwd=HERE); rep("tests_without_private_data","ALL_PASS" in r.stdout,(r.stdout.strip().splitlines() or [r.stderr[-200:]])[-1])
+    env=dict(os.environ,CURVE2X_CTRL_STATE=td,CURVE2X_DERIVED_DIR=td,CURVE2X_V3_DERIVED_DIR=td,CURVE2X_TEST_OUT=os.environ.get("CURVE2X_TEST_OUT",td)); r=subprocess.run([sys.executable,os.path.join(HERE,"tests_controller.py")],capture_output=True,text=True,env=env,cwd=HERE); rep("tests_and_integration_without_private_data","ALL_PASS" in r.stdout,(r.stdout.strip().splitlines() or [r.stderr[-200:]])[-1])
+after={f:sha(os.path.join(HERE,f)) for f in sums if os.path.exists(os.path.join(HERE,f))}; rep("tests_did_not_mutate_published_files",before==after,[f for f in before if before[f]!=after.get(f)])
+gs=subprocess.run(["git","status","--porcelain","--",HERE],capture_output=True,text=True,cwd=HERE); rep("git_status_clean_after_validation",gs.returncode!=0 or not gs.stdout.strip(),gs.stdout.strip()[:200] if gs.returncode==0 else "nu este repo git (ok)")
+rep("promote_accepts_only_forward_reports","evaluation_report_forward.json" in open(os.path.join(HERE,"promote.py")).read() and 'report_kind")!="FORWARD"' in open(os.path.join(HERE,"promote.py")).read(),"")
+import forward_lib as F
+try: F.load_spec(os.path.join(HERE,"forward_spec.json")); rep("forward_spec_sha_recomputed","OK","")
+except SystemExit as e: rep("forward_spec_sha_recomputed",False,str(e))
 fs=json.load(open(os.path.join(HERE,"forward_spec.json"))); rep("forward_spec_frozen",fs.get("status")=="FROZEN_BEFORE_NEW_DATA" and fs.get("model_hash")==c.get("artifact_sha256") and fs.get("policy_enabled") is False and fs.get("maturity_s")==960 and fs.get("LIVE_TRADING_ENABLED") is False,fs.get("spec_sha256","")[:16])
 print("VALIDATION =","PASS" if ok else "FAIL"); sys.exit(0 if ok else 1)

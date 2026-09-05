@@ -39,6 +39,8 @@ class Journal:
     def __init__(self,path):
         self.path=path; self.prev="0"*64; self.n=0
         if os.path.exists(path):
+            v=Journal.verify(path)
+            if not v.get("ok"): raise SystemExit(f"JOURNAL_CHAIN_BROKEN la inregistrarea {v.get('at')} — append refuzat")
             for l in open(path): r=json.loads(l); self.prev=r["record_hash"]; self.n+=1
         self.f=open(path,"a")
     def append(self,rec):
