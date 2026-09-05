@@ -1,6 +1,6 @@
 {
  "label": "HISTORICAL_DEV_NOT_SEALED",
- "built": "2026-09-05 15:43:08 EEST",
+ "built": "2026-09-05 16:20:25 EEST",
  "mints_in_cache": 58648,
  "N_ANCHORED": 2381,
  "N_PULLBACKS": 1869,
@@ -57,11 +57,11 @@
   "31": 1,
   "20": 1
  },
- "rows_sha256": "cee13b2a1c610c40ad314826d58846f4329b9b404e4f8eaa31c58a1b287dc39a",
+ "rows_sha256": "86fdd85dc2aeadb6ab9dad9502ea193d3a68931649cad01801f9ad4abf924a6b",
  "inputs": {
   "curves_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
   "stream_sha256": "b57afd91478412b9b7fa26100beab31d79201a0b36f4fb967de988445bf40d3c"
  },
- "runtime_s": 105.8,
+ "runtime_s": 121.3,
  "rpc_calls": 0
 }

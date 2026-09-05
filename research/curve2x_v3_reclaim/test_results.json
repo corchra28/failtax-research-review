@@ -37,9 +37,9 @@
    "pass_": true,
    "detail": "CURVE_RESOLVED_BEFORE_MIGRATION"
   },
-  "label_independent_of_features": {
+  "exit_positions_semantics": {
    "pass_": true,
-   "detail": "determinist"
+   "detail": "{'exit_slot_states': 1, 'intermediate_states': 2, 'opt': (0.329528029, 0.329528029)}"
   },
   "complete_after_horizon_is_curve_only": {
    "pass_": true,
@@ -47,7 +47,7 @@
   },
   "landing_bounds_ordered": {
    "pass_": true,
-   "detail": "{'n_entry_positions': 4, 'conservative': {'state': 'TP_FIRST', 'pnl': 0.254165224, 'venue': 'curve'}, 'midpoint': {'state': 'TP_FIRST', 'pnl': 0.28594244, 'venue': 'curve'}, 'optimistic': {'state': 'TP_FIRST', 'pnl': 0.290765495, 'venue': 'curve'}}"
+   "detail": "{'n_entry_positions': 4, 'conservative': {'state': 'TP_FIRST', 'pnl': 0.274874023, 'venue': 'curve'}, 'midpoint': {'state': 'TP_FIRST', 'pnl': 0.28594244, 'venue': 'curve'}, 'optimistic': {'state': 'TP_FIRST', 'pnl': 0.290765495, 'venue': 'curve'}}"
   },
   "chain_break_excluded": {
    "pass_": true,
@@ -58,5 +58,6 @@
    "detail": "split per create_ts"
   }
  },
+ "n_tests": 14,
  "all_pass": true
 }

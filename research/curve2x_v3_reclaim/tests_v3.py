@@ -38,8 +38,14 @@ o=V.simulate_v3(rec(Ts),dtp["dec"],Ttp[dtp["dec"]][0]); check("same_slot_SL_wins
 Tmig=mk(base+pb+rc+buys(80,60,130,1*LAMP,"p")); ci=next(i for i,t in enumerate(Tmig) if t[8]>=L.TARGET_RS); Tmig=Tmig[:ci+1]; c=Tmig[-1]; dm=V.detect(Tmig,Tmig[0][0]-1)
 # TP pe curba inainte de migrare? verificam ca fara pool eticheta e fie rezolvata pe curba, fie UNAVAILABLE
 o=V.simulate_v3(rec(Tmig,(c[0],c[1],c[2])),dm["dec"],Tmig[dm["dec"]][0]); check("migration_without_splice_flagged",o["splice_ok"] is False and o["15M"]["label_kind"] in ("CROSS_MIGRATION_LABEL_UNAVAILABLE","CURVE_RESOLVED_BEFORE_MIGRATION"),o["15M"]["label_kind"])
-# eticheta nu depinde de trasaturi (mutarea trasaturilor nu schimba simularea) — trivial prin constructie; verificam ca simularea nu citeste f
-o2=V.simulate_v3(rec(Ttp),dtp["dec"],Ttp[dtp["dec"]][0]); check("label_independent_of_features",o2["15M"]==V.simulate_v3(rec(Ttp),dtp["dec"],Ttp[dtp["dec"]][0])["15M"],"determinist")
+# semantica pozitiilor de iesire: (a) ultima stare strict inainte de exit_slot, (b) starile din exit_slot; o stare intermediara extrema (intre declansare si exit_slot-1) NU trebuie sa influenteze limitele
+Tx=mk(base+pb+rc+buys(60,60,130,2*LAMP,"p",1,1)); dx=V.detect(Tx,Tx[0][0]-1); ox=V.simulate_v3_bounds(rec(Tx),dx["dec"],Tx[dx["dec"]][0]); tp_i=next(i for i in range(dx["dec"]+1,len(Tx)) if V.simulate_v3(rec(Tx[:i+1]),dx["dec"],Tx[dx["dec"]][0])["15M"]["state"]=="TP_FIRST")
+trig=Tx[tp_i]; ex_slot=trig[1]+3; Tm=[list(t) for t in Tx]
+# inseram o stare intermediara cu valoare extrem de mare in slotul trig+1 (pret urias) si una in slotul trig+2; nu sunt pozitii plauzibile => limitele nu se schimba
+big=[trig[0],trig[1]+1,trig[2],1,"whale",50*LAMP,1,1,trig[8]+50*LAMP,trig[9]-1,trig[10]+50*LAMP,trig[11]-1]; Tm2=[t for t in Tm if t[1]<=trig[1]]+[big]+[t for t in Tm if t[1]>trig[1]]
+om=V.simulate_v3_bounds(rec([tuple(t) for t in Tm2]),dx["dec"],Tx[dx["dec"]][0])
+ex_states=[t for t in Tx if t[1]==ex_slot]; before=[t for t in Tx if trig[1]<=t[1]<ex_slot]
+check("exit_positions_semantics",ox["status"]=="OK" and om["status"]=="OK" and abs(om["optimistic"]["pnl"]-ox["optimistic"]["pnl"])<1e-9 and abs(om["conservative"]["pnl"]-ox["conservative"]["pnl"])<1e-9 and len(ex_states)>=1,dict(exit_slot_states=len(ex_states),intermediate_states=len(before)-1,opt=(ox["optimistic"]["pnl"],om["optimistic"]["pnl"])))
 # CompleteEvent la horizon+100 s fara pool => CURVE_ONLY: TIMEOUT_OTHER, unavailable=false, migrated_in_window=false
 Tl=mk(base+pb+rc+[(60+i*30,130+i*75,(0.05*LAMP if i%2 else -0.05*LAMP),f"m{i}") for i in range(20)]); dl=V.detect(Tl,Tl[0][0]-1); dts=Tl[dl["dec"]][0]; last=Tl[-1]
 cts=dts+V.H_PRIMARY+100; o=V.simulate_v3(rec(Tl,(cts,last[1]+5000,last[2]+5000)),dl["dec"],dts)
@@ -52,4 +58,4 @@ Tc=[list(t) for t in Tb]; j=db["dec"]+2; Tc[j][10]+=5*LAMP; Tc[j][8]+=5*LAMP; oc
 try:
     import build_v3 as B; check("same_fold_per_mint",len({B.split_of(t) for t in [Ttp[0][0]]*3})==1,"split per create_ts")
 except Exception as ex: check("same_fold_per_mint",False,ex)
-json.dump(dict(label="HISTORICAL_DEV_NOT_SEALED",tests=R,all_pass=all(v["pass_"] for v in R.values())),open(os.path.join(HERE,"test_results.json"),"w"),indent=1); print("ALL_PASS" if all(v["pass_"] for v in R.values()) else "SOME_FAIL")
+OUTD=os.environ.get("CURVE2X_TEST_OUT",HERE); os.makedirs(OUTD,exist_ok=True); json.dump(dict(label="HISTORICAL_DEV_NOT_SEALED",tests=R,n_tests=len(R),all_pass=all(v["pass_"] for v in R.values())),open(os.path.join(OUTD,"test_results.json"),"w"),indent=1); print("ALL_PASS" if all(v["pass_"] for v in R.values()) else "SOME_FAIL")

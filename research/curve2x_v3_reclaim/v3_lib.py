@@ -163,8 +163,9 @@ def simulate_v3_bounds(rec,i_trig,dec_ts,N=N_REF,land=LAND,cost_mult=1.0,pool=No
                 same=[q for q in path if q[1]==p[1] and q[0]<=hmax]; trigger=("SL_FIRST",p) if any(q[4]-net_cost<=SL_MULT*gross for q in same) else ("TP_FIRST",p); break
         if migrated and not splice_ok and (trigger is None or (trigger[1][1],trigger[1][2],trigger[1][3])>=comp_key): outcomes.append(dict(state=None,unavailable=True)); continue
         if trigger is None: outcomes.append(dict(state="TIMEOUT_OTHER",pnl_lo=(lastv[4]-net_cost-gross)/LAMP,pnl_hi=(lastv[4]-net_cost-gross)/LAMP,pnl_mid=(lastv[4]-net_cost-gross)/LAMP,venue=lastv[5],entry_pos=j)); continue
-        kind,p=trigger; exit_slot=p[1]+land; vals=[q[4] for q in path if (q[1],q[2],q[3])>=(p[1],p[2],p[3]) and q[1]<=exit_slot]   # toate pozitiile plauzibile de iesire in slotul de aterizare (inclusiv 'inainte de primul trade' = starea de declansare)
-        inx=[q for q in path if q[1]==exit_slot]; vals=[p[4]]+[q[4] for q in path if p[1]<q[1]<exit_slot]+[q[4] for q in inx] if exit_slot>p[1] else [p[4]]
+        kind,p=trigger; exit_slot=p[1]+land
+        # pozitiile plauzibile ale tranzactiei de iesire: (a) ULTIMA stare strict inainte de exit_slot (>= declansare), (b) fiecare stare succesiva din exit_slot. Starile intermediare dintre declansare si ultima stare de dinaintea exit_slot NU sunt pozitii plauzibile.
+        before=[q for q in path if (q[1],q[2],q[3])>=(p[1],p[2],p[3]) and q[1]<exit_slot]; inx=[q for q in path if q[1]==exit_slot]; vals=[before[-1][4]]+[q[4] for q in inx] if before else [q[4] for q in inx]
         lo=min(vals); hi=max(vals); mid=sorted(vals)[len(vals)//2]; outcomes.append(dict(state=kind,pnl_lo=(lo-net_cost-gross)/LAMP,pnl_hi=(hi-net_cost-gross)/LAMP,pnl_mid=(mid-net_cost-gross)/LAMP,venue=p[5],entry_pos=j,n_exit_positions=len(vals)))
     if not outcomes: return dict(status="NO_FILL")
     if all(o.get("unavailable") for o in outcomes): return dict(status="OK",unavailable=True,migrated_in_window=comp_key is not None,n_entry_positions=len(pos))
