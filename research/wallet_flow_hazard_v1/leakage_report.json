@@ -1,0 +1,41 @@
+{
+ "label": "HISTORICAL_HYPOTHESIS_GENERATION_NOT_SEALED",
+ "future_mutation": {
+  "identical": 600,
+  "total": 600,
+  "PASS": true
+ },
+ "permutation": {
+  "original": {
+   "usable": 131,
+   "EV": -0.029393897679389325,
+   "median": -0.112838075,
+   "PF": 0.6955862421416702,
+   "win_rate": 0.2748091603053435,
+   "EX_BEST_1PCT": -0.03476361024806201,
+   "max_mint_share": null,
+   "CI95": [
+    -0.05876246725954199,
+    0.000533088496183209
+   ],
+   "LCB90": -0.0489754434351145,
+   "p_one_sided": 0.972
+  },
+  "permuted": {
+   "usable": 88,
+   "EV": -0.047145914522727275,
+   "median": -0.109335351,
+   "PF": 0.5470544990458939,
+   "win_rate": 0.22727272727272727,
+   "EX_BEST_1PCT": -0.05135656845977011,
+   "max_mint_share": null,
+   "CI95": [
+    -0.08084638795454545,
+    -0.009781475056818175
+   ],
+   "LCB90": -0.06917030794318181,
+   "p_one_sided": 0.99225
+  },
+  "collapse": true
+ }
+}

@@ -1,0 +1,38 @@
+{
+ "label": "HISTORICAL_HYPOTHESIS_GENERATION_NOT_SEALED",
+ "built": "2026-09-05 16:57:24 EEST",
+ "mints": 5511,
+ "rows": 14707,
+ "by_split": {
+  "TRAIN": 5156,
+  "CAL": 3401,
+  "EMBARGO": 317,
+  "VAL": 4457,
+  "CONF": 1376
+ },
+ "by_landmark": {
+  "20": 5511,
+  "30": 3327,
+  "40": 2381,
+  "50": 1885,
+  "60": 1603
+ },
+ "status_conservative": {
+  "SL_FIRST": 8324,
+  "TP_FIRST": 2090,
+  "NO_FILL_MIGRATED": 3790,
+  "TIMEOUT_OTHER": 438,
+  "CHAIN_BREAK": 56,
+  "UNAVAILABLE": 9
+ },
+ "gap_rows": 1588,
+ "wallet_graph": {
+  "wallets": 180192,
+  "positions": 1431371,
+  "creators": 14372
+ },
+ "share_rows_with_wallet_history": 0.7781328619024954,
+ "rows_sha256": "0ddc225dac35b9ca269312cf9da57f7f1810a7fddba22980a87700539b9b1d87",
+ "runtime_s": 497.2,
+ "rpc_calls": 0
+}

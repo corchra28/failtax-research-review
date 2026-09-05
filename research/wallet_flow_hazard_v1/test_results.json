@@ -1,0 +1,43 @@
+{
+ "label": "HISTORICAL_HYPOTHESIS_GENERATION_NOT_SEALED",
+ "tests": {
+  "causal_only_matured_before_t": {
+   "pass_": true,
+   "detail": "({'n': 1, 'tp': 1.0, 'ev': 0.2, 'surv': 1.0, 'rw': 0, 'age_h': 0.5277777777777778}, {'n': 2, 'tp': 0.5, 'ev': 0.05, 'surv': 0.5, 'rw': 0, 'age_h': 1.9166666666666667})"
+  },
+  "no_history_before_maturity": {
+   "pass_": true,
+   "detail": ""
+  },
+  "future_mutation_no_change": {
+   "pass_": true,
+   "detail": ""
+  },
+  "wallet_quality_reflects_history": {
+   "pass_": true,
+   "detail": "(1.0, 0.0)"
+  },
+  "permutation_changes_wallet_features": {
+   "pass_": true,
+   "detail": "(0.5, 0.0)"
+  },
+  "no_identifier_features": {
+   "pass_": true,
+   "detail": ""
+  },
+  "path_bins_built": {
+   "pass_": true,
+   "detail": "15"
+  },
+  "dynamic_exit_conservative_pnl": {
+   "pass_": true,
+   "detail": "2.766e-05"
+  },
+  "same_fold_per_mint": {
+   "pass_": true,
+   "detail": ""
+  }
+ },
+ "n_tests": 9,
+ "all_pass": true
+}

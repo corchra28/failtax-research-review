@@ -1,0 +1,169 @@
+{
+ "name": "WALLET_FLOW_HAZARD_V1",
+ "label": "HISTORICAL_HYPOTHESIS_GENERATION_NOT_SEALED",
+ "frozen_at": "2026-09-05 16:34:38 EEST",
+ "sealed": false,
+ "data": {
+  "source": "cache-uri locale V2 (curve + pool + flux) si randurile de landmark V2; zero RPC; date deja inspectate",
+  "v2_curves_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
+  "v2_rows_sha256": "31f6300f8400da7c5b9919117898015bebabeecbaa48bbca134f1f8a1b91086d",
+  "v3_lib_sha256": "9f3097af8a03a3801b3bda0d5120c9186ddb5e91180a19f04fed45343fcc1602"
+ },
+ "code_sha256": {
+  "wfh_lib.py": "a720e796afc87b577d8c5f0140ee5098a5dc4b2ca1511549f811b577aa1ae0b9",
+  "build_wfh.py": "1074c69b78b0d019303357fe031cc3ef847f6878db61d651e17153524b05fca2",
+  "tests_wfh.py": "56b3eca039dde4ad8bcd49ccbaf00e50e86977d8f8ae08ca062aeecbf4d85ffd",
+  "model_wfh.py": "71211d44e2fe0ead8c99b28506357a00b6188a6f0f1c4a80bf0a8661bc1bc74e",
+  "freeze_wfh.py": "56c31999b56988a244253de774cf5bc6219abe48a7036ee4ac33f121e53529cb"
+ },
+ "wallet_graph": {
+  "position": "(portofel, mint): prima cumparare, sol_in/tok_in, sol_out/tok_out; marcarea inventarului ramas la ultima stare <= prima cumparare + 900 s (executabil, overlay static); TP proxy = pret max (vs/vt) in 900 s >= 2,1 x pretul mediu de intrare; realized_pnl = sol_out + marcare - sol_in; survived = pnl > -35 % din sol_in",
+  "maturity": "maturity_ts = prima cumparare + 960 s; o statistica la timpul t foloseste doar pozitii cu maturity_ts <= t",
+  "creator": "lansare maturizata la create + 1860 + 960 s: migrare, TP proxy pentru referinta 0,25 SOL la 20 % progres, cota vanduta de creator, EV proxy",
+  "forbidden_features": [
+   "wallet ID",
+   "mint ID",
+   "timestamp absolut"
+  ]
+ },
+ "checkpoints": {
+  "type": "landmark-uri de progres V2 (prima atingere)",
+  "grid_pct": [
+   20,
+   30,
+   40,
+   50,
+   60
+  ],
+  "selection": "un singur checkpoint per mint (prima decizie eligibila in ordinea landmark-urilor); checkpoint-ul si pragul se aleg EXCLUSIV pe TRAIN/CAL"
+ },
+ "feature_blocks": {
+  "WALLET_QUALITY": [
+   "wq_share_with_history",
+   "wq_prior_matured_med",
+   "wq_prior_tp_rate_w",
+   "wq_prior_ev_w",
+   "wq_wallet_age_med_h",
+   "wq_survival_w",
+   "wq_repeat_winner_share",
+   "wq_sol_share_repeat_winners"
+  ],
+  "INDEPENDENT_BREADTH": [
+   "ib_new_buyers",
+   "ib_new_profitable_buyers",
+   "ib_common_wallet_reuse",
+   "ib_same_slot_max_wallets",
+   "ib_buy_entropy",
+   "ib_hhi",
+   "ib_top1",
+   "ib_top3",
+   "ib_top10"
+  ],
+  "SELLER_INVENTORY_HAZARD": [
+   "sh_early_inventory_share",
+   "sh_early_sold_pct",
+   "sh_sell_intensity_decay",
+   "sh_sellers_remaining",
+   "sh_absorption_after_big_sell",
+   "sh_sell_vol_60s",
+   "sh_holders_remaining"
+  ],
+  "CREATOR_HISTORY": [
+   "ch_prior_launches",
+   "ch_prior_mig_rate",
+   "ch_prior_tp_rate",
+   "ch_prior_sell_share",
+   "ch_prior_ev_mean",
+   "ch_inventory_share",
+   "ch_sold_flag"
+  ],
+  "MARKET_STATE": [
+   "ms_progress",
+   "ms_rs_sol",
+   "ms_vs_sol",
+   "ms_reserve_accel",
+   "ms_slippage_bp",
+   "ms_headroom",
+   "ms_launch_rate_10m",
+   "ms_trades_per_slot_5",
+   "ms_age_s",
+   "ms_landmark"
+  ]
+ },
+ "label_def": {
+  "kind": "FIRST_PASSAGE (V3 lib, read-only)",
+  "tp": "+100 % net",
+  "sl": "-35 % net",
+  "horizon_s": 900,
+  "same_slot": "SL castiga",
+  "landing": "+3 sloturi; PnL primar = conservative (limite de ordine: intrare inainte/dupa fiecare trade din slotul de aterizare; iesire = ultima stare inainte de exit_slot + starile din exit_slot); CHAIN_BREAK exclus; migrare doar in orizont; splice PumpSwap sau UNAVAILABLE",
+  "stress": [
+   "+5 sloturi conservative",
+   "cost x1,25 conservative"
+  ],
+  "network_cost": "0,00021 SOL PRESUPUNERE"
+ },
+ "models": {
+  "H": "hazarde concurente discrete (bin 60 s x 15): multinomial logistic pe person-period cu covariate de intrare + covariate variabile in timp (value_ratio, net_flow, sell_vol) + bin; P_TP/P_SL = suma hazardelor cauza-specifice x supravietuire",
+  "B": "GBM depth-2 multinomial static (TP/SL/TIMEOUT la 15 min)",
+  "C": "logistic doar MARKET_STATE (baseline state/headroom)",
+  "deep_learning": "NU (istoric cauzal per portofel insuficient)",
+  "calibration": "vector scaling pe CAL"
+ },
+ "policy": {
+  "one_entry_per_mint": true,
+  "p_tp_grid": [
+   0.25,
+   0.3,
+   0.35
+  ],
+  "universal": [
+   "EV conservator prezis > 0"
+  ],
+  "checkpoint_grid": [
+   20,
+   30,
+   40,
+   50,
+   60
+  ],
+  "selection": "TRAIN/CAL: max LCB90 (bootstrap mint) al EV conservator per mint, >= 30 mint-uri pe CAL",
+  "exit_static": "TP 2x / SL -35 % / timeout 15 min",
+  "exit_dynamic": "iesire la sfarsitul bin-ului b>=2 cand h_TP(b) < h_TP(1) SI h_SL(b) > h_SL(1) (hazarde prezise cu covariate curente); PnL conservativ; comparat cu exitul static pe VAL/CONF FARA alegere",
+  "no_selection_on_val_conf": true
+ },
+ "split": {
+  "train": "2026-09-02 (de la inceputul benzii)",
+  "train_end_utc": "2026-09-03 00:00",
+  "cal": "09-03 00:00-12:00 UTC",
+  "cal_end_utc": "2026-09-03 12:00",
+  "val": "09-03 12:00-24:00 UTC",
+  "val_end_utc": "2026-09-04 00:00",
+  "conf": "09-04",
+  "embargo_s": 1800,
+  "outcome_maturity_s": 960,
+  "one_row_per_mint": true
+ },
+ "gates": {
+  "min_signals_val_conf": 100,
+  "min_conf": 30,
+  "ev_conservative_gt": 0,
+  "ci95_lower_gt": 0,
+  "pf_min": 1.3,
+  "val_and_conf_positive": true,
+  "land5_gt": 0,
+  "cost125_gt": 0,
+  "ex_best_1pct_gt": 0,
+  "beats_v3_conservative": -0.014,
+  "beats_state_headroom_baseline": true,
+  "max_share_entity_hour_day": 0.2,
+  "multiple_testing": "Holm pe toate modelele x politicile de exit (3 x 2 = 6 teste ale EV>0)"
+ },
+ "forbidden": [
+  "RPC/WSS/API",
+  "date noi",
+  "live",
+  "forward collection",
+  "alte praguri dupa VAL/CONF"
+ ]
+}

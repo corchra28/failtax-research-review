@@ -1,0 +1,82 @@
+{
+ "NEW_INFORMATION_VS_H3": "YES (outcome-uri maturizate per portofel, cumparatori noi profitabili, hazardul inventarului cohortelor timpurii, outcome-uri ale creatorului, hazarde concurente + exit dinamic)",
+ "CAUSAL_WALLET_GRAPH_PASS": true,
+ "N_SIGNALS": 131,
+ "P_TP_FIRST": 0.3014230162157249,
+ "P_SL_FIRST": 0.668895861731194,
+ "TP_FIRST_RATE": 0.26717557251908397,
+ "SL_FIRST_RATE": 0.6564885496183206,
+ "EV_CONSERVATIVE": -0.029393897679389318,
+ "PF": 0.6955862421416704,
+ "CI95": [
+  -0.058288780648854954,
+  0.00016137127480915769
+ ],
+ "DYNAMIC_EXIT_DELTA": -0.0007061313740458035,
+ "CONF_RESULT": {
+  "usable": 61,
+  "EV": -0.04979614508196721,
+  "median": -0.129985771,
+  "PF": 0.5310270469365346,
+  "win_rate": 0.22950819672131148,
+  "EX_BEST_1PCT": -0.05605722273333334,
+  "max_mint_share": 0.09474318849081537,
+  "CI95": [
+   -0.08901447936065573,
+   -0.007112385852459015
+  ],
+  "LCB90": -0.07640151636065572,
+  "p_one_sided": 0.98925,
+  "max_hour_share": 0.413143296852374,
+  "max_signal_share_same_hour": 0.4098360655737705
+ },
+ "FINAL_VERDICT": "NO_VERIFIED_EDGE",
+ "READY_FOR_FORWARD_PAPER": "NO",
+ "LIVE_TRADING_ENABLED": "NO",
+ "model": "B",
+ "policy": {
+  "Lmin": 20,
+  "p_tp_min": 0.25
+ },
+ "gates": {
+  "min_signals_val_conf_100": true,
+  "min_conf_30": true,
+  "ev_conservative_gt_0": false,
+  "ci95_lower_gt_0": false,
+  "pf_ge_1_30": false,
+  "val_and_conf_positive": false,
+  "land5_gt_0": false,
+  "cost125_gt_0": false,
+  "ex_best_1pct_gt_0": false,
+  "beats_v3_conservative": false,
+  "beats_state_headroom_baseline": true,
+  "no_entity_hour_day_gt_20pct": false,
+  "holm_significant_primary": false
+ },
+ "holm": {
+  "H/static": {
+   "p": 0.697,
+   "p_holm": 1.0
+  },
+  "H/dynamic": {
+   "p": 0.68425,
+   "p_holm": 1.0
+  },
+  "B/static": {
+   "p": 0.973,
+   "p_holm": 1.0
+  },
+  "B/dynamic": {
+   "p": 0.978,
+   "p_holm": 1.0
+  },
+  "C/static": {
+   "p": 0.87025,
+   "p_holm": 1.0
+  },
+  "C/dynamic": {
+   "p": 0.87025,
+   "p_holm": 1.0
+  }
+ }
+}
