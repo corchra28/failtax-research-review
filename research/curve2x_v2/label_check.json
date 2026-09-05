@@ -1,0 +1,8 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED",
+ "cases": 600,
+ "strata": 173,
+ "agree": 600,
+ "LABEL_AGREEMENT": 1.0,
+ "disagreements": []
+}

@@ -1,0 +1,93 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED",
+ "built": "2026-09-05 12:27:54 EEST",
+ "rows": 28818,
+ "mints": 11458,
+ "by_split": {
+  "TRAIN": 10277,
+  "CAL": 6342,
+  "EMBARGO": 626,
+  "VAL": 9065,
+  "CONF": 2508
+ },
+ "by_landmark": {
+  "10": 11458,
+  "20": 5511,
+  "30": 3327,
+  "40": 2381,
+  "50": 1885,
+  "60": 1603,
+  "70": 1392,
+  "80": 1261
+ },
+ "gap_rows": 6084,
+ "primary_status": {
+  "SL_FIRST": 11287,
+  "TIMEOUT_OTHER": 6908,
+  "TP_FIRST": 4516,
+  "NO_FILL_MIGRATED": 6068,
+  "UNAVAILABLE": 39
+ },
+ "primary_status_by_landmark": {
+  "10": {
+   "SL_FIRST": 3081,
+   "TIMEOUT_OTHER": 5979,
+   "TP_FIRST": 1647,
+   "NO_FILL_MIGRATED": 751
+  },
+  "20": {
+   "SL_FIRST": 3360,
+   "TIMEOUT_OTHER": 444,
+   "TP_FIRST": 954,
+   "NO_FILL_MIGRATED": 753
+  },
+  "30": {
+   "SL_FIRST": 1785,
+   "TIMEOUT_OTHER": 153,
+   "NO_FILL_MIGRATED": 756,
+   "TP_FIRST": 633
+  },
+  "40": {
+   "SL_FIRST": 1082,
+   "NO_FILL_MIGRATED": 760,
+   "TP_FIRST": 432,
+   "TIMEOUT_OTHER": 107
+  },
+  "50": {
+   "NO_FILL_MIGRATED": 760,
+   "SL_FIRST": 732,
+   "TP_FIRST": 301,
+   "TIMEOUT_OTHER": 91,
+   "UNAVAILABLE": 1
+  },
+  "60": {
+   "NO_FILL_MIGRATED": 761,
+   "SL_FIRST": 544,
+   "TP_FIRST": 228,
+   "TIMEOUT_OTHER": 59,
+   "UNAVAILABLE": 11
+  },
+  "70": {
+   "NO_FILL_MIGRATED": 762,
+   "SL_FIRST": 396,
+   "TP_FIRST": 178,
+   "UNAVAILABLE": 14,
+   "TIMEOUT_OTHER": 42
+  },
+  "80": {
+   "NO_FILL_MIGRATED": 765,
+   "TP_FIRST": 143,
+   "SL_FIRST": 307,
+   "UNAVAILABLE": 13,
+   "TIMEOUT_OTHER": 33
+  }
+ },
+ "migrated_rows": 2739,
+ "splice_ok_rows": 2620,
+ "splice_unavailable_rows": 119,
+ "rows_sha256": "31f6300f8400da7c5b9919117898015bebabeecbaa48bbca134f1f8a1b91086d",
+ "stream_sha256": "b57afd91478412b9b7fa26100beab31d79201a0b36f4fb967de988445bf40d3c",
+ "curves_sha256": "b04221125f5edd009d160fc3e31444be4aae41f5511d6e7113f2e06f3807e27e",
+ "runtime_s": 283.9,
+ "rpc_calls": 0
+}

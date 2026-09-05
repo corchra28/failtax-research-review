@@ -1,0 +1,18 @@
+# EXEMPLU (NU instalat, NU pornit). CURVE2X V2 paper-only replay. PrivateNetwork=true => procesul nu are acces la retea (nici RPC, nici WSS).
+[Unit]
+Description=CURVE2X V2 paper-only replay watcher (HISTORICAL_REMEDIATION_NOT_SEALED)
+[Service]
+Type=simple
+WorkingDirectory=/home/rares/trading/sol/failtax/research/curve2x_v2
+Environment=CURVE2X_PYTHON=/home/rares/trading/ft-venv/bin/python
+ExecStart=/home/rares/trading/sol/failtax/research/curve2x_v2/curve2x_supervisor.sh /home/rares/trading/sol/failtax/strategy_m/data/tape <MODEL_HASH> /home/rares/trading/sol/failtax/research/curve2x_v2/STOP
+Nice=10
+MemoryMax=3G
+CPUQuota=100%
+PrivateNetwork=true
+ProtectSystem=strict
+ReadWritePaths=/home/rares/trading/sol/failtax/research/curve2x_v2
+NoNewPrivileges=true
+Restart=no
+[Install]
+WantedBy=default.target

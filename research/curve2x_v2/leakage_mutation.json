@@ -1,0 +1,73 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED",
+ "spacing_s": 7300,
+ "passes": 15,
+ "sampled": 235,
+ "identical": 235,
+ "missing": 0,
+ "diff_features": {},
+ "per_pass": [
+  [
+   17,
+   17
+  ],
+  [
+   16,
+   16
+  ],
+  [
+   15,
+   15
+  ],
+  [
+   15,
+   15
+  ],
+  [
+   15,
+   15
+  ],
+  [
+   17,
+   17
+  ],
+  [
+   15,
+   15
+  ],
+  [
+   14,
+   14
+  ],
+  [
+   17,
+   17
+  ],
+  [
+   16,
+   16
+  ],
+  [
+   16,
+   16
+  ],
+  [
+   17,
+   17
+  ],
+  [
+   15,
+   15
+  ],
+  [
+   14,
+   14
+  ],
+  [
+   16,
+   16
+  ]
+ ],
+ "PASS": true,
+ "note": "prima versiune a testului muta 300 de mint-uri simultan si detecta diferente in trasaturile de REGIM ale altor randuri (context, nu viitor propriu); refacut cu ferestre disjuncte"
+}

@@ -1,0 +1,116 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED",
+ "source_commits": {
+  "1bf946a4a882a1405ad978cde9d3efcd3b9b21fb": "MEMECOIN_EARLY_2X_PROBABILITY_RANKER initial",
+  "dd1493716d78bfeb8c4e8ff4ba2bba0630719330": "EXPECTED_NET din medii conditionate pe validation"
+ },
+ "git_blobs_at_dd14937": {
+  "build_manifest.json": "3ca6ef4727ec55ef08adcb4d2b3ed5e07fae9d98",
+  "calibration_table.csv": "7ceaa95952baf1829c081a39822c56edcc051b6b",
+  "curve_pass.py": "b65c99b563a03dd4509db25d13dd56d578b813ad",
+  "expected_net_conditional_means_validation.json": "621ee04c93b7aec20b60caff2f772417560948b4",
+  "feature_dictionary.csv": "01a35a6a4fd66a47b160da99055246de49b3b030",
+  "final_summary.json": "2f81d6f8e547302de8432ee2afaad4d0514a979f",
+  "frozen_spec.json": "7477df04aa70fab1f7ad1fa2391ce524396c305b",
+  "leakage_tests.json": "8614563bc9f7b54da52efeb745d6c3890d68979b",
+  "leakage_tests.py": "90adfd1c542f43b74b7f93d042a10f13a621a201",
+  "make_docs.py": "93225654aaf9e57e67ca6d2829443d3c274c16f7",
+  "model_card.md": "9bf75a2b25c3f9d2adf00b408fd3ddca7c19636c",
+  "ranker.py": "c753dac06d9eaed191dcf8a969b670a6ca8ea2e4",
+  "reproducibility_manifest.json": "016dac123819629ccac54e1ce2c1948cc0f999ad",
+  "results.json": "590694a536023bbac6d22c8aedb105f9f2ca1d0f",
+  "signals_test.jsonl.gz": "07c99fe3dbe02e18d4b70090e98097964584ec36",
+  "terminal_signal_rows.txt": "5ad58c9d24b8a78a57392925904d4ba41eccd2a2"
+ },
+ "v1_copy_sha256": {
+  "build_manifest.json": "e57696138c511b484ddabec433d6d266b624a8008eaf8eb36f4c4ca29bcc0f52",
+  "calibration_table.csv": "e8f9aecf0bd36dc95daf62ac13a77896a337a258396be7d10d7fb6fda4d53967",
+  "curve_pass.py": "75f3d8a309a4909e803299a372b7ad2ba58c3b77d065ebad0c8da0bec53b5106",
+  "expected_net_conditional_means_validation.json": "ceaa79cffa8271001923b89ca64ef4ac810a350d8bae67b386248618887145a8",
+  "feature_dictionary.csv": "64e671438fe8352d9cbcd35f7a40258711b253baa8f7075600ecab21aae1eeec",
+  "final_summary.json": "93fdccfd4442ff4f00d8a8de8ce3581ed3d88692d2d1ee228cfa7baa89fd7db2",
+  "frozen_spec.json": "b193b53c3de3758aca037bac4726a76f5ceced8323c2be86da8fa200208e09bc",
+  "leakage_tests.json": "c4445b4640e9a673fc715268a513a44dc36c9eed0a3f7086b8214daacd4d2f55",
+  "leakage_tests.py": "5f8a63680adf4eaede1c02249ad94ebe179046e1b7da69310e1d7c3e11652699",
+  "make_docs.py": "ac40634b23bc4b2fee0fe82c87e7af5297728cdf6668ad5c91b732c3f6fccccd",
+  "model_card.md": "a7402d4eaf2778270d9bf45eb813a266035e0b3e84c22d846d201064859df32c",
+  "ranker.py": "8d5625c4a3314a4fd3ec73eb965e3eabe172410b6e6978735eae5d693bac20b6",
+  "reproducibility_manifest.json": "80480c257a0a179dadbc24c0f5be94d890ce867e777abed0ea701cafe276fd1b",
+  "results.json": "2c3cec915a80e6208879081481c1f84eadf548187e589bf757797320682f8d4e",
+  "signals_test.jsonl.gz": "305b6bc4dcc0265c994937e97c615bdfd457c005bf241f5214b158252f0e6426",
+  "terminal_signal_rows.txt": "a69a5cd32458c11fec100409943dfbc7c79db06934b08998b95ab05909fb6af6"
+ },
+ "v1_reproducibility_manifest": {
+  "built": "2026-09-05 11:04:57 EEST",
+  "commit": "1bf946a4a882a1405ad978cde9d3efcd3b9b21fb",
+  "inputs": {
+   "curves_cache_sha256": "1cb2c76dcbcfa76dbbc8e61bd7c07705227b4ee737f44a2db0a169d57e0ce4c2",
+   "curves_script_sha256": "75f3d8a309a4909e803299a372b7ad2ba58c3b77d065ebad0c8da0bec53b5106",
+   "rows_sha256": "3b30b100eec56d4ff80bf33493803dd4fd3d8a8155e5a0d0e056b820959737d2",
+   "wallet_history": "a8c6bde8c41db0277db8f4f1528aa5b1ecd77fe93eb3defedadb002f72b6dbac",
+   "frozen_spec_sha256": "b193b53c3de3758aca037bac4726a76f5ceced8323c2be86da8fa200208e09bc",
+   "ranker_script_sha256": "8d5625c4a3314a4fd3ec73eb965e3eabe172410b6e6978735eae5d693bac20b6"
+  },
+  "outputs": {
+   "build_manifest.json": "e57696138c511b484ddabec433d6d266b624a8008eaf8eb36f4c4ca29bcc0f52",
+   "calibration_table.csv": "e8f9aecf0bd36dc95daf62ac13a77896a337a258396be7d10d7fb6fda4d53967",
+   "curve_pass.py": "75f3d8a309a4909e803299a372b7ad2ba58c3b77d065ebad0c8da0bec53b5106",
+   "expected_net_conditional_means_validation.json": "ceaa79cffa8271001923b89ca64ef4ac810a350d8bae67b386248618887145a8",
+   "feature_dictionary.csv": "64e671438fe8352d9cbcd35f7a40258711b253baa8f7075600ecab21aae1eeec",
+   "final_summary.json": "93fdccfd4442ff4f00d8a8de8ce3581ed3d88692d2d1ee228cfa7baa89fd7db2",
+   "frozen_spec.json": "b193b53c3de3758aca037bac4726a76f5ceced8323c2be86da8fa200208e09bc",
+   "leakage_tests.json": "c4445b4640e9a673fc715268a513a44dc36c9eed0a3f7086b8214daacd4d2f55",
+   "leakage_tests.py": "5f8a63680adf4eaede1c02249ad94ebe179046e1b7da69310e1d7c3e11652699",
+   "make_docs.py": "ac40634b23bc4b2fee0fe82c87e7af5297728cdf6668ad5c91b732c3f6fccccd",
+   "model_card.md": "a7402d4eaf2778270d9bf45eb813a266035e0b3e84c22d846d201064859df32c",
+   "ranker.py": "8d5625c4a3314a4fd3ec73eb965e3eabe172410b6e6978735eae5d693bac20b6",
+   "results.json": "2c3cec915a80e6208879081481c1f84eadf548187e589bf757797320682f8d4e",
+   "signals_test.jsonl.gz": "305b6bc4dcc0265c994937e97c615bdfd457c005bf241f5214b158252f0e6426",
+   "terminal_signal_rows.txt": "a69a5cd32458c11fec100409943dfbc7c79db06934b08998b95ab05909fb6af6"
+  },
+  "rpc_calls": 0,
+  "new_data": false,
+  "live": false
+ },
+ "findings": {
+  "P_2X": "max-attained (any state in horizon), not first-passage",
+  "P_LOSS_50": "terminal liquidation at 30 min <= 0.5x, not a stop-loss",
+  "independent_labels": true,
+  "minus50_then_2x_labeled_as_2x": true,
+  "checkpoints": "age 5/15/30/60 s",
+  "dedup": "per (mint,checkpoint) rows; mint-level added post hoc",
+  "threshold_0_3421": "chosen on validation ROWS (n>=30 rows, stressed EV>0)",
+  "top_k": "row-level",
+  "splice": "NONE (censored at CompleteEvent; marked at last curve state)",
+  "expected_net": "global conditional means from validation x p (dd14937); heuristic (1bf946a); 0.25 SOL probability extrapolated to 0.5/1.0",
+  "calibration_traded_region": {
+   "0.30-0.40": [
+    2683,
+    0.336,
+    0.367
+   ],
+   "0.40-0.50": [
+    189,
+    0.443,
+    0.529
+   ],
+   "0.50-0.60": [
+    45,
+    0.524,
+    0.622
+   ]
+  },
+  "per_day_mint_dedup": {
+   "2026-09-03": {
+    "mints": 567,
+    "EV": 0.0083,
+    "PF": 1.076
+   },
+   "2026-09-04": {
+    "mints": 329,
+    "EV": -0.0042,
+    "PF": 0.964
+   }
+  }
+ }
+}

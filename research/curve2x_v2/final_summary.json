@@ -1,0 +1,56 @@
+{
+ "FINAL_VERDICT": "NO_VERIFIED_EDGE",
+ "MODEL_SELECTED": "B",
+ "FEATURE_BLOCK_SELECTED": "M4",
+ "POLICY_SELECTED": {
+  "band": [
+   20,
+   60
+  ],
+  "p_tp_min": 0.3,
+  "p_sl_max": 0.4
+ },
+ "TOP_REGION_CALIBRATION": {
+  "n": 6,
+  "gap_tp": 0.3027234287153606,
+  "ece_tp": 0.4082698224996203,
+  "gap_sl": 0.15635237649876135,
+  "pred_tp": 0.4693900953820273,
+  "obs_tp": 0.16666666666666666
+ },
+ "N_VAL": 6,
+ "N_CONF": 0,
+ "TP_FIRST_RATE": 0.16666666666666666,
+ "SL_FIRST_RATE": 0.16666666666666666,
+ "EV_025_SOL": 0.07382876216666666,
+ "PF_025_SOL": 3.0935622750294383,
+ "CI95_025_SOL": [
+  -0.0008605365000000018,
+  0.22320735949999998
+ ],
+ "EX_BEST_1PCT_EV": 0.039341286399999995,
+ "STRESS_5_SLOT_EV": 0.07382876216666666,
+ "STRESS_COST125_EV": 0.07339125116666667,
+ "EV_050_SOL": 0.372483793,
+ "EV_100_SOL": 0.7546935189999999,
+ "LABEL_AGREEMENT": 1.0,
+ "AUTOMATION_REPLAY_AGREEMENT": 1.0,
+ "model_hash": "399eb272682f212452df800d9fe4d2ba85ec86210c93b76b537d02897c654846",
+ "gates": {
+  "min_mints_total_100": false,
+  "min_mints_val_30": false,
+  "min_mints_conf_30": false,
+  "ev_positive_val": true,
+  "ev_positive_conf": false,
+  "ci95_lower_positive": false,
+  "pf_ge_1_5": true,
+  "ex_best_1pct_positive": true,
+  "no_concentration_gt_20pct": false,
+  "stress_land5_ev_positive": true,
+  "stress_cost125_ev_positive": true,
+  "calibration_gap_le_5pp": false,
+  "beats_state_headroom_baseline": true,
+  "positive_after_mint_dedup": false,
+  "policy_feasible_on_cal": false
+ }
+}

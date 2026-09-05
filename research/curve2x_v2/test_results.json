@@ -1,0 +1,58 @@
+{
+ "label": "HISTORICAL_REMEDIATION_NOT_SEALED",
+ "tests": {
+  "TP_before_SL": {
+   "pass_": true,
+   "detail": "{'state': 'TP_FIRST', 'venue': 'curve', 't_exit': 1, 'pnl': 0.280446278, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 2.122625112, 'trigger_value_ratio': 2.0101881}"
+  },
+  "SL_before_TP": {
+   "pass_": true,
+   "detail": "{'state': 'SL_FIRST', 'venue': 'curve', 't_exit': -5, 'pnl': -0.150617194, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 0.398371224, 'trigger_value_ratio': 0.476884776}"
+  },
+  "SL_and_TP_same_slot_SL_wins": {
+   "pass_": true,
+   "detail": "SL_FIRST slot=1070"
+  },
+  "TP_after_prior_SL_is_SL_FIRST": {
+   "pass_": true,
+   "detail": "{'state': 'SL_FIRST', 'venue': 'curve', 't_exit': -5, 'pnl': -0.150617194, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 0.398371224, 'trigger_value_ratio': 0.476884776}"
+  },
+  "timeout": {
+   "pass_": true,
+   "detail": "{'state': 'TIMEOUT_OTHER', 'venue': 'curve', 't_exit': 561, 'pnl': -0.00644319, 'label_kind': 'CURVE_ONLY', 'exit_value_ratio': 0.97506724}"
+  },
+  "migration_then_TP_in_pool": {
+   "pass_": true,
+   "detail": "{'state': 'TP_FIRST', 'venue': 'pool', 't_exit': 37, 'pnl': 0.333539638, 'label_kind': 'CROSS_MIGRATION', 'exit_value_ratio': 2.334998552, 'trigger_value_ratio': 2.069846796}"
+  },
+  "missing_pumpswap_state_unavailable": {
+   "pass_": true,
+   "detail": "{'state': None, 'venue': 'curve', 't_exit': None, 'pnl': None, 'label_kind': 'CROSS_MIGRATION_LABEL_UNAVAILABLE', 'unavailable': True}"
+  },
+  "ambiguous_vq_rejects_splice": {
+   "pass_": true,
+   "detail": "implied_vq IQR mare"
+  },
+  "nonzero_virtual_reserves": {
+   "pass_": true,
+   "detail": "vq 464251691 novq 379726920 cap 994500"
+  },
+  "impact_worse_larger_notional": {
+   "pass_": true,
+   "detail": "headroom [1.801650668, 1.789350074, 1.765245982] slip [0.002928257685053337, 0.005856515370847859, 0.011713030742496633]"
+  },
+  "one_signal_per_mint": {
+   "pass_": true,
+   "detail": "ales 20"
+  },
+  "future_mutation_no_feature_change": {
+   "pass_": true,
+   "detail": "landmark 20 identic; 4 landmark-uri"
+  },
+  "same_fold_per_mint": {
+   "pass_": true,
+   "detail": "{'TRAIN'}"
+  }
+ },
+ "all_pass": true
+}
