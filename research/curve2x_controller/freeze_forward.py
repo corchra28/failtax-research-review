@@ -1,0 +1,7 @@
+"""Ingheata spec-ul de forward paper INAINTE de orice data noua: model hash (champion imuabil), prag, schema de trasaturi, porti, maturitate 960 s, o decizie per mint, fara reantrenare in confirmare."""
+import os,sys,json,time,hashlib
+HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE); import controller_lib as C
+champ=C.Champion(); spec=dict(name="CURVE2X_FORWARD_PAPER_SPEC",frozen_at=time.strftime("%Y-%m-%d %H:%M:%S %Z"),status="FROZEN_BEFORE_NEW_DATA",model_hash=champ.model_hash,feature_schema_hash=champ.feature_schema_hash,feature_schema=champ.art["features"],policy=champ.policy,policy_enabled=False,actions=["REJECT","WATCH"],
+ maturity_s=960,one_decision_per_mint=True,no_retraining_in_confirmation=True,predictions_append_only_before_outcomes=True,gates=C.FORWARD_GATES,baseline="state/headroom (model C V3) cu aceeasi politica",multiple_testing="Bonferroni pe toate challengerele incercate (registru global)",
+ data_source="director local de colectare scris de un colector extern (WSS) aprobat separat; controller-ul NU deschide RPC/WSS; replay-ul istoric NU conteaza ca forward",collection_started=False,LIVE_TRADING_ENABLED=False)
+s=json.dumps({k:v for k,v in spec.items()},sort_keys=True,indent=1); spec["spec_sha256"]=hashlib.sha256(s.encode()).hexdigest(); json.dump(spec,open(os.path.join(HERE,"forward_spec.json"),"w"),indent=1); print("FORWARD_SPEC_FROZEN sha256",spec["spec_sha256"][:16],"model",champ.model_hash[:16])

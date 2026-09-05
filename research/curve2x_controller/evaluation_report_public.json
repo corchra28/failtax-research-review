@@ -1,0 +1,454 @@
+{
+ "label": "PROSPECTIVE_SELF_LEARNING_CONTROLLER / REPLAY_DEMONSTRATION_ON_HISTORICAL_TAPE (nu forward real)",
+ "generated": "2026-09-05 15:24:33 EEST",
+ "champion": {
+  "model_hash": "5fc8dfc4486afbdb4c14ce00a243c8616516892478c5c875de1edf9cf9ab3e1c",
+  "policy": {
+   "p_tp_min": 0.25
+  },
+  "policy_enabled": false
+ },
+ "journal": {
+  "ok": true,
+  "records": 1767
+ },
+ "prequential": {
+  "CHAMPION": {
+   "n_predictions": 1263,
+   "n_labeled_ok": 1258,
+   "n_unusable": 5,
+   "log_loss": 0.6812096957529924,
+   "brier": 0.4060817109017048,
+   "ece_tp_global": 0.029417270804782722,
+   "tp_rate": 0.2329093799682035,
+   "sl_rate": 0.712241653418124,
+   "reliability_tp": [
+    {
+     "bin": "0.0-0.1",
+     "n": 16,
+     "pred": 0.08316254041111255,
+     "obs": 0.3125
+    },
+    {
+     "bin": "0.1-0.2",
+     "n": 668,
+     "pred": 0.16287793914054224,
+     "obs": 0.17664670658682635
+    },
+    {
+     "bin": "0.2-0.3",
+     "n": 487,
+     "pred": 0.23716718880040516,
+     "obs": 0.26078028747433263
+    },
+    {
+     "bin": "0.3-0.4",
+     "n": 72,
+     "pred": 0.33228074536771374,
+     "obs": 0.4722222222222222
+    },
+    {
+     "bin": "0.4-0.5",
+     "n": 10,
+     "pred": 0.4336998501128922,
+     "obs": 0.4
+    },
+    {
+     "bin": "0.5-0.6",
+     "n": 4,
+     "pred": 0.5332132540099808,
+     "obs": 1.0
+    },
+    {
+     "bin": "0.6-0.7",
+     "n": 1,
+     "pred": 0.6395202079396064,
+     "obs": 1.0
+    }
+   ],
+   "selected_region": {
+    "n": 154,
+    "calibration_gap_tp": 0.09991571883648681,
+    "pred_tp": 0.3091751902544223,
+    "obs_tp": 0.4090909090909091,
+    "N": 154,
+    "EV": 0.041395938259740264,
+    "median": -0.08063912649999999,
+    "PF": 1.5855887190756013,
+    "win_rate": 0.42857142857142855,
+    "EX_BEST_1PCT": 0.03349771444736843,
+    "EV_LCB95": 0.014919561181818178,
+    "CI95": [
+     0.009981849337662337,
+     0.07466743533766232
+    ],
+    "max_concentration": 0.43685314044376555,
+    "by_day": {
+     "2026-09-02": {
+      "n": 56,
+      "EV": 0.11511767699999999
+     },
+     "2026-09-03": {
+      "n": 88,
+      "EV": 0.0019885872727272726
+     },
+     "2026-09-04": {
+      "n": 10,
+      "EV": -0.024661109999999997
+     }
+    },
+    "positive_days": 2,
+    "forward_days": 3
+   },
+   "per_regime": {
+    "H06-11|P40-55": {
+     "n": 111,
+     "tp_rate": 0.16216216216216217,
+     "log_loss": 0.7175892351451613
+    },
+    "H06-11|P55-70": {
+     "n": 21,
+     "tp_rate": 0.3333333333333333,
+     "log_loss": 0.7824563828574638
+    },
+    "H12-17|P40-55": {
+     "n": 337,
+     "tp_rate": 0.2551928783382789,
+     "log_loss": 0.6935887213435921
+    },
+    "H12-17|P55-70": {
+     "n": 41,
+     "tp_rate": 0.36585365853658536,
+     "log_loss": 0.7384963580896867
+    },
+    "H12-17|P70+": {
+     "n": 18,
+     "tp_rate": 0.1111111111111111,
+     "log_loss": 0.3589427999362897
+    },
+    "H18-23|P40-55": {
+     "n": 399,
+     "tp_rate": 0.20802005012531327,
+     "log_loss": 0.6305857717472148
+    },
+    "H18-23|P55-70": {
+     "n": 45,
+     "tp_rate": 0.4444444444444444,
+     "log_loss": 0.8779895078077361
+    },
+    "H18-23|P70+": {
+     "n": 26,
+     "tp_rate": 0.34615384615384615,
+     "log_loss": 0.6497895355555947
+    },
+    "H00-05|P40-55": {
+     "n": 238,
+     "tp_rate": 0.19327731092436976,
+     "log_loss": 0.6952020606500919
+    },
+    "H00-05|P55-70": {
+     "n": 14,
+     "tp_rate": 0.2857142857142857,
+     "log_loss": 0.7533350213195427
+    },
+    "H00-05|P70+": {
+     "n": 4,
+     "tp_rate": 0.25,
+     "log_loss": 0.5059300607778625
+    },
+    "H06-11|P70+": {
+     "n": 4,
+     "tp_rate": 0.5,
+     "log_loss": 1.0907020658961755
+    }
+   },
+   "mayhem_separate": {
+    "note": "modul Mayhem nu este observabil in CreateEvent-urile locale; toate deciziile sunt in bucket-ul UNKNOWN",
+    "UNKNOWN": {
+     "n": 1258,
+     "tp_rate": 0.2329093799682035
+    }
+   },
+   "drift": {
+    "feature_psi": {
+     "pullback_depth": 0.03001230315502983,
+     "pullback_duration_s": 0.025581761726036885,
+     "pullback_slots": 0.024100258072670556,
+     "pullback_trades": 0.01836209408494293,
+     "reclaim_duration_s": 0.017351379632473844,
+     "reclaim_slots": 0.01969709238785957,
+     "reclaim_trades": 0.02261823431590749,
+     "recovery_fraction": 0.01475649166238166,
+     "recovery_speed": 0.012981728095205385,
+     "time_since_anchor_s": 0.02234326297344483,
+     "anchor_progress": 0.011760583073119555,
+     "buy_vol_pre": 0.06992214734543833,
+     "sell_vol_pre": 0.01946503227345035,
+     "buy_vol_post": 0.024786391370902758,
+     "sell_vol_post": 0.03786708248971722,
+     "sell_intensity_change": 0.017202885377400497,
+     "sell_intensity_ratio": 0.02897583851015061,
+     "uniq_sellers_window": 0.010236196545031348,
+     "seller_inventory_decline": 0.010665765106025717,
+     "uniq_buyers": 0.03575117970561537,
+     "new_buyers_post": 0.020476545439431473,
+     "buyer_retention": 0.015959814888586134,
+     "imbalance_window": 0.015456417703978997,
+     "net_quote_flow_window": 0.02001712493368966,
+     "top1_share": 0.010068516785620787,
+     "top3_share": 0.014533726570207406,
+     "top10_share": 0.016814166139622076,
+     "hhi": 0.018445608022419274,
+     "wallet_reuse_share": 0.009477694959159077,
+     "same_slot_max_wallets": 0.029874380427811577,
+     "same_slot_share": 0.021240114979592658,
+     "creator_inventory_share": 0.18944872334464147,
+     "creator_sold_flag": 0.0,
+     "creator_sell_share": 0.11058452845919804,
+     "progress": 0.015420457881495084,
+     "dist_to_migration_sol": 0.015420457881495084,
+     "rs_sol": 0.015420457881495084,
+     "vs_sol": 0.016380359967503436,
+     "headroom_025": 0.017354595380765607,
+     "slippage_bp_025": 0.016380359967503436,
+     "n_trades_total": 0.020868987020301977
+    },
+    "features_psi_gt_025": [],
+    "label_drift": {
+     "tp_rate": 0.2329093799682035,
+     "ref_tp_rate": 0.23155737704918034,
+     "z": 0.11367969931820221,
+     "n": 1258
+    },
+    "ood_share_gt_025": 0.000791765637371338,
+    "SEVERE": false
+   }
+  },
+  "CHALLENGER": {
+   "n_predictions": 494,
+   "n_labeled_ok": 493,
+   "n_unusable": 1,
+   "log_loss": 0.6886179076262318,
+   "brier": 0.4214891095889206,
+   "ece_tp_global": 0.047845850936538176,
+   "tp_rate": 0.24543610547667344,
+   "sl_rate": 0.7099391480730223,
+   "reliability_tp": [
+    {
+     "bin": "0.0-0.1",
+     "n": 39,
+     "pred": 0.07431530480178267,
+     "obs": 0.2564102564102564
+    },
+    {
+     "bin": "0.1-0.2",
+     "n": 189,
+     "pred": 0.15618721810247105,
+     "obs": 0.19047619047619047
+    },
+    {
+     "bin": "0.2-0.3",
+     "n": 177,
+     "pred": 0.2419100658960569,
+     "obs": 0.2655367231638418
+    },
+    {
+     "bin": "0.3-0.4",
+     "n": 70,
+     "pred": 0.33889035728744005,
+     "obs": 0.3142857142857143
+    },
+    {
+     "bin": "0.4-0.5",
+     "n": 12,
+     "pred": 0.4354038551130454,
+     "obs": 0.25
+    },
+    {
+     "bin": "0.5-0.6",
+     "n": 4,
+     "pred": 0.5661953271401213,
+     "obs": 0.25
+    },
+    {
+     "bin": "0.6-0.7",
+     "n": 1,
+     "pred": 0.6529589093864832,
+     "obs": 1.0
+    },
+    {
+     "bin": "0.7-0.8",
+     "n": 1,
+     "pred": 0.7352263866993999,
+     "obs": 1.0
+    }
+   ],
+   "selected_region": {
+    "n": 49,
+    "calibration_gap_tp": 0.05466495566485158,
+    "pred_tp": 0.3403792413791373,
+    "obs_tp": 0.2857142857142857,
+    "N": 49,
+    "EV": -0.011103669530612247,
+    "median": -0.090235952,
+    "PF": 0.8738650113147031,
+    "win_rate": 0.30612244897959184,
+    "EX_BEST_1PCT": -0.018386054208333336,
+    "EV_LCB95": -0.05342234006122449,
+    "CI95": [
+     -0.05945967073469388,
+     0.041218986408163266
+    ],
+    "max_concentration": 0.6301153648249389,
+    "by_day": {
+     "2026-09-03": {
+      "n": 36,
+      "EV": -0.0011539838888888904
+     },
+     "2026-09-04": {
+      "n": 13,
+      "EV": -0.03865664515384615
+     }
+    },
+    "positive_days": 0,
+    "forward_days": 2
+   },
+   "per_regime": {
+    "H12-17|P55-70": {
+     "n": 20,
+     "tp_rate": 0.45,
+     "log_loss": 0.7556205219152441
+    },
+    "H12-17|P40-55": {
+     "n": 152,
+     "tp_rate": 0.29605263157894735,
+     "log_loss": 0.769932785694802
+    },
+    "H12-17|P70+": {
+     "n": 10,
+     "tp_rate": 0.1,
+     "log_loss": 0.4183740457106556
+    },
+    "H18-23|P40-55": {
+     "n": 180,
+     "tp_rate": 0.18888888888888888,
+     "log_loss": 0.5952276283664166
+    },
+    "H18-23|P70+": {
+     "n": 11,
+     "tp_rate": 0.45454545454545453,
+     "log_loss": 0.7139872909417764
+    },
+    "H18-23|P55-70": {
+     "n": 23,
+     "tp_rate": 0.4782608695652174,
+     "log_loss": 0.965617403169125
+    },
+    "H00-05|P40-55": {
+     "n": 95,
+     "tp_rate": 0.16842105263157894,
+     "log_loss": 0.6869827334119796
+    },
+    "H00-05|P55-70": {
+     "n": 2,
+     "tp_rate": 0.0,
+     "log_loss": 0.3476504426842476
+    }
+   },
+   "mayhem_separate": {
+    "note": "modul Mayhem nu este observabil in CreateEvent-urile locale; toate deciziile sunt in bucket-ul UNKNOWN",
+    "UNKNOWN": {
+     "n": 493,
+     "tp_rate": 0.24543610547667344
+    }
+   },
+   "drift": {
+    "feature_psi": {
+     "pullback_depth": 0.09102713309902903,
+     "pullback_duration_s": 0.029337564085379925,
+     "pullback_slots": 0.029363690903016215,
+     "pullback_trades": 0.024865741631404405,
+     "reclaim_duration_s": 0.04857879230200396,
+     "reclaim_slots": 0.05638410566263177,
+     "reclaim_trades": 0.03768725751374272,
+     "recovery_fraction": 0.036479824183073155,
+     "recovery_speed": 0.03979669177352731,
+     "time_since_anchor_s": 0.03114508175079548,
+     "anchor_progress": 0.0586311765660705,
+     "buy_vol_pre": 0.07299761475435565,
+     "sell_vol_pre": 0.057131943054421236,
+     "buy_vol_post": 0.06855119186002459,
+     "sell_vol_post": 0.03809177866452464,
+     "sell_intensity_change": 0.043534614223054616,
+     "sell_intensity_ratio": 0.04211385234800495,
+     "uniq_sellers_window": 0.009495601375010296,
+     "seller_inventory_decline": 0.05077247209947634,
+     "uniq_buyers": 0.11456506669609647,
+     "new_buyers_post": 0.04500096283962884,
+     "buyer_retention": 0.06800297704137118,
+     "imbalance_window": 0.06032370512203433,
+     "net_quote_flow_window": 0.05762454936817374,
+     "top1_share": 0.04151825423911754,
+     "top3_share": 0.050071003360427815,
+     "top10_share": 0.08017418538385326,
+     "hhi": 0.05523432092329328,
+     "wallet_reuse_share": 0.01340833905276111,
+     "same_slot_max_wallets": 0.03611066302676617,
+     "same_slot_share": 0.04284266114172541,
+     "creator_inventory_share": 0.2782337538996763,
+     "creator_sold_flag": 0.0,
+     "creator_sell_share": 0.14951989471540025,
+     "progress": 0.06678318807529869,
+     "dist_to_migration_sol": 0.06678318807529869,
+     "rs_sol": 0.06678318807529869,
+     "vs_sol": 0.06764223454068123,
+     "headroom_025": 0.06914276324461638,
+     "slippage_bp_025": 0.06764223454068123,
+     "n_trades_total": 0.08022423384763573
+    },
+    "features_psi_gt_025": [
+     "creator_inventory_share"
+    ],
+    "label_drift": {
+     "tp_rate": 0.24543610547667344,
+     "ref_tp_rate": 0.23155737704918034,
+     "z": 0.7305300814203253,
+     "n": 493
+    },
+    "ood_share_gt_025": 0.0,
+    "SEVERE": false
+   }
+  }
+ },
+ "champion_vs_challenger": {
+  "n_paired": 493,
+  "champion_log_loss": 0.6881418025567961,
+  "challenger_log_loss": 0.6886179076262318,
+  "agreement_action": 0.8620689655172413
+ },
+ "challenger_stress": {
+  "land5": -0.012962706163265305,
+  "cost125": -0.01103259897959184
+ },
+ "promotion_gates": {
+  "FORWARD_CANDIDATES_ge_100": false,
+  "FORWARD_DAYS_ge_3": false,
+  "CALIBRATION_GAP_SELECTED_REGION_le_0.05": false,
+  "EV_NET_LCB95_gt_0": false,
+  "PF_ge_1.30": false,
+  "EX_BEST_1PCT_EV_gt_0": false,
+  "POSITIVE_DAYS_ge_2": false,
+  "MAX_CONCENTRATION_le_0.20": false,
+  "STRESS_5_SLOT_EV_gt_0": false,
+  "STRESS_COST_125_EV_gt_0": false,
+  "OOD_AND_DRIFT_PASS": true,
+  "HUMAN_APPROVAL_REQUIRED": "PENDING (nicio promovare automata)"
+ },
+ "all_statistical_gates_pass": false,
+ "POLICY_ENABLED": false,
+ "DRIFT_SEVERE": false,
+ "ACTION_ON_DRIFT": null,
+ "PROMOTION": "NONE (aprobare umana obligatorie; niciodata automata)",
+ "READY_FOR_TINY_CAPITAL_REVIEW": "NO",
+ "LIVE_TRADING_ENABLED": "NO"
+}

@@ -1,0 +1,9 @@
+{
+ "role": "CHAMPION",
+ "artifact_path": "research/curve2x_v3_reclaim/model_artifact.json",
+ "artifact_sha256": "5fc8dfc4486afbdb4c14ce00a243c8616516892478c5c875de1edf9cf9ab3e1c",
+ "source": "CURVE2X_V3_RECLAIM (HISTORICAL_DEV_NOT_SEALED, NO_VERIFIED_EDGE)",
+ "policy_enabled": false,
+ "immutable": true,
+ "note": "Champion-ul nu se modifica niciodata in loc; o promovare inseamna un champion.json NOU semnat de un om (promote.py), niciodata automat"
+}

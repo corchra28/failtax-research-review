@@ -1,0 +1,65 @@
+{
+ "tests": {
+  "journal_hash_chain_ok": {
+   "pass_": true,
+   "detail": "{'ok': True, 'records': 2}"
+  },
+  "journal_tamper_detected": {
+   "pass_": true,
+   "detail": "{'ok': False, 'at': 0}"
+  },
+  "champion_hash_mismatch_refused": {
+   "pass_": true,
+   "detail": "CHAMPION_HASH_MISMATCH 5fc8dfc4486afbdb != 0000000000000000"
+  },
+  "labeler_only_after_maturity": {
+   "pass_": true,
+   "detail": "(0, 1)"
+  },
+  "challenger_trained_only_before_cutoff_embargo": {
+   "pass_": true,
+   "detail": "{'n': 98, 'sha256': 'e48e7166f96ca95e5d26737dc3e846464a39de922cd88ed683e7ab3b40f767fc'}"
+  },
+  "challenger_policy_disabled": {
+   "pass_": true,
+   "detail": ""
+  },
+  "severe_drift_forces_watch": {
+   "pass_": true,
+   "detail": "('WATCH', 'MODEL_DRIFT')"
+  },
+  "no_paper_candidate_ever": {
+   "pass_": true,
+   "detail": "actiunile posibile sunt doar WATCH/REJECT"
+  },
+  "promotion_refused_without_human": {
+   "pass_": true,
+   "detail": "REFUSED: aprobare umana explicita obligatorie (--i-am-a-human)"
+  },
+  "gates_fail_on_small_sample": {
+   "pass_": true,
+   "detail": "{'FORWARD_CANDIDATES_ge_100': False, 'FORWARD_DAYS_ge_3': False, 'CALIBRATION_GAP_SELECTED_REGION_le_0.05': False, 'EV_NET_LCB95_gt_0': False, 'PF_ge_1.30': False, 'EX_BEST_1PCT_EV_gt_0': False, 'POSI"
+  },
+  "bonferroni_alpha_by_attempts": {
+   "pass_": true,
+   "detail": "0.025"
+  },
+  "untouched_window_rule": {
+   "pass_": true,
+   "detail": ""
+  },
+  "rollback_condition_on_negative_lcb95": {
+   "pass_": true,
+   "detail": ""
+  },
+  "rollback_noop_without_archive": {
+   "pass_": true,
+   "detail": "fara champion arhivat => niciun rollback"
+  },
+  "forward_gates_fail_empty": {
+   "pass_": true,
+   "detail": "Bonferroni: 2 challengere incercate => alpha 0.0250"
+  }
+ },
+ "all_pass": true
+}
